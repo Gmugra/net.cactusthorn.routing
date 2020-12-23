@@ -4,12 +4,14 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpSession;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import net.cactusthorn.routing.RoutingConfig.ConfigProperty;
 import net.cactusthorn.routing.Template.PathValues;
 import net.cactusthorn.routing.annotation.*;
 import net.cactusthorn.routing.converter.*;
@@ -91,11 +93,14 @@ public final class MethodInvoker {
 
     private final List<ParameterInfo> parameters = new ArrayList<>();
 
+    private Map<ConfigProperty, Object> configProperties;
+
     public MethodInvoker(Class<?> clazz, Method method, ComponentProvider componentProvider, ConvertersHolder convertersHolder,
-            String contentType) {
+            String contentType, Map<ConfigProperty, Object> configProperties) {
         this.clazz = clazz;
         this.method = method;
         this.componentProvider = componentProvider;
+        this.configProperties = configProperties;
         for (Parameter parameter : method.getParameters()) {
             if (parameter.isSynthetic()) {
                 continue;
@@ -109,7 +114,12 @@ public final class MethodInvoker {
         try {
 
             Object object = componentProvider.provide(clazz);
-            RequestData requestData = new RequestData(req, pathValues, containsBody());
+            RequestData requestData;
+            if (containsBody()) {
+                requestData = new RequestData(req, pathValues, (int)configProperties.get(ConfigProperty.READ_BODY_BUFFER_SIZE));
+            } else {
+                requestData = new RequestData(req, pathValues);
+            }
 
             Object[] values;
             if (parameters.size() == 0) {

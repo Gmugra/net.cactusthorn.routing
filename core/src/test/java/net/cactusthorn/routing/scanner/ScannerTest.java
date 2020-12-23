@@ -5,15 +5,18 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.lang.annotation.Annotation;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
 import net.cactusthorn.routing.ComponentProvider;
 import net.cactusthorn.routing.EntryPointScanner;
 import net.cactusthorn.routing.Template;
 import net.cactusthorn.routing.EntryPointScanner.EntryPoint;
+import net.cactusthorn.routing.RoutingConfig.ConfigProperty;
 import net.cactusthorn.routing.Template.PathValues;
 import net.cactusthorn.routing.annotation.*;
 import net.cactusthorn.routing.converter.ConvertersHolder;
@@ -46,11 +49,17 @@ public class ScannerTest {
         }
     }
 
-    private static final ConvertersHolder HOLDER = new ConvertersHolder();
+    static final ConvertersHolder HOLDER = new ConvertersHolder();
+    static Map<ConfigProperty, Object> PROPERTIES = new HashMap<>();
+
+    @BeforeAll //
+    static void setUp() {
+        PROPERTIES.put(ConfigProperty.READ_BODY_BUFFER_SIZE, 512);
+    }
 
     @Test //
     public void entryPoint1() {
-        EntryPointScanner f = new EntryPointScanner(Arrays.asList(EntryPoint1.class), new EntryPoint1Provider1(), HOLDER);
+        EntryPointScanner f = new EntryPointScanner(Arrays.asList(EntryPoint1.class), new EntryPoint1Provider1(), HOLDER, PROPERTIES);
         Map<Class<? extends Annotation>, List<EntryPoint>> entryPoints = f.scan();
         List<EntryPoint> gets = entryPoints.get(GET.class);
 
@@ -86,7 +95,7 @@ public class ScannerTest {
 
     @Test //
     public void entryPoint2() {
-        EntryPointScanner f = new EntryPointScanner(Arrays.asList(EntryPoint2.class), new EntryPoint1Provider2(), HOLDER);
+        EntryPointScanner f = new EntryPointScanner(Arrays.asList(EntryPoint2.class), new EntryPoint1Provider2(), HOLDER, PROPERTIES);
         Map<Class<? extends Annotation>, List<EntryPoint>> entryPoints = f.scan();
         List<EntryPoint> gets = entryPoints.get(GET.class);
 
@@ -111,7 +120,7 @@ public class ScannerTest {
 
     @Test //
     public void entryPoint3() {
-        EntryPointScanner f = new EntryPointScanner(Arrays.asList(EntryPoint3.class), new EntryPoint1Provider3(), HOLDER);
+        EntryPointScanner f = new EntryPointScanner(Arrays.asList(EntryPoint3.class), new EntryPoint1Provider3(), HOLDER, PROPERTIES);
         Map<Class<? extends Annotation>, List<EntryPoint>> entryPoints = f.scan();
         EntryPoint entryPoint = entryPoints.get(GET.class).get(0);
 
@@ -136,7 +145,7 @@ public class ScannerTest {
 
     @Test //
     public void entryPoint4() {
-        EntryPointScanner f = new EntryPointScanner(Arrays.asList(EntryPoint4.class), new EntryPoint1Provider4(), HOLDER);
+        EntryPointScanner f = new EntryPointScanner(Arrays.asList(EntryPoint4.class), new EntryPoint1Provider4(), HOLDER, PROPERTIES);
         Map<Class<? extends Annotation>, List<EntryPoint>> entryPoints = f.scan();
         EntryPoint entryPoint = entryPoints.get(GET.class).get(0);
         Template.PathValues values = entryPoint.parse("/api");

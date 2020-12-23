@@ -33,7 +33,7 @@ public class RequestDataTest {
 
     @Test //
     public void reader() throws IOException {
-        RequestData data = new RequestData(request, null, true);
+        RequestData data = new RequestData(request, null, 512);
 
         assertEquals("THE BODY", data.requestBody().toString());
     }

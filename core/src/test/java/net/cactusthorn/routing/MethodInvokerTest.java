@@ -7,6 +7,8 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.StringReader;
 import java.lang.reflect.*;
+import java.util.HashMap;
+import java.util.Map;
 
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
@@ -18,6 +20,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
+import net.cactusthorn.routing.RoutingConfig.ConfigProperty;
 import net.cactusthorn.routing.Template.PathValues;
 import net.cactusthorn.routing.annotation.*;
 import net.cactusthorn.routing.converter.ConverterException;
@@ -72,13 +75,7 @@ public class MethodInvokerTest {
         }
     }
 
-    HttpServletRequest request;
-
-    HttpServletResponse response;
-
-    HttpSession session;
-
-    ServletContext context;
+    static Map<ConfigProperty, Object> configProperties;
 
     static ComponentProvider provider;
 
@@ -89,7 +86,17 @@ public class MethodInvokerTest {
         holder = new ConvertersHolder();
         holder.register("test/date", TEST_CONSUMER);
         provider = new EntryPoint1Provider();
+        configProperties = new HashMap<>();
+        configProperties.put(ConfigProperty.READ_BODY_BUFFER_SIZE, 512);
     }
+
+    HttpServletRequest request;
+
+    HttpServletResponse response;
+
+    HttpSession session;
+
+    ServletContext context;
 
     @BeforeEach //
     void mock() throws IOException {
@@ -109,7 +116,7 @@ public class MethodInvokerTest {
     public void invokeM1() throws ConverterException {
 
         Method method = findMethod("m1");
-        MethodInvoker caller = new MethodInvoker(EntryPoint1.class, method, provider, holder, "*/*");
+        MethodInvoker caller = new MethodInvoker(EntryPoint1.class, method, provider, holder, "*/*", configProperties);
 
         PathValues values = new PathValues();
         values.put("in", "123");
@@ -123,7 +130,7 @@ public class MethodInvokerTest {
     public void invokeM0() throws ConverterException {
 
         Method method = findMethod("m0");
-        MethodInvoker caller = new MethodInvoker(EntryPoint1.class, method, provider, holder, "*/*");
+        MethodInvoker caller = new MethodInvoker(EntryPoint1.class, method, provider, holder, "*/*", configProperties);
 
         PathValues values = PathValues.EMPTY;
 
@@ -136,7 +143,7 @@ public class MethodInvokerTest {
     public void invokeM2() throws ConverterException {
 
         Method method = findMethod("m2");
-        MethodInvoker caller = new MethodInvoker(EntryPoint1.class, method, provider, holder, "*/*");
+        MethodInvoker caller = new MethodInvoker(EntryPoint1.class, method, provider, holder, "*/*", configProperties);
 
         PathValues values = PathValues.EMPTY;
 
@@ -149,7 +156,7 @@ public class MethodInvokerTest {
     public void invokeM3() throws ConverterException {
 
         Method method = findMethod("m3");
-        MethodInvoker caller = new MethodInvoker(EntryPoint1.class, method, provider, holder, "*/*");
+        MethodInvoker caller = new MethodInvoker(EntryPoint1.class, method, provider, holder, "*/*", configProperties);
 
         PathValues values = new PathValues();
         values.put("in", "123");
@@ -163,7 +170,7 @@ public class MethodInvokerTest {
     public void invokeM4() throws ConverterException {
 
         Method method = findMethod("m4");
-        MethodInvoker caller = new MethodInvoker(EntryPoint1.class, method, provider, holder, "*/*");
+        MethodInvoker caller = new MethodInvoker(EntryPoint1.class, method, provider, holder, "*/*", configProperties);
 
         String result = (String) caller.invoke(request, null, null, null);
 
@@ -174,7 +181,7 @@ public class MethodInvokerTest {
     public void invokeM5() throws ConverterException {
 
         Method method = findMethod("m5");
-        MethodInvoker caller = new MethodInvoker(EntryPoint1.class, method, provider, holder, "*/*");
+        MethodInvoker caller = new MethodInvoker(EntryPoint1.class, method, provider, holder, "*/*", configProperties);
 
         String result = (String) caller.invoke(request, null, context, null);
 
@@ -185,7 +192,7 @@ public class MethodInvokerTest {
     public void invokeM6() throws ConverterException {
 
         Method method = findMethod("m6");
-        MethodInvoker caller = new MethodInvoker(EntryPoint1.class, method, provider, holder, "*/*");
+        MethodInvoker caller = new MethodInvoker(EntryPoint1.class, method, provider, holder, "*/*", configProperties);
 
         String result = (String) caller.invoke(request, response, null, null);
 
@@ -199,7 +206,7 @@ public class MethodInvokerTest {
         Mockito.when(request.getReader()).thenReturn(reader);
 
         Method method = findMethod("m7");
-        MethodInvoker caller = new MethodInvoker(EntryPoint1.class, method, provider, holder, "test/date");
+        MethodInvoker caller = new MethodInvoker(EntryPoint1.class, method, provider, holder, "test/date", configProperties);
 
         java.util.Date result = (java.util.Date) caller.invoke(request, response, null, null);
 

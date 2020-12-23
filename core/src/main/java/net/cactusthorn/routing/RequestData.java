@@ -13,14 +13,12 @@ public class RequestData {
     private String requestBody;
 
     public RequestData(HttpServletRequest request, PathValues pathValues) throws IOException {
-        this(request, pathValues, false);
+        this.pathValues = pathValues;
     }
 
-    public RequestData(HttpServletRequest request, PathValues pathValues, boolean readBody) throws IOException {
+    public RequestData(HttpServletRequest request, PathValues pathValues, int readBodyBufferSize) throws IOException {
         this.pathValues = pathValues;
-        if (readBody) {
-            requestBody = requestBody(request);
-        }
+        requestBody = requestBody(request, readBodyBufferSize);
     }
 
     public PathValues pathValues() {
@@ -31,11 +29,11 @@ public class RequestData {
         return requestBody;
     }
 
-    private String requestBody(HttpServletRequest request) throws IOException {
+    private String requestBody(HttpServletRequest request, int readBodyBufferSize) throws IOException {
 
         try (Reader reader = request.getReader()) {
 
-            char[] charBuffer = new char[1024];
+            char[] charBuffer = new char[readBodyBufferSize];
             StringBuilder builder = new StringBuilder();
             int numCharsRead;
             while ((numCharsRead = reader.read(charBuffer, 0, charBuffer.length)) != -1) {

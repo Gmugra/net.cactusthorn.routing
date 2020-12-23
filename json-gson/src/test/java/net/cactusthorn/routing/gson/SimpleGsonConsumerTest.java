@@ -29,7 +29,7 @@ public class SimpleGsonConsumerTest {
                 BufferedReader buf = new BufferedReader(reader)) {
 
             Mockito.when(request.getReader()).thenReturn(buf);
-            requestData = new RequestData(request, null, true);
+            requestData = new RequestData(request, null, 512);
         }
         SimpleGsonConsumer consumer = new SimpleGsonConsumer();
         DataObject data = (DataObject) consumer.consume(DataObject.class, null, requestData);

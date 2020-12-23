@@ -18,6 +18,7 @@ import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import net.cactusthorn.routing.RoutingConfig.ConfigProperty;
 import net.cactusthorn.routing.Template.PathValues;
 import net.cactusthorn.routing.annotation.*;
 import net.cactusthorn.routing.converter.ConverterException;
@@ -36,12 +37,12 @@ public class EntryPointScanner {
         private Pattern contentTypePattern;
 
         private EntryPoint(Class<?> clazz, Method method, ComponentProvider componentProvider, String template,
-                ConvertersHolder convertersHolder, String produces, String contentType) {
+                ConvertersHolder convertersHolder, String produces, String contentType, Map<ConfigProperty, Object> configProperties) {
             try {
                 this.produces = produces;
                 this.contentType = contentType;
                 contentTypePattern = Pattern.compile(contentType.replace("*", "(.*)"));
-                methodInvoker = new MethodInvoker(clazz, method, componentProvider, convertersHolder, contentType);
+                methodInvoker = new MethodInvoker(clazz, method, componentProvider, convertersHolder, contentType, configProperties);
                 this.template = new Template(template);
             } catch (Exception e) {
                 throw new RoutingException("Initialization problem at the Method: " + method, e);
@@ -87,11 +88,14 @@ public class EntryPointScanner {
     private final List<Class<?>> classes = new ArrayList<>();
     private ConvertersHolder convertersHolder;
     private ComponentProvider componentProvider;
+    private Map<ConfigProperty, Object> configProperties;
 
-    public EntryPointScanner(Collection<Class<?>> classes, ComponentProvider componentProvider, ConvertersHolder convertersHolder) {
+    public EntryPointScanner(Collection<Class<?>> classes, ComponentProvider componentProvider, ConvertersHolder convertersHolder,
+            Map<ConfigProperty, Object> configProperties) {
         this.classes.addAll(classes);
         this.componentProvider = componentProvider;
         this.convertersHolder = convertersHolder;
+        this.configProperties = configProperties;
     }
 
     public Map<Class<? extends Annotation>, List<EntryPoint>> scan() {
@@ -120,7 +124,7 @@ public class EntryPointScanner {
                         String consumes = findConsumes(method, clazzConsumes);
 
                         EntryPoint entryPoint = new EntryPoint(clazz, method, componentProvider, path, convertersHolder, produces,
-                                consumes);
+                                consumes, configProperties);
                         entryPoints.get(type).add(entryPoint);
                     }
                 }

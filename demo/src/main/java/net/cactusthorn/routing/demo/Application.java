@@ -4,6 +4,9 @@ import net.cactusthorn.routing.annotation.*;
 import net.cactusthorn.routing.gson.SimpleGsonConsumer;
 import net.cactusthorn.routing.gson.SimpleGsonProducer;
 
+import org.eclipse.jetty.server.Connector;
+import org.eclipse.jetty.server.HttpConnectionFactory;
+import org.eclipse.jetty.server.ConnectionFactory;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
@@ -35,6 +38,13 @@ public class Application {
         servletContext.addServlet(servletHolder, "/rest/*");
 
         Server jetty = new Server(8080);
+        for(Connector connector : jetty.getConnectors()) {
+            for(ConnectionFactory factory  : connector.getConnectionFactories()) {
+                if(factory instanceof HttpConnectionFactory) {
+                    ((HttpConnectionFactory)factory).getHttpConfiguration().setSendServerVersion(false);
+                }
+            }
+        }
         jetty.setStopAtShutdown(true);
         jetty.setHandler(servletContext);
 
@@ -80,3 +90,4 @@ public class Application {
         }
     }
 }
+

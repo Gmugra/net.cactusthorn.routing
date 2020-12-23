@@ -12,6 +12,7 @@ import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
 import net.cactusthorn.routing.EntryPointScanner.EntryPoint;
+import net.cactusthorn.routing.RoutingConfig.ConfigProperty;
 import net.cactusthorn.routing.Template.PathValues;
 import net.cactusthorn.routing.annotation.GET;
 import net.cactusthorn.routing.annotation.Path;
@@ -99,5 +100,17 @@ public class RoutingConfigTest {
         RoutingConfig config = RoutingConfig.builder(new EntryPointDateProvider()).addProducer("*/*", TEST_PRODUCER).build();
         Producer producer = config.producers().get("*/*");
         assertEquals(TEST_PRODUCER.getClass(), producer.getClass());
+    }
+
+    @Test //
+    public void consumer() {
+        RoutingConfig.builder(new EntryPointDateProvider()).addConsumer("aa/bb", TEST_CONSUMER).build();
+    }
+
+    @Test //
+    public void property() {
+        RoutingConfig config = RoutingConfig.builder(new EntryPointDateProvider()).setReadBodyBufferSize(123).build();
+        int value = (int) config.configProperties().get(ConfigProperty.READ_BODY_BUFFER_SIZE);
+        assertEquals(123, value);
     }
 }
