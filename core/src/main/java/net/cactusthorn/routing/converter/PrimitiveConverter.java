@@ -1,47 +1,34 @@
 package net.cactusthorn.routing.converter;
 
-import javax.servlet.ServletContext;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
 public class PrimitiveConverter implements Converter<Object> {
 
-    private Class<?> type;
-
-    public PrimitiveConverter(Class<?> type) {
-        if (!type.isPrimitive()) {
-            throw new IllegalArgumentException("Not a primitive type");
-        }
-        this.type = type;
-    }
-
     @Override //
-    public Object convert(HttpServletRequest req, HttpServletResponse res, ServletContext con, String input) {
+    public Object convert(RequestData requestData, Class<?> type, String value) {
         if (Byte.TYPE == type) {
-            return convertByte(input);
+            return convertByte(value);
         }
         if (Short.TYPE == type) {
-            return convertShort(input);
+            return convertShort(value);
         }
         if (Integer.TYPE == type) {
-            return convertInt(input);
+            return convertInt(value);
         }
         if (Long.TYPE == type) {
-            return convertLong(input);
+            return convertLong(value);
         }
         if (Float.TYPE == type) {
-            return convertFloat(input);
+            return convertFloat(value);
         }
         if (Double.TYPE == type) {
-            return convertDouble(input);
+            return convertDouble(value);
         }
         if (Character.TYPE == type) {
-            return convertChar(input);
+            return convertChar(value);
         }
         if (Boolean.TYPE == type) {
-            return convertBoolean(input);
+            return convertBoolean(value);
         }
-        return null;
+        throw new IllegalArgumentException("Not a primitive type");
     }
 
     private static Integer convertInt(String input) {

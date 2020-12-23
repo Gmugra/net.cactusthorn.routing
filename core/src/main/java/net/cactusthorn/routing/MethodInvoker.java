@@ -7,11 +7,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 import javax.servlet.ServletContext;
+import javax.servlet.http.HttpSession;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import net.cactusthorn.routing.Template.PathValues;
-import net.cactusthorn.routing.annotation.Context;
 import net.cactusthorn.routing.annotation.PathParam;
 import net.cactusthorn.routing.annotation.QueryParam;
 import net.cactusthorn.routing.converter.*;
@@ -19,40 +19,58 @@ import net.cactusthorn.routing.converter.*;
 public final class MethodInvoker {
 
     private enum ParameterType {
-        UNKNOWN, PATHPARAM, QUERYPARAM, CONTEXT
+        UNKNOWN, PATHPARAM, QUERYPARAM, REQUEST, RESPONSE, SESSION, CONTEXT
     }
 
     private static final class ParameterInfo {
 
         private ParameterType type = ParameterType.UNKNOWN;
+        private Class<?> classType;
         private String name;
         private Converter<?> converter;
 
         private ParameterInfo(Parameter parameter, ConvertersHolder convertersHolder) {
-            converter = convertersHolder.findConverter(parameter);
-            if (parameter.getAnnotation(Context.class) != null) {
-                type = ParameterType.CONTEXT;
-            } else if (parameter.getAnnotation(PathParam.class) != null) {
+            classType = parameter.getType();
+            if (parameter.getAnnotation(PathParam.class) != null) {
                 PathParam pathParam = parameter.getAnnotation(PathParam.class);
                 type = ParameterType.PATHPARAM;
                 name = pathParam.value();
+                converter = convertersHolder.findConverter(classType);
             } else if (parameter.getAnnotation(QueryParam.class) != null) {
                 QueryParam queryParam = parameter.getAnnotation(QueryParam.class);
                 type = ParameterType.QUERYPARAM;
                 name = queryParam.value();
+                converter = convertersHolder.findConverter(classType);
+            } else if (classType == HttpServletRequest.class) {
+                type = ParameterType.REQUEST;
+            } else if (classType == HttpServletResponse.class) {
+                type = ParameterType.RESPONSE;
+            } else if (classType == HttpSession.class) {
+                type = ParameterType.SESSION;
+            } else if (classType == ServletContext.class) {
+                type = ParameterType.CONTEXT;
             }
         }
 
         private Object findValue(HttpServletRequest req, HttpServletResponse res, ServletContext con, PathValues pathValues)
                 throws ConverterException {
+
+            Converter.RequestData requestData = new Converter.RequestData(req, pathValues);
+
             try {
                 switch (type) {
+                case REQUEST:
+                    return req;
+                case RESPONSE:
+                    return res;
+                case SESSION:
+                    return req.getSession(false);
                 case CONTEXT:
-                    return converter.convert(req, res, con, null);
+                    return con;
                 case PATHPARAM:
-                    return converter.convert(req, res, con, pathValues.value(name));
+                    return converter.convert(requestData, classType, pathValues.value(name));
                 case QUERYPARAM:
-                    return converter.convert(req, res, con, req.getParameter(name));
+                    return converter.convert(requestData, classType, req.getParameter(name));
                 default:
                     return null;
                 }

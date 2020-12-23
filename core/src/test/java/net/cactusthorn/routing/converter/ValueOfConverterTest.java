@@ -21,25 +21,29 @@ public class ValueOfConverterTest {
 
     @Test //
     public void support() {
-        assertTrue(ValueOfConverter.support(Integer.class));
-        assertFalse(ValueOfConverter.support(X.class));
+        ValueOfConverter c = new ValueOfConverter();
+        assertTrue(c.register(Integer.class));
+        assertFalse(c.register(X.class));
     }
 
     @Test //
     public void invoke() {
-        ValueOfConverter v = new ValueOfConverter(Integer.class);
-        assertEquals(123, v.convert(null, null, null, "123"));
+        ValueOfConverter c = new ValueOfConverter();
+        c.register(Integer.class);
+        assertEquals(123, c.convert(null, Integer.class, "123"));
     }
 
     @Test //
     public void wrong() {
-        ValueOfConverter v = new ValueOfConverter(Integer.class);
-        assertThrows(RoutingException.class, () -> v.convert(null, null, null, "12dd"));
+        ValueOfConverter c = new ValueOfConverter();
+        c.register(Integer.class);
+        assertThrows(RoutingException.class, () -> c.convert(null, Integer.class, "12dd"));
     }
 
     @Test //
     public void nullValue() {
-        ValueOfConverter v = new ValueOfConverter(Integer.class);
-        @SuppressWarnings("unused") Integer i = (Integer) v.convert(null, null, null, null);
+        ValueOfConverter c = new ValueOfConverter();
+        c.register(Integer.class);
+        @SuppressWarnings("unused") Integer i = (Integer) c.convert(null, Integer.class, null);
     }
 }

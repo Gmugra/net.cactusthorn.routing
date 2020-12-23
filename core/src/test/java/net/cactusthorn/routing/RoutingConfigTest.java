@@ -6,7 +6,10 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.util.Arrays;
 
+import javax.servlet.http.HttpServletRequest;
+
 import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
 
 import net.cactusthorn.routing.EntryPointScanner.EntryPoint;
 import net.cactusthorn.routing.Template.PathValues;
@@ -18,7 +21,7 @@ import net.cactusthorn.routing.converter.ConverterException;
 
 public class RoutingConfigTest {
 
-    public static final Converter<java.util.Date> TEST_CONVERTER = (req, res, con, value) -> {
+    public static final Converter<java.util.Date> TEST_CONVERTER = (req, type, value) -> {
         return new java.util.Date();
     };
 
@@ -74,7 +77,8 @@ public class RoutingConfigTest {
 
         EntryPoint entryPoint = config.entryPoints().get(GET.class).get(0);
 
-        java.util.Date date = (java.util.Date) entryPoint.invoke(null, null, null, PathValues.EMPTY);
+        HttpServletRequest request = Mockito.mock(HttpServletRequest.class);
+        java.util.Date date = (java.util.Date) entryPoint.invoke(request, null, null, PathValues.EMPTY);
         assertNotNull(date);
     }
 

@@ -9,7 +9,7 @@ public class StringConverterTest {
     @Test //
     public void test() {
         StringConverter c = new StringConverter();
-        String result = c.convert(null, null, null, "abc");
+        String result = c.convert(null, null, "abc");
         assertEquals("abc", result);
     }
 }

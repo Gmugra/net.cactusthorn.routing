@@ -7,7 +7,7 @@ import org.junit.jupiter.api.Test;
 
 public class ConvertersHolderTest {
 
-    public static final Converter<java.util.Date> TEST_CONVERTER = (req, res, con, value) -> {
+    public static final Converter<java.util.Date> TEST_CONVERTER = (req, type, value) -> {
         return new java.util.Date();
     };
 
@@ -16,7 +16,7 @@ public class ConvertersHolderTest {
         ConvertersHolder holder = new ConvertersHolder();
         holder.register(java.util.Date.class, TEST_CONVERTER);
         Converter<?> converter = holder.findConverter(java.util.Date.class);
-        java.util.Date date = (java.util.Date) converter.convert(null, null, null, null);
+        java.util.Date date = (java.util.Date) converter.convert(null, null, null);
         assertNotNull(date);
     }
 
@@ -29,7 +29,7 @@ public class ConvertersHolderTest {
         ConvertersHolder holder = new ConvertersHolder();
         Converter<?> converter = holder.findConverter(TestEnum.class);
         assertEquals(ValueOfConverter.class, converter.getClass());
-        assertEquals(TestEnum.AAAA, converter.convert(null, null, null, "AAAA"));
+        assertEquals(TestEnum.AAAA, converter.convert(null, TestEnum.class, "AAAA"));
     }
 
     @Test //
@@ -41,11 +41,9 @@ public class ConvertersHolderTest {
     }
 
     @Test //
-    public void valueOfAlreadyNull() {
+    public void unknown() {
         ConvertersHolder holder = new ConvertersHolder();
         Converter<?> converter1 = holder.findConverter(java.util.Date.class);
-        Converter<?> converter2 = holder.findConverter(java.util.Date.class);
         assertEquals(NullConverter.class, converter1.getClass());
-        assertEquals(NullConverter.class, converter2.getClass());
     }
 }

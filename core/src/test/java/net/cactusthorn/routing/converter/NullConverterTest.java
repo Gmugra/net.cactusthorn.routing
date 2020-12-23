@@ -9,7 +9,7 @@ public class NullConverterTest {
     @Test //
     public void test() {
         NullConverter c = new NullConverter();
-        Object result = c.convert(null, null, null, "1");
+        Object result = c.convert(null, null, "1");
         assertNull(result);
     }
 }

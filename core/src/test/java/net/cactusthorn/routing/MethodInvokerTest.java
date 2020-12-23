@@ -4,7 +4,9 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.lang.reflect.*;
 
+import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
 import org.junit.jupiter.api.BeforeAll;
@@ -13,7 +15,6 @@ import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
 import net.cactusthorn.routing.Template.PathValues;
-import net.cactusthorn.routing.annotation.Context;
 import net.cactusthorn.routing.annotation.PathParam;
 import net.cactusthorn.routing.annotation.QueryParam;
 import net.cactusthorn.routing.converter.ConverterException;
@@ -31,16 +32,24 @@ public class MethodInvokerTest {
             return "OK";
         }
 
-        public String m2(@Context HttpSession session) {
+        public String m2(HttpSession session) {
             return (String) session.getAttribute("test");
         }
 
-        public String m3(@Context HttpServletRequest request, @PathParam("in") Integer val, String willBeNull) {
+        public String m3(HttpServletRequest request, @PathParam("in") Integer val, String willBeNull) {
             return (String) request.getAttribute("req") + val + willBeNull;
         }
 
         public String m4(@QueryParam("in") Double val) {
             return "" + val;
+        }
+
+        public String m5(ServletContext context) {
+            return (String) context.getAttribute("test");
+        }
+
+        public String m6(HttpServletResponse response) {
+            return response.getCharacterEncoding();
         }
     }
 
@@ -54,7 +63,11 @@ public class MethodInvokerTest {
 
     HttpServletRequest request;
 
+    HttpServletResponse response;
+
     HttpSession session;
+
+    ServletContext context;
 
     static ComponentProvider provider;
 
@@ -70,10 +83,14 @@ public class MethodInvokerTest {
     void mock() {
         request = Mockito.mock(HttpServletRequest.class);
         session = Mockito.mock(HttpSession.class);
+        context = Mockito.mock(ServletContext.class);
+        response = Mockito.mock(HttpServletResponse.class);
         Mockito.when(request.getAttribute("req")).thenReturn("EVE");
         Mockito.when(request.getParameter("in")).thenReturn("120.5");
         Mockito.when(request.getSession(false)).thenReturn(session);
         Mockito.when(session.getAttribute("test")).thenReturn("YES");
+        Mockito.when(context.getAttribute("test")).thenReturn("CONTEXT");
+        Mockito.when(response.getCharacterEncoding()).thenReturn("KOI8-R");
     }
 
     @Test //
@@ -139,6 +156,28 @@ public class MethodInvokerTest {
         String result = (String) caller.invoke(request, null, null, null);
 
         assertEquals("120.5", result);
+    }
+
+    @Test //
+    public void invokeM5() throws IllegalAccessException, IllegalArgumentException, InvocationTargetException, ConverterException {
+
+        Method method = findMethod("m5");
+        MethodInvoker caller = new MethodInvoker(EntryPoint1.class, method, provider, holder);
+
+        String result = (String) caller.invoke(request, null, context, null);
+
+        assertEquals("CONTEXT", result);
+    }
+
+    @Test //
+    public void invokeM6() throws IllegalAccessException, IllegalArgumentException, InvocationTargetException, ConverterException {
+
+        Method method = findMethod("m6");
+        MethodInvoker caller = new MethodInvoker(EntryPoint1.class, method, provider, holder);
+
+        String result = (String) caller.invoke(request, response, null, null);
+
+        assertEquals("KOI8-R", result);
     }
 
     private Method findMethod(String methodName) {
