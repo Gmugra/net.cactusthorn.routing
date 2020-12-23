@@ -53,7 +53,7 @@ public class Application {
     }
 ```
 The library is doing only routing, but it's expected that the application will provide implementations for several interfaces:
-1. CompoentProvider - which will provide EntryPoint instances
+1. ComponentProvider - which will provide EntryPoint instances
 1. multiple Producers: which will generate responses based on Content-Type
 1. multiple Consumers to convert request body to Java objects based on Content-Type
 
@@ -83,13 +83,14 @@ Already:
 1. Types converting for primitive types and classes with _public static valeuOf(String arg)_ method. And possibility to write custom convertors.
 1. @Produce and Producer interface (example: _json-gson_ module)
 1. @Consumes for class and/or method. To specify Content-Type as additional routing filter. Wildcard is supported (e.g. text/* )
+1. Consumer interface support (example: _json-gson_ module)
 1. inject HttpServletRequest, HttpServletResponse, HttpSession, ServletContext in method parameters
 1. @PathParam and @QueryParam for parameters.
 
 Comming soon:
 1. Type converting for classes with _public static fromString(String arg)_ method.
 1. Type converting for classes with a constructor that accepts a single String argument.
-1. Consumer interface support (and example with Gson)
+1. Type converting for arrays/collections
 1. Producer example for text/html with [Thymeleaf](https://www.thymeleaf.org)
 1. ComponentProvider example with _dagger 2_
 

@@ -36,6 +36,7 @@
         <plugin.dependency>3.1.2</plugin.dependency>
         <plugin.assembly>3.3.0</plugin.assembly>
         <plugin.jacoco>0.8.6</plugin.jacoco>
+        <plugin.source>3.2.1</plugin.source>
 
     </properties>
 
@@ -149,6 +150,14 @@
 
     <build>
 
+        <plugins>
+
+            <plugin>
+                <artifactId>maven-source-plugin</artifactId>
+            </plugin>
+
+        </plugins>
+
         <pluginManagement>
             <plugins>
 
@@ -215,6 +224,30 @@
                     <groupId>org.jacoco</groupId>
                     <artifactId>jacoco-maven-plugin</artifactId>
                     <version>${plugin.jacoco}</version>
+                </plugin>
+
+                <plugin>
+                    <artifactId>maven-source-plugin</artifactId>
+                    <version>${plugin.source}</version>
+                    <configuration>
+                        <archive>
+                            <manifest>
+                                <addDefaultImplementationEntries>true</addDefaultImplementationEntries>
+                            </manifest>
+                            <manifestEntries>
+                                <Build-Time>${maven.build.timestamp}</Build-Time>
+                            </manifestEntries>
+                        </archive>
+                    </configuration>
+                    <executions>
+                        <execution>
+                            <id>attach-sources</id>
+                            <phase>verify</phase>
+                            <goals>
+                                <goal>jar-no-fork</goal>
+                            </goals>
+                        </execution>
+                    </executions>
                 </plugin>
 
             </plugins>
