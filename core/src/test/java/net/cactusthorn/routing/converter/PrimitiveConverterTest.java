@@ -7,90 +7,90 @@ import org.junit.jupiter.api.Test;
 public class PrimitiveConverterTest {
 
     @Test //
-    public void byteTest() {
+    public void byteTest() throws ConverterException {
         PrimitiveConverter c = new PrimitiveConverter();
-        byte v = (byte) c.convert(null, Byte.TYPE, "1");
+        byte v = (byte) c.convert(Byte.TYPE, "1");
         assertEquals((byte) 1, v);
-        v = (byte) c.convert(null, Byte.TYPE, null);
+        v = (byte) c.convert( Byte.TYPE, null);
         assertEquals((byte) 0, v);
-        v = (byte) c.convert(null, Byte.TYPE, " ");
+        v = (byte) c.convert(Byte.TYPE, " ");
         assertEquals((byte) 0, v);
     }
 
     @Test //
-    public void shortTest() {
+    public void shortTest() throws ConverterException {
         PrimitiveConverter c = new PrimitiveConverter();
-        short v = (short) c.convert(null, Short.TYPE, "1");
+        short v = (short) c.convert( Short.TYPE, "1");
         assertEquals((short) 1, v);
-        v = (short) c.convert(null, Short.TYPE, null);
+        v = (short) c.convert(Short.TYPE, null);
         assertEquals((short) 0, v);
-        v = (short) c.convert(null, Short.TYPE, " ");
+        v = (short) c.convert(Short.TYPE, " ");
         assertEquals((byte) 0, v);
     }
 
     @Test //
-    public void intTest() {
+    public void intTest() throws ConverterException {
         PrimitiveConverter c = new PrimitiveConverter();
-        int v = (int) c.convert(null, Integer.TYPE, "1");
+        int v = (int) c.convert(Integer.TYPE, "1");
         assertEquals(1, v);
-        v = (int) c.convert(null, Integer.TYPE, null);
+        v = (int) c.convert(Integer.TYPE, null);
         assertEquals(0, v);
-        v = (int) c.convert(null, Integer.TYPE, " ");
+        v = (int) c.convert(Integer.TYPE, " ");
         assertEquals(0, v);
     }
 
     @Test //
-    public void longTest() {
+    public void longTest() throws ConverterException {
         PrimitiveConverter c = new PrimitiveConverter();
-        long v = (long) c.convert(null, Long.TYPE, "1");
+        long v = (long) c.convert(Long.TYPE, "1");
         assertEquals(1L, v);
-        v = (long) c.convert(null, Long.TYPE, null);
+        v = (long) c.convert(Long.TYPE, null);
         assertEquals(0L, v);
-        v = (long) c.convert(null, Long.TYPE, " ");
+        v = (long) c.convert(Long.TYPE, " ");
         assertEquals(0L, v);
     }
 
     @Test //
-    public void floatTest() {
+    public void floatTest() throws ConverterException {
         PrimitiveConverter c = new PrimitiveConverter();
-        float v = (float) c.convert(null, Float.TYPE, "1.1");
+        float v = (float) c.convert(Float.TYPE, "1.1");
         assertEquals(1.1f, v);
-        v = (float) c.convert(null, Float.TYPE, null);
+        v = (float) c.convert(Float.TYPE, null);
         assertEquals(0.0f, v);
-        v = (float) c.convert(null, Float.TYPE, " ");
+        v = (float) c.convert(Float.TYPE, " ");
         assertEquals(0.0f, v);
     }
 
     @Test //
-    public void doubleTest() {
+    public void doubleTest() throws ConverterException {
         PrimitiveConverter c = new PrimitiveConverter();
-        double v = (double) c.convert(null, Double.TYPE, "1.1");
+        double v = (double) c.convert(Double.TYPE, "1.1");
         assertEquals(1.1d, v);
-        v = (double) c.convert(null, Double.TYPE, null);
+        v = (double) c.convert(Double.TYPE, null);
         assertEquals(0.0d, v);
-        v = (double) c.convert(null, Double.TYPE, " ");
+        v = (double) c.convert(Double.TYPE, " ");
         assertEquals(0.0d, v);
     }
 
     @Test //
-    public void charTest() {
+    public void charTest() throws ConverterException {
         PrimitiveConverter c = new PrimitiveConverter();
-        char v = (char) c.convert(null, Character.TYPE, "abc");
+        char v = (char) c.convert(Character.TYPE, "abc");
         assertEquals('a', v);
-        v = (char) c.convert(null, Character.TYPE, null);
+        v = (char) c.convert(Character.TYPE, null);
         assertEquals('\u0000', v);
-        v = (char) c.convert(null, Character.TYPE, " ");
+        v = (char) c.convert(Character.TYPE, " ");
         assertEquals('\u0000', v);
     }
 
     @Test //
-    public void boolTest() {
+    public void boolTest() throws ConverterException {
         PrimitiveConverter c = new PrimitiveConverter();
-        boolean v = (boolean) c.convert(null, Boolean.TYPE, "true");
+        boolean v = (boolean) c.convert(Boolean.TYPE, "true");
         assertTrue(v);
-        v = (boolean) c.convert(null, Boolean.TYPE, null);
+        v = (boolean) c.convert(Boolean.TYPE, null);
         assertFalse(v);
-        v = (boolean) c.convert(null, Boolean.TYPE, " ");
+        v = (boolean) c.convert(Boolean.TYPE, " ");
         assertFalse(v);
     }
 

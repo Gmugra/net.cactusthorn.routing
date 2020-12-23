@@ -26,7 +26,6 @@ public class RoutingServlet extends HttpServlet {
     private transient Map<Class<? extends Annotation>, List<EntryPoint>> entryPoints;
     private transient ServletContext servletContext;
     private transient Map<String, Producer> producers;
-    private transient Map<String, Consumer> consumers;
     private transient ComponentProvider componentProvider;
 
     public RoutingServlet(RoutingConfig config) {
@@ -41,8 +40,6 @@ public class RoutingServlet extends HttpServlet {
         super.init();
         servletContext = getServletContext();
         componentProvider.init(servletContext);
-        producers.values().stream().forEach(p -> p.init(servletContext, componentProvider));
-        consumers.values().stream().forEach(c -> c.init(servletContext, componentProvider));
     }
 
     @Override //
@@ -86,9 +83,9 @@ public class RoutingServlet extends HttpServlet {
             return;
         }
         String path = getPath(req);
-        String consumes = getConsumes(req);
+        String contentType = contentType(req);
         for (EntryPoint entryPoint : entryPoints) {
-            if (!entryPoint.matchConsumes(consumes)) {
+            if (!entryPoint.matchContentType(contentType)) {
                 continue;
             }
             PathValues values = entryPoint.parse(path);
@@ -107,7 +104,7 @@ public class RoutingServlet extends HttpServlet {
         resp.sendError(HttpServletResponse.SC_NOT_FOUND, "Not Found");
     }
 
-    private String getConsumes(HttpServletRequest req) {
+    private String contentType(HttpServletRequest req) {
         String consumes = req.getContentType();
         if (consumes == null || consumes.trim().isEmpty()) {
             return EntryPointScanner.CONSUMES_DEFAULT;
@@ -123,7 +120,7 @@ public class RoutingServlet extends HttpServlet {
         } else if (!"/".equals(path) && path.charAt(path.length() - 1) == '/') {
             path = path.substring(0, path.length() - 1);
         }
-        LOG.debug("PathInfo -> original: \"{}\", corrected: \"{}\"", original, path);
+        LOG.debug("{} PathInfo -> original: \"{}\", corrected: \"{}\"", req.getMethod(), original, path);
         return path;
     }
 

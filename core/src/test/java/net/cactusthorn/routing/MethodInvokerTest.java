@@ -1,7 +1,11 @@
 package net.cactusthorn.routing;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.StringReader;
 import java.lang.reflect.*;
 
 import javax.servlet.ServletContext;
@@ -15,12 +19,15 @@ import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
 import net.cactusthorn.routing.Template.PathValues;
-import net.cactusthorn.routing.annotation.PathParam;
-import net.cactusthorn.routing.annotation.QueryParam;
+import net.cactusthorn.routing.annotation.*;
 import net.cactusthorn.routing.converter.ConverterException;
 import net.cactusthorn.routing.converter.ConvertersHolder;
 
 public class MethodInvokerTest {
+
+    public static final Consumer TEST_CONSUMER = (clazz, mediaType, data) -> {
+        return new java.util.Date();
+    };
 
     public static class EntryPoint1 {
 
@@ -51,6 +58,10 @@ public class MethodInvokerTest {
         public String m6(HttpServletResponse response) {
             return response.getCharacterEncoding();
         }
+
+        public java.util.Date m7(@Context java.util.Date date) {
+            return date;
+        }
     }
 
     public static class EntryPoint1Provider implements ComponentProvider {
@@ -76,11 +87,12 @@ public class MethodInvokerTest {
     @BeforeAll //
     static void setUp() {
         holder = new ConvertersHolder();
+        holder.register("test/date", TEST_CONSUMER);
         provider = new EntryPoint1Provider();
     }
 
     @BeforeEach //
-    void mock() {
+    void mock() throws IOException {
         request = Mockito.mock(HttpServletRequest.class);
         session = Mockito.mock(HttpSession.class);
         context = Mockito.mock(ServletContext.class);
@@ -94,10 +106,10 @@ public class MethodInvokerTest {
     }
 
     @Test //
-    public void invokeM1() throws IllegalAccessException, IllegalArgumentException, InvocationTargetException, ConverterException {
+    public void invokeM1() throws ConverterException {
 
         Method method = findMethod("m1");
-        MethodInvoker caller = new MethodInvoker(EntryPoint1.class, method, provider, holder);
+        MethodInvoker caller = new MethodInvoker(EntryPoint1.class, method, provider, holder, "*/*");
 
         PathValues values = new PathValues();
         values.put("in", "123");
@@ -108,10 +120,10 @@ public class MethodInvokerTest {
     }
 
     @Test //
-    public void invokeM0() throws IllegalAccessException, IllegalArgumentException, InvocationTargetException, ConverterException {
+    public void invokeM0() throws ConverterException {
 
         Method method = findMethod("m0");
-        MethodInvoker caller = new MethodInvoker(EntryPoint1.class, method, provider, holder);
+        MethodInvoker caller = new MethodInvoker(EntryPoint1.class, method, provider, holder, "*/*");
 
         PathValues values = PathValues.EMPTY;
 
@@ -121,10 +133,10 @@ public class MethodInvokerTest {
     }
 
     @Test //
-    public void invokeM2() throws IllegalAccessException, IllegalArgumentException, InvocationTargetException, ConverterException {
+    public void invokeM2() throws ConverterException {
 
         Method method = findMethod("m2");
-        MethodInvoker caller = new MethodInvoker(EntryPoint1.class, method, provider, holder);
+        MethodInvoker caller = new MethodInvoker(EntryPoint1.class, method, provider, holder, "*/*");
 
         PathValues values = PathValues.EMPTY;
 
@@ -134,10 +146,10 @@ public class MethodInvokerTest {
     }
 
     @Test //
-    public void invokeM3() throws IllegalAccessException, IllegalArgumentException, InvocationTargetException, ConverterException {
+    public void invokeM3() throws ConverterException {
 
         Method method = findMethod("m3");
-        MethodInvoker caller = new MethodInvoker(EntryPoint1.class, method, provider, holder);
+        MethodInvoker caller = new MethodInvoker(EntryPoint1.class, method, provider, holder, "*/*");
 
         PathValues values = new PathValues();
         values.put("in", "123");
@@ -148,10 +160,10 @@ public class MethodInvokerTest {
     }
 
     @Test //
-    public void invokeM4() throws IllegalAccessException, IllegalArgumentException, InvocationTargetException, ConverterException {
+    public void invokeM4() throws ConverterException {
 
         Method method = findMethod("m4");
-        MethodInvoker caller = new MethodInvoker(EntryPoint1.class, method, provider, holder);
+        MethodInvoker caller = new MethodInvoker(EntryPoint1.class, method, provider, holder, "*/*");
 
         String result = (String) caller.invoke(request, null, null, null);
 
@@ -159,10 +171,10 @@ public class MethodInvokerTest {
     }
 
     @Test //
-    public void invokeM5() throws IllegalAccessException, IllegalArgumentException, InvocationTargetException, ConverterException {
+    public void invokeM5() throws ConverterException {
 
         Method method = findMethod("m5");
-        MethodInvoker caller = new MethodInvoker(EntryPoint1.class, method, provider, holder);
+        MethodInvoker caller = new MethodInvoker(EntryPoint1.class, method, provider, holder, "*/*");
 
         String result = (String) caller.invoke(request, null, context, null);
 
@@ -170,14 +182,28 @@ public class MethodInvokerTest {
     }
 
     @Test //
-    public void invokeM6() throws IllegalAccessException, IllegalArgumentException, InvocationTargetException, ConverterException {
+    public void invokeM6() throws ConverterException {
 
         Method method = findMethod("m6");
-        MethodInvoker caller = new MethodInvoker(EntryPoint1.class, method, provider, holder);
+        MethodInvoker caller = new MethodInvoker(EntryPoint1.class, method, provider, holder, "*/*");
 
         String result = (String) caller.invoke(request, response, null, null);
 
         assertEquals("KOI8-R", result);
+    }
+
+    @Test //
+    public void invokeM7() throws IOException, ConverterException {
+
+        BufferedReader reader = new BufferedReader(new StringReader("TO HAVE BODY"));
+        Mockito.when(request.getReader()).thenReturn(reader);
+
+        Method method = findMethod("m7");
+        MethodInvoker caller = new MethodInvoker(EntryPoint1.class, method, provider, holder, "test/date");
+
+        java.util.Date result = (java.util.Date) caller.invoke(request, response, null, null);
+
+        assertNotNull(result);
     }
 
     private Method findMethod(String methodName) {

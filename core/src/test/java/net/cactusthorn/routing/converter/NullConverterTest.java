@@ -7,9 +7,9 @@ import org.junit.jupiter.api.Test;
 public class NullConverterTest {
 
     @Test //
-    public void test() {
+    public void test() throws ConverterException {
         NullConverter c = new NullConverter();
-        Object result = c.convert(null, null, "1");
+        Object result = c.convert("1");
         assertNull(result);
     }
 }

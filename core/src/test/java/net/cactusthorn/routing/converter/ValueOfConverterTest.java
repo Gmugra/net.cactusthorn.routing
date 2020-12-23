@@ -4,8 +4,6 @@ import static org.junit.jupiter.api.Assertions.*;
 
 import org.junit.jupiter.api.Test;
 
-import net.cactusthorn.routing.RoutingException;
-
 public class ValueOfConverterTest {
 
     public static class X {
@@ -27,7 +25,7 @@ public class ValueOfConverterTest {
     }
 
     @Test //
-    public void invoke() {
+    public void invoke() throws ConverterException {
         ValueOfConverter c = new ValueOfConverter();
         c.register(Integer.class);
         assertEquals(123, c.convert(null, Integer.class, "123"));
@@ -37,13 +35,13 @@ public class ValueOfConverterTest {
     public void wrong() {
         ValueOfConverter c = new ValueOfConverter();
         c.register(Integer.class);
-        assertThrows(RoutingException.class, () -> c.convert(null, Integer.class, "12dd"));
+        assertThrows(ConverterException.class, () -> c.convert(Integer.class, "12dd"));
     }
 
     @Test //
-    public void nullValue() {
+    public void nullValue() throws ConverterException {
         ValueOfConverter c = new ValueOfConverter();
         c.register(Integer.class);
-        @SuppressWarnings("unused") Integer i = (Integer) c.convert(null, Integer.class, null);
+        @SuppressWarnings("unused") Integer i = (Integer) c.convert(Integer.class, null);
     }
 }

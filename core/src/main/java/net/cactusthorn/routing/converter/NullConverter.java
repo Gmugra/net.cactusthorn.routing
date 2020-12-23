@@ -1,5 +1,7 @@
 package net.cactusthorn.routing.converter;
 
+import net.cactusthorn.routing.RequestData;
+
 public class NullConverter implements Converter<Object> {
 
     @Override //

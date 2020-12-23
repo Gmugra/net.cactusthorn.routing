@@ -3,12 +3,16 @@ package net.cactusthorn.routing.converter;
 import java.util.HashMap;
 import java.util.Map;
 
+import net.cactusthorn.routing.Consumer;
+
 public class ConvertersHolder {
 
     private static final NullConverter NULL = new NullConverter();
     private static final ValueOfConverter VALUE_OF = new ValueOfConverter();
 
     private final Map<Class<?>, Converter<?>> converters = new HashMap<>();
+
+    private final Map<String, ConsumerConverter> consumers = new HashMap<>();
 
     public ConvertersHolder() {
 
@@ -37,7 +41,19 @@ public class ConvertersHolder {
         return NULL;
     }
 
+    public Converter<?> findConsumerConverter(String contentType) {
+        ConsumerConverter converter = consumers.get(contentType);
+        if (converter != null) {
+            return converter;
+        }
+        return NULL;
+    }
+
     public <T> void register(Class<T> clazz, Converter<T> converter) {
         converters.put(clazz, converter);
+    }
+
+    public <T> void register(String contentType, Consumer consumer) {
+        consumers.put(contentType, new ConsumerConverter(contentType, consumer));
     }
 }

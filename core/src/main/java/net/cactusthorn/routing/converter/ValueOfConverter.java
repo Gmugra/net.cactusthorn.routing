@@ -6,6 +6,7 @@ import java.lang.reflect.Modifier;
 import java.util.HashMap;
 import java.util.Map;
 
+import net.cactusthorn.routing.RequestData;
 import net.cactusthorn.routing.RoutingException;
 
 public class ValueOfConverter implements Converter<Object> {
@@ -13,7 +14,7 @@ public class ValueOfConverter implements Converter<Object> {
     private final Map<Class<?>, Method> classes = new HashMap<>();
 
     @Override //
-    public Object convert(RequestData requestData, Class<?> type, String value) {
+    public Object convert(RequestData requestData, Class<?> type, String value) throws ConverterException {
         try {
             if (value == null) {
                 return null;
@@ -21,7 +22,7 @@ public class ValueOfConverter implements Converter<Object> {
             Method method = classes.get(type);
             return method.invoke(null, value);
         } catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
-            throw new RoutingException("The problem with method invocation", e);
+            throw new ConverterException("The problem with method invocation", e);
         }
     }
 

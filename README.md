@@ -81,7 +81,7 @@ Already:
 1. @Path for class and/or method (regular expressions support; routing priority like in JAX-RS)
 1. @GET @POST and so on
 1. Types converting for primitive types and classes with _public static valeuOf(String arg)_ method. And possibility to write custom convertors.
-1. @Produce and Producers (example: _json-gson_ module)
+1. @Produce and Producer interface (example: _json-gson_ module)
 1. @Consumes for class and/or method. To specify Content-Type as additional routing filter. Wildcard is supported (e.g. text/* )
 1. inject HttpServletRequest, HttpServletResponse, HttpSession, ServletContext in method parameters
 1. @PathParam and @QueryParam for parameters.

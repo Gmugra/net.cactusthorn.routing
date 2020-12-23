@@ -7,9 +7,9 @@ import org.junit.jupiter.api.Test;
 public class StringConverterTest {
 
     @Test //
-    public void test() {
+    public void test() throws ConverterException {
         StringConverter c = new StringConverter();
-        String result = c.convert(null, null, "abc");
+        String result = c.convert("abc");
         assertEquals("abc", result);
     }
 }

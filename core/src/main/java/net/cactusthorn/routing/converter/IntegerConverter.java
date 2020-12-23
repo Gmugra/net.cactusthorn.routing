@@ -1,5 +1,7 @@
 package net.cactusthorn.routing.converter;
 
+import net.cactusthorn.routing.RequestData;
+
 public class IntegerConverter implements Converter<Integer> {
 
     @Override //

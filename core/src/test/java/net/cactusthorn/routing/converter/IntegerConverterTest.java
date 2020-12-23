@@ -7,9 +7,9 @@ import org.junit.jupiter.api.Test;
 public class IntegerConverterTest {
 
     @Test //
-    public void test() {
+    public void test() throws ConverterException {
         IntegerConverter c = new IntegerConverter();
-        Integer result = c.convert(null, null, "125");
+        Integer result = c.convert("125");
         assertEquals(125, result);
         result = c.convert(null, null, null);
         assertNull(result);

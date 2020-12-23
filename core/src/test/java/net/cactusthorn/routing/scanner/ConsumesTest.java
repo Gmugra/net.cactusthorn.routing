@@ -44,7 +44,7 @@ public class ConsumesTest {
         Map<Class<? extends Annotation>, List<EntryPoint>> entryPoints = scanner.scan();
         EntryPoint entryPoint = entryPoints.get(GET.class).get(0);
         assertEquals("*/*", entryPoint.consumes());
-        assertTrue(entryPoint.matchConsumes("aaa/vvvv"));
+        assertTrue(entryPoint.matchContentType("aaa/vvvv"));
     }
 
     @Test //
@@ -52,8 +52,8 @@ public class ConsumesTest {
         EntryPointScanner scanner = new EntryPointScanner(Arrays.asList(EntryPoint1.class), new EntryPoint1Provider1(), HOLDER);
         Map<Class<? extends Annotation>, List<EntryPoint>> entryPoints = scanner.scan();
         EntryPoint entryPoint = entryPoints.get(POST.class).get(0);
-        assertTrue(entryPoint.matchConsumes("text/html"));
-        assertFalse(entryPoint.matchConsumes("application/json"));
+        assertTrue(entryPoint.matchContentType("text/html"));
+        assertFalse(entryPoint.matchContentType("application/json"));
     }
 
     @Path("/") @Consumes("text/*") //
@@ -81,8 +81,8 @@ public class ConsumesTest {
         EntryPointScanner scanner = new EntryPointScanner(Arrays.asList(EntryPoint2.class), new EntryPoint1Provider2(), HOLDER);
         Map<Class<? extends Annotation>, List<EntryPoint>> entryPoints = scanner.scan();
         EntryPoint entryPoint = entryPoints.get(POST.class).get(0);
-        assertTrue(entryPoint.matchConsumes("text/html"));
-        assertFalse(entryPoint.matchConsumes("application/json"));
+        assertTrue(entryPoint.matchContentType("text/html"));
+        assertFalse(entryPoint.matchContentType("application/json"));
     }
 
     @Test //
@@ -90,7 +90,7 @@ public class ConsumesTest {
         EntryPointScanner scanner = new EntryPointScanner(Arrays.asList(EntryPoint2.class), new EntryPoint1Provider2(), HOLDER);
         Map<Class<? extends Annotation>, List<EntryPoint>> entryPoints = scanner.scan();
         EntryPoint entryPoint = entryPoints.get(GET.class).get(0);
-        assertFalse(entryPoint.matchConsumes("text/html"));
-        assertTrue(entryPoint.matchConsumes("application/json"));
+        assertFalse(entryPoint.matchContentType("text/html"));
+        assertTrue(entryPoint.matchContentType("application/json"));
     }
 }

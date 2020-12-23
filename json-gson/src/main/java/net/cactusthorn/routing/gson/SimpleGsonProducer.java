@@ -23,13 +23,8 @@ public class SimpleGsonProducer implements Producer {
         this.gson = gson;
     }
 
-    public SimpleGsonProducer(boolean prettyPrinting) {
-
-        GsonBuilder builder = new GsonBuilder();
-        if (prettyPrinting) {
-            builder.setPrettyPrinting();
-        }
-        gson = builder.create();
+    public SimpleGsonProducer() {
+        gson = new GsonBuilder().create();
     }
 
     @Override //

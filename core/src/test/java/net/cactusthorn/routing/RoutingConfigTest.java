@@ -100,11 +100,4 @@ public class RoutingConfigTest {
         Producer producer = config.producers().get("*/*");
         assertEquals(TEST_PRODUCER.getClass(), producer.getClass());
     }
-    
-    @Test //
-    public void consumer() {
-        RoutingConfig config = RoutingConfig.builder(new EntryPointDateProvider()).addConsumer("*/*", TEST_CONSUMER).build();
-        Consumer consumer = config.consumers().get("*/*");
-        assertEquals(TEST_CONSUMER.getClass(), consumer.getClass());
-    }
 }

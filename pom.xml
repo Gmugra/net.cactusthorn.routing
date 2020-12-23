@@ -6,7 +6,7 @@
 
     <groupId>net.cactusthorn.routing</groupId>
     <artifactId>root</artifactId>
-    <version>0.11</version>
+    <version>0.12</version>
     <packaging>pom</packaging>
     <name>Routing :: Root</name>
 

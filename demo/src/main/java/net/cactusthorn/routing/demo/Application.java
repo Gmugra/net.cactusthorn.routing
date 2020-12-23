@@ -1,6 +1,7 @@
 package net.cactusthorn.routing.demo;
 
 import net.cactusthorn.routing.annotation.*;
+import net.cactusthorn.routing.gson.SimpleGsonConsumer;
 import net.cactusthorn.routing.gson.SimpleGsonProducer;
 
 import org.eclipse.jetty.server.Server;
@@ -17,8 +18,14 @@ public class Application {
 
     public static void main(String... args) {
 
-        RoutingConfig config = RoutingConfig.builder(new Provider()).addEntryPoint(Component.class)
-                .addProducer("application/json", new SimpleGsonProducer(true)).build();
+        // @formatter:off
+        RoutingConfig config =
+            RoutingConfig.builder(new Provider())
+            .addEntryPoint(Component.class)
+            .addProducer("application/json", new SimpleGsonProducer())
+            .addConsumer("application/json", new SimpleGsonConsumer())
+            .build();
+        // @formatter:on
 
         ServletHolder servletHolder = new ServletHolder(new RoutingServlet(config));
         servletHolder.setInitOrder(0);
@@ -57,6 +64,11 @@ public class Application {
         @GET @Path("api/test/gson") @Produces("application/json") //
         public DataObject doitGson() {
             return new DataObject("The Name \u00DF", 123);
+        }
+
+        @POST @Path("api/test/gson") @Consumes("application/json") //
+        public String getitGson(@Context DataObject data) {
+            return data.getName();
         }
     }
 

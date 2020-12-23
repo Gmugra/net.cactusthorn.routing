@@ -7,7 +7,7 @@
     <parent>
         <groupId>net.cactusthorn.routing</groupId>
         <artifactId>root</artifactId>
-        <version>0.11</version>
+        <version>0.12</version>
     </parent>
 
     <artifactId>json-gson</artifactId>
@@ -25,6 +25,12 @@
         <dependency>
             <groupId>com.google.code.gson</groupId>
             <artifactId>gson</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>ch.qos.logback</groupId>
+            <artifactId>logback-classic</artifactId>
+            <scope>test</scope>
         </dependency>
 
     </dependencies>

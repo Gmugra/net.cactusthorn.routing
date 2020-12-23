@@ -32,16 +32,16 @@ public class EntryPointScanner {
         private Template template;
         private MethodInvoker methodInvoker;
         private String produces;
-        private String consumes;
-        private Pattern consumesPattern;
+        private String contentType;
+        private Pattern contentTypePattern;
 
         private EntryPoint(Class<?> clazz, Method method, ComponentProvider componentProvider, String template,
-                ConvertersHolder convertersHolder, String produces, String consumes) {
+                ConvertersHolder convertersHolder, String produces, String contentType) {
             try {
                 this.produces = produces;
-                this.consumes = consumes;
-                consumesPattern = Pattern.compile(consumes.replace("*", "(.*)"));
-                methodInvoker = new MethodInvoker(clazz, method, componentProvider, convertersHolder);
+                this.contentType = contentType;
+                contentTypePattern = Pattern.compile(contentType.replace("*", "(.*)"));
+                methodInvoker = new MethodInvoker(clazz, method, componentProvider, convertersHolder, contentType);
                 this.template = new Template(template);
             } catch (Exception e) {
                 throw new RoutingException("Initialization problem at the Method: " + method, e);
@@ -70,14 +70,14 @@ public class EntryPointScanner {
         }
 
         public String consumes() {
-            return consumes;
+            return contentType;
         }
 
-        public boolean matchConsumes(String consumes) {
-            if (this.consumes.equals(consumes)) {
+        public boolean matchContentType(String contentType) {
+            if (this.contentType.equals(contentType)) {
                 return true;
             }
-            return consumesPattern.matcher(consumes).find();
+            return contentTypePattern.matcher(contentType).find();
         }
     }
 

@@ -5,14 +5,20 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 import org.junit.jupiter.api.Test;
 
+import net.cactusthorn.routing.Consumer;
+
 public class ConvertersHolderTest {
 
     public static final Converter<java.util.Date> TEST_CONVERTER = (req, type, value) -> {
         return new java.util.Date();
     };
 
+    public static final Consumer TEST_CONSUMER = (clazz, mediaType, data) -> {
+        return new java.util.Date();
+    };
+
     @Test //
-    public void register() {
+    public void register() throws ConverterException {
         ConvertersHolder holder = new ConvertersHolder();
         holder.register(java.util.Date.class, TEST_CONVERTER);
         Converter<?> converter = holder.findConverter(java.util.Date.class);
@@ -25,7 +31,7 @@ public class ConvertersHolderTest {
     }
 
     @Test //
-    public void valueOf() {
+    public void valueOf() throws ConverterException {
         ConvertersHolder holder = new ConvertersHolder();
         Converter<?> converter = holder.findConverter(TestEnum.class);
         assertEquals(ValueOfConverter.class, converter.getClass());
@@ -45,5 +51,12 @@ public class ConvertersHolderTest {
         ConvertersHolder holder = new ConvertersHolder();
         Converter<?> converter1 = holder.findConverter(java.util.Date.class);
         assertEquals(NullConverter.class, converter1.getClass());
+    }
+    
+    @Test //
+    public void consumer() {
+        ConvertersHolder holder = new ConvertersHolder();
+        holder.register("a/b", TEST_CONSUMER);
+        //?
     }
 }

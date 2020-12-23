@@ -18,16 +18,14 @@ public final class RoutingConfig {
     private Map<Class<? extends Annotation>, List<EntryPoint>> entryPoints;
 
     private Map<String, Producer> producers;
-    private Map<String, Consumer> consumers;
 
     private ComponentProvider componentProvider;
 
     private RoutingConfig(ComponentProvider componentProvider, Map<Class<? extends Annotation>, List<EntryPoint>> entryPoints,
-            Map<String, Producer> producers, Map<String, Consumer> consumers) {
+            Map<String, Producer> producers) {
         this.componentProvider = componentProvider;
         this.entryPoints = entryPoints;
         this.producers = producers;
-        this.consumers = consumers;
     }
 
     public static Builder builder(ComponentProvider componentProvider) {
@@ -40,10 +38,6 @@ public final class RoutingConfig {
 
     public Map<String, Producer> producers() {
         return producers;
-    }
-
-    public Map<String, Consumer> consumers() {
-        return consumers;
     }
 
     public ComponentProvider provider() {
@@ -59,8 +53,6 @@ public final class RoutingConfig {
         private final List<Class<?>> entryPointClasses = new ArrayList<>();
 
         private final Map<String, Producer> producers = new HashMap<>();
-
-        private final Map<String, Consumer> consumers = new HashMap<>();
 
         private Builder(ComponentProvider componentProvider) {
             if (componentProvider == null) {
@@ -90,15 +82,14 @@ public final class RoutingConfig {
         }
 
         public Builder addConsumer(String mediaType, Consumer consumer) {
-            consumers.put(mediaType, consumer);
+            convertersHolder.register(mediaType, consumer);
             return this;
         }
 
         public RoutingConfig build() {
             EntryPointScanner scanner = new EntryPointScanner(entryPointClasses, componentProvider, convertersHolder);
             Map<Class<? extends Annotation>, List<EntryPoint>> entryPoints = scanner.scan();
-            return new RoutingConfig(componentProvider, Collections.unmodifiableMap(entryPoints), Collections.unmodifiableMap(producers),
-                    Collections.unmodifiableMap(consumers));
+            return new RoutingConfig(componentProvider, Collections.unmodifiableMap(entryPoints), Collections.unmodifiableMap(producers));
         }
     }
 }

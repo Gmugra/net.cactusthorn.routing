@@ -1,6 +1,5 @@
 package net.cactusthorn.routing;
 
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
 import java.util.ArrayList;
@@ -12,14 +11,13 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import net.cactusthorn.routing.Template.PathValues;
-import net.cactusthorn.routing.annotation.PathParam;
-import net.cactusthorn.routing.annotation.QueryParam;
+import net.cactusthorn.routing.annotation.*;
 import net.cactusthorn.routing.converter.*;
 
 public final class MethodInvoker {
 
     private enum ParameterType {
-        UNKNOWN, PATHPARAM, QUERYPARAM, REQUEST, RESPONSE, SESSION, CONTEXT
+        UNKNOWN, PATHPARAM, QUERYPARAM, REQUEST, RESPONSE, SESSION, CONTEXT, BODY
     }
 
     private static final class ParameterInfo {
@@ -29,7 +27,7 @@ public final class MethodInvoker {
         private String name;
         private Converter<?> converter;
 
-        private ParameterInfo(Parameter parameter, ConvertersHolder convertersHolder) {
+        private ParameterInfo(Parameter parameter, ConvertersHolder convertersHolder, String contentType) {
             classType = parameter.getType();
             if (parameter.getAnnotation(PathParam.class) != null) {
                 PathParam pathParam = parameter.getAnnotation(PathParam.class);
@@ -49,13 +47,14 @@ public final class MethodInvoker {
                 type = ParameterType.SESSION;
             } else if (classType == ServletContext.class) {
                 type = ParameterType.CONTEXT;
+            } else if (parameter.getAnnotation(Context.class) != null) {
+                type = ParameterType.BODY;
+                converter = convertersHolder.findConsumerConverter(contentType);
             }
         }
 
-        private Object findValue(HttpServletRequest req, HttpServletResponse res, ServletContext con, PathValues pathValues)
+        private Object findValue(HttpServletRequest req, HttpServletResponse res, ServletContext con, RequestData requestData)
                 throws ConverterException {
-
-            Converter.RequestData requestData = new Converter.RequestData(req, pathValues);
 
             try {
                 switch (type) {
@@ -68,14 +67,18 @@ public final class MethodInvoker {
                 case CONTEXT:
                     return con;
                 case PATHPARAM:
-                    return converter.convert(requestData, classType, pathValues.value(name));
+                    return converter.convert(classType, requestData.pathValues().value(name));
                 case QUERYPARAM:
-                    return converter.convert(requestData, classType, req.getParameter(name));
+                    return converter.convert(classType, req.getParameter(name));
+                case BODY:
+                    return converter.convert(requestData, classType);
                 default:
                     return null;
                 }
+            } catch (ConverterException ce) {
+                throw ce;
             } catch (Exception e) {
-                throw new ConverterException("Parameter convertiong problem", e);
+                throw new ConverterException("Type convertion problem", e);
             }
         }
     }
@@ -88,7 +91,8 @@ public final class MethodInvoker {
 
     private final List<ParameterInfo> parameters = new ArrayList<>();
 
-    public MethodInvoker(Class<?> clazz, Method method, ComponentProvider componentProvider, ConvertersHolder convertersHolder) {
+    public MethodInvoker(Class<?> clazz, Method method, ComponentProvider componentProvider, ConvertersHolder convertersHolder,
+            String contentType) {
         this.clazz = clazz;
         this.method = method;
         this.componentProvider = componentProvider;
@@ -96,7 +100,7 @@ public final class MethodInvoker {
             if (parameter.isSynthetic()) {
                 continue;
             }
-            parameters.add(new ParameterInfo(parameter, convertersHolder));
+            parameters.add(new ParameterInfo(parameter, convertersHolder, contentType));
         }
     }
 
@@ -105,6 +109,7 @@ public final class MethodInvoker {
         try {
 
             Object object = componentProvider.provide(clazz);
+            RequestData requestData = new RequestData(req, pathValues, containsBody());
 
             Object[] values;
             if (parameters.size() == 0) {
@@ -114,14 +119,23 @@ public final class MethodInvoker {
             }
 
             for (int i = 0; i < parameters.size(); i++) {
-                values[i] = parameters.get(i).findValue(req, res, con, pathValues);
+                values[i] = parameters.get(i).findValue(req, res, con, requestData);
             }
 
             return method.invoke(object, values);
         } catch (ConverterException ce) {
             throw ce;
-        } catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
+        } catch (Exception e) {
             throw new RoutingException("The problem with method invocation", e);
         }
+    }
+
+    private boolean containsBody() {
+        for (ParameterInfo info : parameters) {
+            if (info.type == ParameterType.BODY) {
+                return true;
+            }
+        }
+        return false;
     }
 }
