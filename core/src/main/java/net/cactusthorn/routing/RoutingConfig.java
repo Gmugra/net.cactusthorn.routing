@@ -17,7 +17,8 @@ public final class RoutingConfig {
 
     public enum ConfigProperty {
 
-        READ_BODY_BUFFER_SIZE(new Integer(1024));
+        READ_BODY_BUFFER_SIZE(new Integer(1024)),
+        RESPONSE_CHARACTER_ENCODING("UTF-8");
 
         private final Object $default;
 
@@ -62,7 +63,7 @@ public final class RoutingConfig {
         return componentProvider;
     }
 
-    public Map<ConfigProperty, Object> configProperties() {
+    public Map<ConfigProperty, Object> properties() {
         return configProperties;
     }
 
@@ -116,6 +117,11 @@ public final class RoutingConfig {
 
         public Builder setReadBodyBufferSize(int size) {
             configProperties.put(ConfigProperty.READ_BODY_BUFFER_SIZE, size);
+            return this;
+        }
+        
+        public Builder setResponseCharacterEncoding(String encoding) {
+            configProperties.put(ConfigProperty.RESPONSE_CHARACTER_ENCODING, encoding);
             return this;
         }
 

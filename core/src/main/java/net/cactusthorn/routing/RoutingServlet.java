@@ -2,7 +2,6 @@ package net.cactusthorn.routing;
 
 import java.io.*;
 import java.lang.annotation.Annotation;
-import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Map;
 
@@ -13,6 +12,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import net.cactusthorn.routing.EntryPointScanner.EntryPoint;
+import net.cactusthorn.routing.RoutingConfig.ConfigProperty;
 import net.cactusthorn.routing.Template.PathValues;
 import net.cactusthorn.routing.annotation.*;
 import net.cactusthorn.routing.converter.ConverterException;
@@ -27,12 +27,14 @@ public class RoutingServlet extends HttpServlet {
     private transient ServletContext servletContext;
     private transient Map<String, Producer> producers;
     private transient ComponentProvider componentProvider;
+    private transient String responseCharacterEncoding;
 
     public RoutingServlet(RoutingConfig config) {
         super();
         componentProvider = config.provider();
         entryPoints = config.entryPoints();
         producers = config.producers();
+        responseCharacterEncoding = (String)config.properties().get(ConfigProperty.RESPONSE_CHARACTER_ENCODING);
     }
 
     @Override //
@@ -125,7 +127,7 @@ public class RoutingServlet extends HttpServlet {
     }
 
     private void produce(HttpServletRequest req, HttpServletResponse resp, EntryPoint entryPoint, Object result) throws IOException {
-        resp.setCharacterEncoding(StandardCharsets.UTF_8.toString());
+        resp.setCharacterEncoding(responseCharacterEncoding);
         if (producers.containsKey(entryPoint.produces())) {
             resp.setContentType(entryPoint.produces());
             producers.get(entryPoint.produces()).produce(result, entryPoint.produces(), req, resp);

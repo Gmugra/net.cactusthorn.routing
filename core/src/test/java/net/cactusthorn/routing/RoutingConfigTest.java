@@ -108,9 +108,9 @@ public class RoutingConfigTest {
     }
 
     @Test //
-    public void property() {
-        RoutingConfig config = RoutingConfig.builder(new EntryPointDateProvider()).setReadBodyBufferSize(123).build();
-        int value = (int) config.configProperties().get(ConfigProperty.READ_BODY_BUFFER_SIZE);
-        assertEquals(123, value);
+    public void responseCharacterEncoding() {
+        RoutingConfig config = RoutingConfig.builder(new EntryPointDateProvider()).setResponseCharacterEncoding("KOI8-R").build();
+        String value = (String) config.properties().get(ConfigProperty.RESPONSE_CHARACTER_ENCODING);
+        assertEquals("KOI8-R", value);
     }
 }
