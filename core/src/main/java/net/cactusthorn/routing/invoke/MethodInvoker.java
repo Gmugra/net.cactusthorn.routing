@@ -51,7 +51,7 @@ public final class MethodInvoker {
         if (containsBody()) {
             requestData = new RequestData(req, pathValues, (int) configProperties.get(ConfigProperty.READ_BODY_BUFFER_SIZE));
         } else {
-            requestData = new RequestData(req, pathValues);
+            requestData = new RequestData(pathValues);
         }
 
         Object[] values;

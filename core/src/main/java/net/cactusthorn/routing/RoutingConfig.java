@@ -20,14 +20,14 @@ public final class RoutingConfig {
         READ_BODY_BUFFER_SIZE(new Integer(1024)),
         RESPONSE_CHARACTER_ENCODING("UTF-8");
 
-        private final Object $default;
+        private final Object ddefault;
 
-        ConfigProperty(Object $default) {
-            this.$default = $default;
+        ConfigProperty(Object ddefault) {
+            this.ddefault = ddefault;
         }
 
-        public Object $default() {
-            return $default;
+        public Object ddefault() {
+            return ddefault;
         }
     }
 
@@ -67,7 +67,7 @@ public final class RoutingConfig {
         return configProperties;
     }
 
-    public static class Builder {
+    public static final class Builder {
 
         private ComponentProvider componentProvider;
 
@@ -86,7 +86,7 @@ public final class RoutingConfig {
             this.componentProvider = componentProvider;
 
             for (ConfigProperty property : ConfigProperty.values()) {
-                configProperties.put(property, property.$default());
+                configProperties.put(property, property.ddefault());
             }
         }
 
@@ -119,7 +119,7 @@ public final class RoutingConfig {
             configProperties.put(ConfigProperty.READ_BODY_BUFFER_SIZE, size);
             return this;
         }
-        
+
         public Builder setResponseCharacterEncoding(String encoding) {
             configProperties.put(ConfigProperty.RESPONSE_CHARACTER_ENCODING, encoding);
             return this;

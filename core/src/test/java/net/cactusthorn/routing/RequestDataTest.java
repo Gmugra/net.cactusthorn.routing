@@ -15,7 +15,7 @@ import org.mockito.Mockito;
 
 public class RequestDataTest {
 
-    HttpServletRequest request;
+    private HttpServletRequest request;
 
     @BeforeEach //
     void mock() throws IOException {
@@ -40,7 +40,7 @@ public class RequestDataTest {
 
     @Test //
     public void withoutBody() throws IOException {
-        RequestData data = new RequestData(request, null);
+        RequestData data = new RequestData(null);
 
         assertNull(data.requestBody());
     }

@@ -10,6 +10,8 @@
     <packaging>pom</packaging>
     <name>Routing :: Root</name>
 
+    <url>https://github.com/Gmugra/net.cactusthorn.routing</url>
+
     <properties>
 
         <maven.build.timestamp.format>yyyy-MM-dd'T'HH:mm:ss'Z'</maven.build.timestamp.format>
@@ -18,6 +20,7 @@
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 
         <jdk.version>1.8</jdk.version>
+        <require.version>3.5.0-beta-1</require.version>
 
         <dependency.slf4j>1.7.30</dependency.slf4j>
         <dependency.logback-classic>1.2.3</dependency.logback-classic>
@@ -37,6 +40,13 @@
         <plugin.assembly>3.3.0</plugin.assembly>
         <plugin.jacoco>0.8.6</plugin.jacoco>
         <plugin.source>3.2.1</plugin.source>
+        <plugin.enforcer>3.0.0-M3</plugin.enforcer>
+        <plugin.jxr>3.0.0</plugin.jxr>
+        <plugin.site>3.9.1</plugin.site>
+        <plugin.pmd>3.14.0</plugin.pmd>
+        <plugin.project-info-reports>3.1.1</plugin.project-info-reports>
+        <plugin.checkstyle>3.1.1</plugin.checkstyle>
+            <dependency.checkstyle>8.38</dependency.checkstyle>
 
     </properties>
 
@@ -153,7 +163,28 @@
         <plugins>
 
             <plugin>
+                <artifactId>maven-enforcer-plugin</artifactId>
+            </plugin>
+
+            <plugin>
                 <artifactId>maven-source-plugin</artifactId>
+            </plugin>
+
+            <plugin>
+                <artifactId>maven-pmd-plugin</artifactId>
+                <configuration>
+                    <aggregate>true</aggregate>
+                    <verbose>true</verbose>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>pmd-check</id>
+                        <phase>test</phase>
+                        <goals>
+                            <goal>check</goal>
+                        </goals>
+                   </execution>
+                </executions>
             </plugin>
 
         </plugins>
@@ -250,10 +281,75 @@
                     </executions>
                 </plugin>
 
+                <plugin>
+                    <artifactId>maven-pmd-plugin</artifactId>
+                    <version>${plugin.pmd}</version>
+                </plugin>
+
+                <plugin>
+                    <artifactId>maven-jxr-plugin</artifactId>
+                    <version>${plugin.jxr}</version>
+                </plugin>
+
+                <plugin>
+                    <artifactId>maven-site-plugin</artifactId>
+                    <version>${plugin.site}</version>
+                </plugin>
+
+                <plugin>
+                    <artifactId>maven-project-info-reports-plugin</artifactId>
+                    <version>${plugin.project-info-reports}</version>
+                </plugin>
+
+                <plugin>
+                    <artifactId>maven-checkstyle-plugin</artifactId>
+                    <version>${plugin.checkstyle}</version>
+                    <dependencies>
+                        <dependency>
+                            <groupId>com.puppycrawl.tools</groupId>
+                            <artifactId>checkstyle</artifactId>
+                            <version>${dependency.checkstyle}</version>
+                        </dependency>
+                    </dependencies>
+                </plugin>
+
+                <plugin>
+                    <artifactId>maven-enforcer-plugin</artifactId>
+                    <version>${plugin.enforcer}</version>
+                    <executions>
+                        <execution>
+                            <id>enforce-maven</id>
+                            <goals>
+                                <goal>enforce</goal>
+                            </goals>
+                            <configuration>
+                                <rules>
+                                    <requireMavenVersion>
+                                        <message>Current version of Maven ${maven.version}: should be ${require.version}, or higher!</message>
+                                        <version>${require.version}</version>
+                                    </requireMavenVersion>
+                                    <requireJavaVersion>
+                                    <message>Current JDK version ${java.version}: should be ${jdk.version}, or higher!</message>
+                                        <version>${jdk.version}</version>
+                                    </requireJavaVersion>
+                                </rules>
+                            </configuration>
+                        </execution>
+                    </executions>
+                </plugin>
+
             </plugins>
         </pluginManagement>
 
     </build>
+
+    <reporting>
+        <plugins>
+            <plugin>
+                <artifactId>maven-jxr-plugin</artifactId>
+            </plugin>
+        </plugins>
+    </reporting>
 
     <profiles>
 

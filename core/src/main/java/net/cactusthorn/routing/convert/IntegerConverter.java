@@ -2,7 +2,7 @@ package net.cactusthorn.routing.convert;
 
 import net.cactusthorn.routing.RequestData;
 
-public class IntegerConverter implements Converter {
+public final class IntegerConverter implements Converter {
 
     @Override //
     public Integer convert(RequestData requestData, Class<?> type, String value) {

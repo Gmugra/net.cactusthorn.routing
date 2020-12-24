@@ -12,7 +12,7 @@ public class RequestData {
     private PathValues pathValues;
     private String requestBody;
 
-    public RequestData(HttpServletRequest request, PathValues pathValues) {
+    public RequestData(PathValues pathValues) {
         this.pathValues = pathValues;
     }
 

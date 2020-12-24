@@ -144,10 +144,8 @@ public final class Template {
             if (c == ':') {
                 String regExp = processRegExp(it);
                 String paramName = param.toString();
-                if (paramsBuf.containsKey(paramName)) {
-                    if (!regExp.equals(paramsBuf.get(paramName))) {
-                        throw new IllegalArgumentException(String.format(MULTIPLE_PARAM, paramName));
-                    }
+                if (paramsBuf.containsKey(paramName) && !regExp.equals(paramsBuf.get(paramName))) {
+                    throw new IllegalArgumentException(String.format(MULTIPLE_PARAM, paramName));
                 }
                 parameters.add(param.toString());
                 regExpParamsAmount++;
@@ -171,10 +169,9 @@ public final class Template {
     private char eraseWhitespaces(StringCharacterIterator it) {
         while (true) {
             char c = it.next();
-            if (Character.isWhitespace(c)) {
-                continue;
+            if (!Character.isWhitespace(c)) {
+                return c;
             }
-            return c;
         }
     }
 

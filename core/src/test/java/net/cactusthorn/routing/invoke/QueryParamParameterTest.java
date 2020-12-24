@@ -40,7 +40,7 @@ public class QueryParamParameterTest {
 
         HttpServletRequest request = Mockito.mock(HttpServletRequest.class);
         Mockito.when(request.getParameterValues("val")).thenReturn(new String[] { "100", "200" });
-        RequestData data = new RequestData(request, null);
+        RequestData data = new RequestData(null);
 
         int[] result = (int[]) mp.findValue(request, null, null, data);
 
@@ -62,7 +62,7 @@ public class QueryParamParameterTest {
 
         HttpServletRequest request = Mockito.mock(HttpServletRequest.class);
         Mockito.when(request.getParameter("val")).thenReturn("abc");
-        RequestData data = new RequestData(request, null);
+        RequestData data = new RequestData(null);
 
         assertThrows(ConverterException.class, () -> mp.findValue(request, null, null, data));
     }

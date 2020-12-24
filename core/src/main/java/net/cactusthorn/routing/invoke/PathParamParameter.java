@@ -9,24 +9,29 @@ import javax.servlet.http.HttpServletResponse;
 
 import net.cactusthorn.routing.RequestData;
 import net.cactusthorn.routing.annotation.PathParam;
+import net.cactusthorn.routing.convert.Converter;
 import net.cactusthorn.routing.convert.ConverterException;
 import net.cactusthorn.routing.convert.ConvertersHolder;
 
 public final class PathParamParameter extends MethodParameter {
 
-    public PathParamParameter(Method method, Parameter parameter, ConvertersHolder convertersHolder, String contentType) {
-        super(method, parameter, convertersHolder, contentType);
+    private String name;
+    private Class<?> converterType;
+    private Converter converter;
+
+    public PathParamParameter(Method method, Parameter parameter, ConvertersHolder convertersHolder) {
+        super(parameter);
         PathParam pathParam = parameter.getAnnotation(PathParam.class);
         name = pathParam.value();
-        converterType = converterType(method, classType);
-        if (converterType != classType) {
+        converterType = converterType(method, classType());
+        if (converterType != classType()) {
             throw new IllegalArgumentException("@PathParam can't be array or collection; Wrong method: " + method.toGenericString());
         }
         converter = convertersHolder.findConverter(converterType);
     }
 
     @Override //
-    final Object findValue(HttpServletRequest req, HttpServletResponse res, ServletContext con, RequestData requestData)
+    Object findValue(HttpServletRequest req, HttpServletResponse res, ServletContext con, RequestData requestData)
             throws ConverterException {
         try {
             return converter.convert(converterType, requestData.pathValues().value(name));

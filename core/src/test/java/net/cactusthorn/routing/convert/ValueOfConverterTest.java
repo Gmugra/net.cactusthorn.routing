@@ -44,4 +44,11 @@ public class ValueOfConverterTest {
         c.register(Integer.class);
         @SuppressWarnings("unused") Integer i = (Integer) c.convert(Integer.class, (String) null);
     }
+
+    @Test //
+    public void emptyValue() throws ConverterException {
+        ValueOfConverter c = new ValueOfConverter();
+        c.register(Integer.class);
+        @SuppressWarnings("unused") Integer i = (Integer) c.convert(Integer.class, (String) "");
+    }
 }

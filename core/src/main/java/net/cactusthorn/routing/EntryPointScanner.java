@@ -27,7 +27,7 @@ import net.cactusthorn.routing.invoke.MethodInvoker;
 
 public class EntryPointScanner {
 
-    public final static class EntryPoint {
+    public static final class EntryPoint {
 
         private static final Comparator<EntryPoint> COMPARATOR = (o1, o2) -> Template.COMPARATOR.compare(o1.template, o2.template);
 
@@ -75,11 +75,11 @@ public class EntryPointScanner {
             return contentType;
         }
 
-        public boolean matchContentType(String contentType) {
-            if (this.contentType.equals(contentType)) {
+        public boolean matchContentType(String contenttype) {
+            if (this.contentType.equals(contenttype)) {
                 return true;
             }
-            return contentTypePattern.matcher(contentType).find();
+            return contentTypePattern.matcher(contenttype).find();
         }
     }
 

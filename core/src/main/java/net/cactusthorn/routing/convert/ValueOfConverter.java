@@ -9,7 +9,7 @@ import java.util.Map;
 import net.cactusthorn.routing.RequestData;
 import net.cactusthorn.routing.RoutingException;
 
-public class ValueOfConverter implements Converter {
+public final class ValueOfConverter implements Converter {
 
     private final Map<Class<?>, Method> classes = new HashMap<>();
 
@@ -26,7 +26,7 @@ public class ValueOfConverter implements Converter {
         }
     }
 
-    public boolean register(Class<?> type) {
+    boolean register(Class<?> type) {
         Method method = findMethod(type);
         if (method != null) {
             classes.put(type, method);

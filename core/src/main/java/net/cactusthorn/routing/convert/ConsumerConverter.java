@@ -3,12 +3,12 @@ package net.cactusthorn.routing.convert;
 import net.cactusthorn.routing.Consumer;
 import net.cactusthorn.routing.RequestData;
 
-public class ConsumerConverter implements Converter {
+public final class ConsumerConverter implements Converter {
 
     private String contentType;
     private Consumer consumer;
 
-    public ConsumerConverter(String contentType, Consumer consumer) {
+    ConsumerConverter(String contentType, Consumer consumer) {
         this.contentType = contentType;
         this.consumer = consumer;
     }

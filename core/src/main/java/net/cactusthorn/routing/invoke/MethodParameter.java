@@ -12,19 +12,19 @@ import net.cactusthorn.routing.RequestData;
 import net.cactusthorn.routing.annotation.Context;
 import net.cactusthorn.routing.annotation.PathParam;
 import net.cactusthorn.routing.annotation.QueryParam;
-import net.cactusthorn.routing.convert.Converter;
 import net.cactusthorn.routing.convert.ConverterException;
 import net.cactusthorn.routing.convert.ConvertersHolder;
 
 public abstract class MethodParameter {
 
-    protected Class<?> classType;
-    protected String name;
-    protected Class<?> converterType;
-    protected Converter converter;
+    private Class<?> classType;
 
-    MethodParameter(Method method, Parameter parameter, ConvertersHolder convertersHolder, String contentType) {
+    MethodParameter(Parameter parameter) {
         classType = parameter.getType();
+    }
+
+    protected Class<?> classType() {
+        return classType;
     }
 
     abstract Object findValue(HttpServletRequest req, HttpServletResponse res, ServletContext con, RequestData requestData)
@@ -43,31 +43,31 @@ public abstract class MethodParameter {
 
     static final class Factory {
 
-        static final MethodParameter create(Method method, Parameter parameter, ConvertersHolder convertersHolder, String contentType) {
+        static MethodParameter create(Method method, Parameter parameter, ConvertersHolder convertersHolder, String contentType) {
             Class<?> parameterClassType = parameter.getType();
             if (parameter.getAnnotation(PathParam.class) != null) {
 
-                return new PathParamParameter(method, parameter, convertersHolder, contentType);
+                return new PathParamParameter(method, parameter, convertersHolder);
             } else if (parameter.getAnnotation(QueryParam.class) != null) {
 
-                return new QueryParamParameter(method, parameter, convertersHolder, contentType);
+                return new QueryParamParameter(method, parameter, convertersHolder);
             } else if (parameterClassType == HttpServletRequest.class) {
 
-                return new HttpServletRequestParameter(method, parameter, convertersHolder, contentType);
+                return new HttpServletRequestParameter(parameter);
             } else if (parameterClassType == HttpServletResponse.class) {
 
-                return new HttpServletResponseParameter(method, parameter, convertersHolder, contentType);
+                return new HttpServletResponseParameter(parameter);
             } else if (parameterClassType == HttpSession.class) {
 
-                return new HttpSessionParameter(method, parameter, convertersHolder, contentType);
+                return new HttpSessionParameter(parameter);
             } else if (parameterClassType == ServletContext.class) {
 
-                return new ServletContextParameter(method, parameter, convertersHolder, contentType);
+                return new ServletContextParameter(parameter);
             } else if (parameter.getAnnotation(Context.class) != null) {
 
-                return new BodyParameter(method, parameter, convertersHolder, contentType);
+                return new BodyParameter(parameter, convertersHolder, contentType);
             }
-            return new UnknownParameter(method, parameter, convertersHolder, contentType);
+            return new UnknownParameter(parameter);
         }
     }
 }
