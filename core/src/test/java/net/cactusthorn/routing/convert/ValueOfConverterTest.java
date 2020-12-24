@@ -1,4 +1,4 @@
-package net.cactusthorn.routing.converter;
+package net.cactusthorn.routing.convert;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -42,6 +42,6 @@ public class ValueOfConverterTest {
     public void nullValue() throws ConverterException {
         ValueOfConverter c = new ValueOfConverter();
         c.register(Integer.class);
-        @SuppressWarnings("unused") Integer i = (Integer) c.convert(Integer.class, null);
+        @SuppressWarnings("unused") Integer i = (Integer) c.convert(Integer.class, (String) null);
     }
 }

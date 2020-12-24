@@ -1,9 +1,9 @@
-package net.cactusthorn.routing.converter;
+package net.cactusthorn.routing.convert;
 
 import net.cactusthorn.routing.Consumer;
 import net.cactusthorn.routing.RequestData;
 
-public class ConsumerConverter implements Converter<Object> {
+public class ConsumerConverter implements Converter {
 
     private String contentType;
     private Consumer consumer;
@@ -20,6 +20,11 @@ public class ConsumerConverter implements Converter<Object> {
         } catch (Exception e) {
             throw new ConverterException("Consumer convert problem", e);
         }
+    }
+
+    @Override //
+    public Object convert(RequestData requestData, Class<?> type, String[] value) throws ConverterException {
+        throw new UnsupportedOperationException("Array support is senseless for consumer converting");
     }
 
 }

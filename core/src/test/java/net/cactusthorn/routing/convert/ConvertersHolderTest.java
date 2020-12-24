@@ -1,4 +1,4 @@
-package net.cactusthorn.routing.converter;
+package net.cactusthorn.routing.convert;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -9,7 +9,7 @@ import net.cactusthorn.routing.Consumer;
 
 public class ConvertersHolderTest {
 
-    public static final Converter<java.util.Date> TEST_CONVERTER = (req, type, value) -> {
+    public static final Converter TEST_CONVERTER = (req, type, value) -> {
         return new java.util.Date();
     };
 
@@ -21,8 +21,8 @@ public class ConvertersHolderTest {
     public void register() throws ConverterException {
         ConvertersHolder holder = new ConvertersHolder();
         holder.register(java.util.Date.class, TEST_CONVERTER);
-        Converter<?> converter = holder.findConverter(java.util.Date.class);
-        java.util.Date date = (java.util.Date) converter.convert(null, null, null);
+        Converter converter = holder.findConverter(java.util.Date.class);
+        java.util.Date date = (java.util.Date) converter.convert(java.util.Date.class, (String) null);
         assertNotNull(date);
     }
 
@@ -33,7 +33,7 @@ public class ConvertersHolderTest {
     @Test //
     public void valueOf() throws ConverterException {
         ConvertersHolder holder = new ConvertersHolder();
-        Converter<?> converter = holder.findConverter(TestEnum.class);
+        Converter converter = holder.findConverter(TestEnum.class);
         assertEquals(ValueOfConverter.class, converter.getClass());
         assertEquals(TestEnum.AAAA, converter.convert(null, TestEnum.class, "AAAA"));
     }
@@ -41,22 +41,22 @@ public class ConvertersHolderTest {
     @Test //
     public void valueOfAlreadyExist() {
         ConvertersHolder holder = new ConvertersHolder();
-        Converter<?> converter1 = holder.findConverter(TestEnum.class);
-        Converter<?> converter2 = holder.findConverter(TestEnum.class);
+        Converter converter1 = holder.findConverter(TestEnum.class);
+        Converter converter2 = holder.findConverter(TestEnum.class);
         assertEquals(converter1.hashCode(), converter2.hashCode());
     }
 
     @Test //
     public void unknown() {
         ConvertersHolder holder = new ConvertersHolder();
-        Converter<?> converter1 = holder.findConverter(java.util.Date.class);
+        Converter converter1 = holder.findConverter(java.util.Date.class);
         assertEquals(NullConverter.class, converter1.getClass());
     }
-    
+
     @Test //
     public void consumer() {
         ConvertersHolder holder = new ConvertersHolder();
         holder.register("a/b", TEST_CONSUMER);
-        //?
+        // ?
     }
 }

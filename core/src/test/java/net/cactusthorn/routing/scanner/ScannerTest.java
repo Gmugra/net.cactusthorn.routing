@@ -19,7 +19,7 @@ import net.cactusthorn.routing.EntryPointScanner.EntryPoint;
 import net.cactusthorn.routing.RoutingConfig.ConfigProperty;
 import net.cactusthorn.routing.Template.PathValues;
 import net.cactusthorn.routing.annotation.*;
-import net.cactusthorn.routing.converter.ConvertersHolder;
+import net.cactusthorn.routing.convert.ConvertersHolder;
 
 public class ScannerTest {
 

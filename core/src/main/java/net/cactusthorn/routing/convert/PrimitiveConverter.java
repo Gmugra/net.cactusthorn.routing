@@ -1,8 +1,8 @@
-package net.cactusthorn.routing.converter;
+package net.cactusthorn.routing.convert;
 
 import net.cactusthorn.routing.RequestData;
 
-public class PrimitiveConverter implements Converter<Object> {
+public class PrimitiveConverter implements Converter {
 
     @Override //
     public Object convert(RequestData requestData, Class<?> type, String value) {

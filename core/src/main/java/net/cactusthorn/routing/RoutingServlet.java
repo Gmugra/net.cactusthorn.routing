@@ -15,7 +15,7 @@ import net.cactusthorn.routing.EntryPointScanner.EntryPoint;
 import net.cactusthorn.routing.RoutingConfig.ConfigProperty;
 import net.cactusthorn.routing.Template.PathValues;
 import net.cactusthorn.routing.annotation.*;
-import net.cactusthorn.routing.converter.ConverterException;
+import net.cactusthorn.routing.convert.ConverterException;
 
 public class RoutingServlet extends HttpServlet {
 

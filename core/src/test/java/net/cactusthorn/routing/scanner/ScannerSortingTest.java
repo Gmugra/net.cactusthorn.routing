@@ -17,7 +17,7 @@ import net.cactusthorn.routing.EntryPointScanner.EntryPoint;
 import net.cactusthorn.routing.RoutingConfig.ConfigProperty;
 import net.cactusthorn.routing.annotation.GET;
 import net.cactusthorn.routing.annotation.Path;
-import net.cactusthorn.routing.converter.ConvertersHolder;
+import net.cactusthorn.routing.convert.ConvertersHolder;
 
 public class ScannerSortingTest {
 

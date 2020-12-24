@@ -1,4 +1,4 @@
-package net.cactusthorn.routing;
+package net.cactusthorn.routing.invoke;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -20,11 +20,13 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
+import net.cactusthorn.routing.ComponentProvider;
+import net.cactusthorn.routing.Consumer;
 import net.cactusthorn.routing.RoutingConfig.ConfigProperty;
 import net.cactusthorn.routing.Template.PathValues;
 import net.cactusthorn.routing.annotation.*;
-import net.cactusthorn.routing.converter.ConverterException;
-import net.cactusthorn.routing.converter.ConvertersHolder;
+import net.cactusthorn.routing.convert.ConverterException;
+import net.cactusthorn.routing.convert.ConvertersHolder;
 
 public class MethodInvokerTest {
 

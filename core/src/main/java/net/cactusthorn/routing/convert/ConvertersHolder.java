@@ -1,4 +1,4 @@
-package net.cactusthorn.routing.converter;
+package net.cactusthorn.routing.convert;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -10,7 +10,7 @@ public class ConvertersHolder {
     private static final NullConverter NULL = new NullConverter();
     private static final ValueOfConverter VALUE_OF = new ValueOfConverter();
 
-    private final Map<Class<?>, Converter<?>> converters = new HashMap<>();
+    private final Map<Class<?>, Converter> converters = new HashMap<>();
 
     private final Map<String, ConsumerConverter> consumers = new HashMap<>();
 
@@ -29,8 +29,8 @@ public class ConvertersHolder {
         converters.put(String.class, new StringConverter());
     }
 
-    public Converter<?> findConverter(Class<?> clazz) {
-        Converter<?> converter = converters.get(clazz);
+    public Converter findConverter(Class<?> clazz) {
+        Converter converter = converters.get(clazz);
         if (converter != null) {
             return converter;
         }
@@ -41,7 +41,7 @@ public class ConvertersHolder {
         return NULL;
     }
 
-    public Converter<?> findConsumerConverter(String contentType) {
+    public Converter findConsumerConverter(String contentType) {
         ConsumerConverter converter = consumers.get(contentType);
         if (converter != null) {
             return converter;
@@ -49,7 +49,7 @@ public class ConvertersHolder {
         return NULL;
     }
 
-    public <T> void register(Class<T> clazz, Converter<T> converter) {
+    public void register(Class<?> clazz, Converter converter) {
         converters.put(clazz, converter);
     }
 

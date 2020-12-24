@@ -21,8 +21,9 @@ import javax.servlet.http.HttpServletResponse;
 import net.cactusthorn.routing.RoutingConfig.ConfigProperty;
 import net.cactusthorn.routing.Template.PathValues;
 import net.cactusthorn.routing.annotation.*;
-import net.cactusthorn.routing.converter.ConverterException;
-import net.cactusthorn.routing.converter.ConvertersHolder;
+import net.cactusthorn.routing.convert.ConverterException;
+import net.cactusthorn.routing.convert.ConvertersHolder;
+import net.cactusthorn.routing.invoke.MethodInvoker;
 
 public class EntryPointScanner {
 

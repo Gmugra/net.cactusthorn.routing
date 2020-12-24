@@ -13,9 +13,9 @@ import org.junit.jupiter.api.Test;
 
 import net.cactusthorn.routing.*;
 import net.cactusthorn.routing.annotation.*;
+import net.cactusthorn.routing.convert.ConvertersHolder;
 import net.cactusthorn.routing.EntryPointScanner.EntryPoint;
 import net.cactusthorn.routing.RoutingConfig.ConfigProperty;
-import net.cactusthorn.routing.converter.ConvertersHolder;
 
 public class ConsumesTest {
 

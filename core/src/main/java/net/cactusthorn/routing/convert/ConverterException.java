@@ -1,4 +1,4 @@
-package net.cactusthorn.routing.converter;
+package net.cactusthorn.routing.convert;
 
 public class ConverterException extends Exception {
 

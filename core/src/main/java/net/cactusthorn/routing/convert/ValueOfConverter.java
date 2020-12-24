@@ -1,4 +1,4 @@
-package net.cactusthorn.routing.converter;
+package net.cactusthorn.routing.convert;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -9,14 +9,14 @@ import java.util.Map;
 import net.cactusthorn.routing.RequestData;
 import net.cactusthorn.routing.RoutingException;
 
-public class ValueOfConverter implements Converter<Object> {
+public class ValueOfConverter implements Converter {
 
     private final Map<Class<?>, Method> classes = new HashMap<>();
 
     @Override //
     public Object convert(RequestData requestData, Class<?> type, String value) throws ConverterException {
         try {
-            if (value == null) {
+            if (value == null || value.trim().isEmpty()) {
                 return null;
             }
             Method method = classes.get(type);

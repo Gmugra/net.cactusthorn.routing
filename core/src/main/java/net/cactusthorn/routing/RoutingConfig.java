@@ -4,8 +4,8 @@ import java.util.List;
 import java.util.Map;
 
 import net.cactusthorn.routing.EntryPointScanner.EntryPoint;
-import net.cactusthorn.routing.converter.Converter;
-import net.cactusthorn.routing.converter.ConvertersHolder;
+import net.cactusthorn.routing.convert.Converter;
+import net.cactusthorn.routing.convert.ConvertersHolder;
 
 import java.lang.annotation.Annotation;
 import java.util.ArrayList;
@@ -90,7 +90,7 @@ public final class RoutingConfig {
             }
         }
 
-        public <T> Builder addConverter(Class<T> clazz, Converter<T> converter) {
+        public Builder addConverter(Class<?> clazz, Converter converter) {
             convertersHolder.register(clazz, converter);
             return this;
         }

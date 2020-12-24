@@ -17,12 +17,12 @@ import net.cactusthorn.routing.Template.PathValues;
 import net.cactusthorn.routing.annotation.GET;
 import net.cactusthorn.routing.annotation.Path;
 import net.cactusthorn.routing.annotation.PathParam;
-import net.cactusthorn.routing.converter.Converter;
-import net.cactusthorn.routing.converter.ConverterException;
+import net.cactusthorn.routing.convert.Converter;
+import net.cactusthorn.routing.convert.ConverterException;
 
 public class RoutingConfigTest {
 
-    public static final Converter<java.util.Date> TEST_CONVERTER = (req, type, value) -> {
+    public static final Converter TEST_CONVERTER = (req, type, value) -> {
         return new java.util.Date();
     };
 
@@ -112,5 +112,12 @@ public class RoutingConfigTest {
         RoutingConfig config = RoutingConfig.builder(new EntryPointDateProvider()).setResponseCharacterEncoding("KOI8-R").build();
         String value = (String) config.properties().get(ConfigProperty.RESPONSE_CHARACTER_ENCODING);
         assertEquals("KOI8-R", value);
+    }
+
+    @Test //
+    public void readBodyBufferSize() {
+        RoutingConfig config = RoutingConfig.builder(new EntryPointDateProvider()).setReadBodyBufferSize(512).build();
+        int value = (int) config.properties().get(ConfigProperty.READ_BODY_BUFFER_SIZE);
+        assertEquals(512, value);
     }
 }

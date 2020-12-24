@@ -22,10 +22,10 @@ public final class Template {
 
         private final Map<String, String> values = new HashMap<>();
 
-        PathValues() {
+        public PathValues() {
         }
 
-        void put(String name, String value) {
+        public void put(String name, String value) {
             values.put(name, value);
         }
 

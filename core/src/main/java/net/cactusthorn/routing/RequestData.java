@@ -12,11 +12,11 @@ public class RequestData {
     private PathValues pathValues;
     private String requestBody;
 
-    public RequestData(HttpServletRequest request, PathValues pathValues) throws IOException {
+    public RequestData(HttpServletRequest request, PathValues pathValues) {
         this.pathValues = pathValues;
     }
 
-    public RequestData(HttpServletRequest request, PathValues pathValues, int readBodyBufferSize) throws IOException {
+    public RequestData(HttpServletRequest request, PathValues pathValues, int readBodyBufferSize) {
         this.pathValues = pathValues;
         requestBody = requestBody(request, readBodyBufferSize);
     }
@@ -29,8 +29,7 @@ public class RequestData {
         return requestBody;
     }
 
-    private String requestBody(HttpServletRequest request, int readBodyBufferSize) throws IOException {
-
+    private String requestBody(HttpServletRequest request, int readBodyBufferSize) {
         try (Reader reader = request.getReader()) {
 
             char[] charBuffer = new char[readBodyBufferSize];
@@ -40,6 +39,8 @@ public class RequestData {
                 builder.append(charBuffer, 0, numCharsRead);
             }
             return builder.toString();
+        } catch (IOException e) {
+            throw new RoutingException("Problem to get request body", e);
         }
     }
 }
