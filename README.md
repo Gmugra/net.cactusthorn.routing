@@ -89,17 +89,23 @@ Already:
 1. Full functional Servlet
 1. @Path for class and/or method (regular expressions support; routing priority like in JAX-RS)
 1. @GET @POST and so on
-1. Types converting for primitive types and classes with _public static valeuOf(String arg)_ method. Possibility to write custom convertors.
+1. Types converting for:
+   1. primitive types 
+   1. classes with _public static valeuOf(String arg)_ method. 
+   1. classes with a public constructor that accepts a single String argument.
+   1. classes with _public static fromString(String arg)_ method.
+   1. Possibility to write custom convertors.
 1. @PathParam and @QueryParam for parameters.
-1. Arrays & collections support for @QueryParam
+1. Arrays support for @QueryParam
+1. Collections support for @QueryParam
+   1. Interfaces List<T>, Set<T>, SortedSet<T>, Collection<T> where T is supported by type converting
+   1. any class which is not abstract and _Collections.class.isAssignableFrom( this class ) == true_
 1. @Produce and Producer interface (example: _json-gson_ module)
 1. @Consumes for class and/or method. To specify Content-Type as additional routing filter. Wildcard is supported (e.g. text/* )
 1. Consumer interface support (example: _json-gson_ module)
 1. inject HttpServletRequest, HttpServletResponse, HttpSession, ServletContext in method parameters
 
 Comming soon:
-1. Type converting for classes with _public static fromString(String arg)_ method.
-1. Type converting for classes with a constructor that accepts a single String argument.
 1. Producer example for text/html with [Thymeleaf](https://www.thymeleaf.org)
 1. ComponentProvider example with _dagger 2_
 

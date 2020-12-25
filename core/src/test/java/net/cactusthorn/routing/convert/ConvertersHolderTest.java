@@ -7,6 +7,7 @@ import org.junit.jupiter.api.Test;
 import net.cactusthorn.routing.Consumer;
 
 import java.util.Optional;
+import java.util.UUID;
 
 public class ConvertersHolderTest {
 
@@ -35,7 +36,7 @@ public class ConvertersHolderTest {
     public void valueOf() throws ConverterException {
         ConvertersHolder holder = new ConvertersHolder();
         Converter converter = holder.findConverter(TestEnum.class).get();
-        assertEquals(ValueOfConverter.class, converter.getClass());
+        assertEquals(StaticStringMethodConverter.class, converter.getClass());
         assertEquals(TestEnum.AAAA, converter.convert(null, TestEnum.class, "AAAA"));
     }
 
@@ -50,7 +51,7 @@ public class ConvertersHolderTest {
     @Test //
     public void unknown() {
         ConvertersHolder holder = new ConvertersHolder();
-        Optional<Converter> c = holder.findConverter(java.util.Date.class);
+        Optional<Converter> c = holder.findConverter(Math.class);
         assertFalse(c.isPresent());
     }
 
@@ -68,16 +69,17 @@ public class ConvertersHolderTest {
         assertFalse(c.isPresent());
     }
 
-    public static class X {
-        public static X valueOf(String s) {
-            return new X();
-        }
+    @Test //
+    public void fromString() throws ConverterException {
+        ConvertersHolder holder = new ConvertersHolder();
+        Converter converter = holder.findConverter(UUID.class).get();
+        assertEquals(StaticStringMethodConverter.class, converter.getClass());
     }
 
     @Test //
-    public void byTypeNotFound() {
+    public void constructor() throws ConverterException {
         ConvertersHolder holder = new ConvertersHolder();
-        Optional<Converter> c = holder.findConverter(java.util.Date.class);
-        assertFalse(c.isPresent());
+        Converter converter = holder.findConverter(StringBuilder.class).get();
+        assertEquals(StringConstructorConverter.class, converter.getClass());
     }
 }

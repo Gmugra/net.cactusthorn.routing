@@ -9,7 +9,9 @@ import net.cactusthorn.routing.Consumer;
 
 public class ConvertersHolder {
 
-    private static final ValueOfConverter VALUE_OF = new ValueOfConverter();
+    private static final StaticStringMethodConverter VALUE_OF = new StaticStringMethodConverter("valueOf");
+    private static final StaticStringMethodConverter FROM_STRING = new StaticStringMethodConverter("fromString");
+    private static final StringConstructorConverter CONSTRUCTOR = new StringConstructorConverter();
 
     private final Map<Type, Converter> converters = new HashMap<>();
 
@@ -45,6 +47,14 @@ public class ConvertersHolder {
         if (VALUE_OF.register(clazz)) {
             converters.put(clazz, VALUE_OF);
             return Optional.of(VALUE_OF);
+        }
+        if (CONSTRUCTOR.register(clazz)) {
+            converters.put(clazz, CONSTRUCTOR);
+            return Optional.of(CONSTRUCTOR);
+        }
+        if (FROM_STRING.register(clazz)) {
+            converters.put(clazz, FROM_STRING);
+            return Optional.of(FROM_STRING);
         }
         return Optional.empty();
     }

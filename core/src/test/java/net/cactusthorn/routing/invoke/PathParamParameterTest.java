@@ -27,7 +27,7 @@ public class PathParamParameterTest {
         public void collection(@PathParam("val") List<String> values) {
         }
 
-        public void date(@PathParam("val") java.util.Date values) {
+        public void math(@PathParam("val") Math values) {
         }
     }
 
@@ -46,8 +46,8 @@ public class PathParamParameterTest {
     }
 
     @Test //
-    public void date() {
-        Method m = findMethod("date");
+    public void math() {
+        Method m = findMethod("math");
         Parameter p = m.getParameters()[0];
         assertThrows(RoutingInitializationException.class, () -> MethodParameter.Factory.create(m, p, HOLDER, "*/*"));
     }
