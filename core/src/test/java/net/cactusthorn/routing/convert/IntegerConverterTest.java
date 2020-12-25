@@ -29,7 +29,7 @@ public class IntegerConverterTest {
     @Test //
     public void testNullArray() throws ConverterException {
         IntegerConverter c = new IntegerConverter();
-        Object result = (Object) c.convert(String.class, (String[]) null);
+        Object result = (Object) c.convert(Integer.class, (String[]) null);
         assertNull(result);
     }
 }

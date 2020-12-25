@@ -26,8 +26,15 @@ public class ConvertersHolder {
         converters.put(Character.TYPE, new PrimitiveConverter());
         converters.put(Boolean.TYPE, new PrimitiveConverter());
 
-        converters.put(Integer.class, new IntegerConverter());
         converters.put(String.class, new StringConverter());
+        converters.put(Byte.class, new ByteConverter());
+        converters.put(Short.class, new ShortConverter());
+        converters.put(Integer.class, new IntegerConverter());
+        converters.put(Long.class, new LongConverter());
+        converters.put(Float.class, new FloatConverter());
+        converters.put(Double.class, new DoubleConverter());
+        converters.put(Character.class, new CharacterConverter());
+        converters.put(Boolean.class, new BooleanConverter());
     }
 
     public Optional<Converter> findConverter(Class<?> clazz) {
