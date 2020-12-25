@@ -16,10 +16,10 @@ public class MyEntryPoint {
     @Path("something/{ id : \\d{6} }/{var1}-{var2}")
     @Produces("application/json")
     public MySomething getIt(
-        @PathParam("id") int id, 
-        @PathParam("var1") String var1, 
+        @PathParam("id") int id,
+        @PathParam("var1") String var1,
         @PathParam("var2") String var2,
-        @QueryParam("qval") int[] qval) {
+        @QueryParam("qval") List<Integer> qval) {
 
         return new MySomething(...);
     }
@@ -40,8 +40,12 @@ public class Application {
 
     public static void main(String... args) {
 
-        RoutingConfig config = RoutingConfig.builder(new Provider()).addEntryPoint(MyEntryPoint.class)
-                .addProducer("application/json", new SimpleGsonProducer(true)).build();
+        RoutingConfig config =
+            RoutingConfig.builder(new MyProvider())
+            .addEntryPoint(MyEntryPoint.class)
+            .addProducer("application/json", new SimpleGsonProducer())
+            .addConsumer("application/json", new SimpleGsonConsumer())
+            .build();
 
         ServletHolder servletHolder = new ServletHolder(new RoutingServlet(config));
         servletHolder.setInitOrder(0);
@@ -87,7 +91,7 @@ Already:
 1. @GET @POST and so on
 1. Types converting for primitive types and classes with _public static valeuOf(String arg)_ method. Possibility to write custom convertors.
 1. @PathParam and @QueryParam for parameters.
-1. Arrays support for @QueryParam
+1. Arrays & collections support for @QueryParam
 1. @Produce and Producer interface (example: _json-gson_ module)
 1. @Consumes for class and/or method. To specify Content-Type as additional routing filter. Wildcard is supported (e.g. text/* )
 1. Consumer interface support (example: _json-gson_ module)
@@ -96,7 +100,6 @@ Already:
 Comming soon:
 1. Type converting for classes with _public static fromString(String arg)_ method.
 1. Type converting for classes with a constructor that accepts a single String argument.
-1. Type converting for collections
 1. Producer example for text/html with [Thymeleaf](https://www.thymeleaf.org)
 1. ComponentProvider example with _dagger 2_
 

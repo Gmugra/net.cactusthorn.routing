@@ -1,6 +1,6 @@
 package net.cactusthorn.routing.convert;
 
-import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import org.junit.jupiter.api.Test;
@@ -20,5 +20,12 @@ public class StringConverterTest {
         String[] value = new String[] { "abc", "xyz" };
         String[] result = (String[]) c.convert(String.class, value);
         assertArrayEquals(value, result);
+    }
+
+    @Test //
+    public void testNullArray() throws ConverterException {
+        StringConverter c = new StringConverter();
+        Object result = (Object)c.convert(String.class, (String[])null);
+        assertNull(result);
     }
 }

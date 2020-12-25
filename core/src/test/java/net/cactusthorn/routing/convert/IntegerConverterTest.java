@@ -25,4 +25,11 @@ public class IntegerConverterTest {
         Integer[] result = (Integer[]) c.convert(Integer.class, value);
         assertArrayEquals(valuesAsInt, result);
     }
+
+    @Test //
+    public void testNullArray() throws ConverterException {
+        IntegerConverter c = new IntegerConverter();
+        Object result = (Object) c.convert(String.class, (String[]) null);
+        assertNull(result);
+    }
 }

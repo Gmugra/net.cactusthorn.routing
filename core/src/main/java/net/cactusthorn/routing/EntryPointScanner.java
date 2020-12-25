@@ -39,14 +39,14 @@ public class EntryPointScanner {
 
         private EntryPoint(Class<?> clazz, Method method, ComponentProvider componentProvider, String template,
                 ConvertersHolder convertersHolder, String produces, String contentType, Map<ConfigProperty, Object> configProperties) {
+            this.produces = produces;
+            this.contentType = contentType;
+            contentTypePattern = Pattern.compile(contentType.replace("*", "(.*)"));
+            methodInvoker = new MethodInvoker(clazz, method, componentProvider, convertersHolder, contentType, configProperties);
             try {
-                this.produces = produces;
-                this.contentType = contentType;
-                contentTypePattern = Pattern.compile(contentType.replace("*", "(.*)"));
-                methodInvoker = new MethodInvoker(clazz, method, componentProvider, convertersHolder, contentType, configProperties);
                 this.template = new Template(template);
-            } catch (Exception e) {
-                throw new RoutingException("Initialization problem at the Method: " + method, e);
+            } catch (IllegalArgumentException e) {
+                throw new RoutingInitializationException("Template is incorrect %s", e, method);
             }
         }
 

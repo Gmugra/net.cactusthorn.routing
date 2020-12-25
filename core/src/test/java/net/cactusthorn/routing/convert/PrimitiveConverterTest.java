@@ -27,6 +27,13 @@ public class PrimitiveConverterTest {
     }
 
     @Test //
+    public void byteNullArrayTest() throws ConverterException {
+        PrimitiveConverter c = new PrimitiveConverter();
+        Object result = c.convert(Byte.TYPE, (String[]) null);
+        assertNull(result);
+    }
+
+    @Test //
     public void shortTest() throws ConverterException {
         PrimitiveConverter c = new PrimitiveConverter();
         short v = (short) c.convert(Short.TYPE, "1");

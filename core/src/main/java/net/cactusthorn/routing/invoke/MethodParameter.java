@@ -30,17 +30,6 @@ public abstract class MethodParameter {
     abstract Object findValue(HttpServletRequest req, HttpServletResponse res, ServletContext con, RequestData requestData)
             throws ConverterException;
 
-    protected final Class<?> converterType(Method method, Class<?> parameterType) {
-        if (parameterType.isArray()) {
-            Class<?> arrayType = parameterType.getComponentType();
-            if (arrayType.isArray()) {
-                throw new IllegalArgumentException("Multi-dimensional arrays are not supported; Wrong method: " + method.toGenericString());
-            }
-            return arrayType;
-        }
-        return parameterType;
-    }
-
     static final class Factory {
 
         static MethodParameter create(Method method, Parameter parameter, ConvertersHolder convertersHolder, String contentType) {
@@ -65,7 +54,7 @@ public abstract class MethodParameter {
                 return new ServletContextParameter(parameter);
             } else if (parameter.getAnnotation(Context.class) != null) {
 
-                return new BodyParameter(parameter, convertersHolder, contentType);
+                return new BodyParameter(method, parameter, convertersHolder, contentType);
             }
             return new UnknownParameter(parameter);
         }

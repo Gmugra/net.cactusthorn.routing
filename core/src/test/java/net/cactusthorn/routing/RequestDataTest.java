@@ -25,14 +25,19 @@ public class RequestDataTest {
 
         request = Mockito.mock(HttpServletRequest.class);
         Mockito.when(request.getParameterMap()).thenReturn(parameterMap);
+    }
 
-        BufferedReader reader = new BufferedReader(new StringReader("THE BODY"));
-
-        Mockito.when(request.getReader()).thenReturn(reader);
+    @Test //
+    public void ioexception() throws IOException {
+        Mockito.when(request.getReader()).thenThrow(IOException.class);
+        assertThrows(RoutingException.class,() -> new RequestData(request, null, 512));
     }
 
     @Test //
     public void reader() throws IOException {
+        BufferedReader reader = new BufferedReader(new StringReader("THE BODY"));
+        Mockito.when(request.getReader()).thenReturn(reader);
+
         RequestData data = new RequestData(request, null, 512);
 
         assertEquals("THE BODY", data.requestBody().toString());

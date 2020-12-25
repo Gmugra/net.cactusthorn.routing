@@ -51,7 +51,7 @@ public class RoutingConfigTest {
 
     @Test //
     public void exception() {
-        assertThrows(RoutingException.class,
+        assertThrows(RoutingInitializationException.class,
                 () -> RoutingConfig.builder(new EntryPointWrongProvider()).addEntryPoint(EntryPointWrong.class).build());
     }
 

@@ -19,4 +19,11 @@ public class NullConverterTest {
         Object result = c.convert(Object.class, new String[] { "125", "3456" });
         assertNull(result);
     }
+
+    @Test //
+    public void testPrimitive() throws ConverterException {
+        NullConverter c = new NullConverter();
+        byte b = (byte) c.convert(Byte.TYPE, (String) null);
+        assertEquals((byte) 0, b);
+    }
 }

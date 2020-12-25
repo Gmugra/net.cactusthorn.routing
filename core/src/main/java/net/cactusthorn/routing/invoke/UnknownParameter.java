@@ -8,6 +8,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import net.cactusthorn.routing.RequestData;
 import net.cactusthorn.routing.convert.ConverterException;
+import net.cactusthorn.routing.convert.NullConverter;
 
 public final class UnknownParameter extends MethodParameter {
 
@@ -18,6 +19,6 @@ public final class UnknownParameter extends MethodParameter {
     @Override //
     Object findValue(HttpServletRequest req, HttpServletResponse res, ServletContext con, RequestData requestData)
             throws ConverterException {
-        return null;
+        return NullConverter.NULL.convert(getClass(), (String) null);
     }
 }

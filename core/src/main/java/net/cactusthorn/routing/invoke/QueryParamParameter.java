@@ -2,6 +2,7 @@ package net.cactusthorn.routing.invoke;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
+import java.util.Optional;
 
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
@@ -13,18 +14,40 @@ import net.cactusthorn.routing.convert.Converter;
 import net.cactusthorn.routing.convert.ConverterException;
 import net.cactusthorn.routing.convert.ConvertersHolder;
 
-public final class QueryParamParameter extends MethodParameter {
+public final class QueryParamParameter extends MethodComplexParameter {
 
     private String name;
     private Class<?> converterType;
     private Converter converter;
 
+    private boolean array;
+    private boolean collection;
+    private Class<?> collectionType;
+
     public QueryParamParameter(Method method, Parameter parameter, ConvertersHolder convertersHolder) {
         super(parameter);
         QueryParam queryParam = parameter.getAnnotation(QueryParam.class);
         name = queryParam.value();
-        converterType = converterType(method, classType());
-        converter = convertersHolder.findConverter(converterType);
+
+        Optional<Class<?>> optionalArray = arrayType(method);
+        if (optionalArray.isPresent()) {
+            array = true;
+            converterType = optionalArray.get();
+            converter = findConverter(method, converterType, convertersHolder);
+            return;
+        }
+
+        Optional<Class<?>> optionalCollection = collectionType();
+        if (optionalCollection.isPresent()) {
+            collection = true;
+            collectionType = optionalCollection.get();
+            converterType = collectionGenericType(method, parameter);
+            converter = findConverter(method, converterType, convertersHolder);
+            return;
+        }
+
+        converterType = classType();
+        converter = findConverter(method, convertersHolder);
     }
 
     @Override //
@@ -32,16 +55,15 @@ public final class QueryParamParameter extends MethodParameter {
             throws ConverterException {
         try {
 
-            // not array or collection
-            if (classType() == converterType) {
-                return converter.convert(converterType, req.getParameter(name));
+            if (array) {
+                return converter.convert(converterType, req.getParameterValues(name));
             }
 
-            // at the moment only arrays supported
-            return converter.convert(converterType, req.getParameterValues(name));
+            if (collection) {
+                return createCollection(collectionType, converterType, converter, req.getParameterValues(name));
+            }
 
-            // TODO collections support
-
+            return converter.convert(converterType, req.getParameter(name));
         } catch (ConverterException ce) {
             throw ce;
         } catch (Exception e) {
