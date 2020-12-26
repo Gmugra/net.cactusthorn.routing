@@ -128,8 +128,8 @@ public class RoutingServlet extends HttpServlet {
         String path = original;
         if (path == null || path.isEmpty()) {
             path = "/";
-        } else if (!"/".equals(path) && path.charAt(path.length() - 1) == '/') {
-            path = path.substring(0, path.length() - 1);
+        } else if (!"/".equals(path) && path.charAt(path.length() - 1) != '/') {
+            path += '/';
         }
         LOG.debug("{}({} {}) PathInfo -> original: \"{}\", corrected: \"{}\"", req.getMethod(), contentType, req.getCharacterEncoding(),
                 original, path);

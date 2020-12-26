@@ -101,6 +101,7 @@ Already:
 1. Collections support for @QueryParam & @FormParam
    1. Interfaces List\<T\>, Set\<T\>, SortedSet\<T\>, Collection\<T\> where T is supported by type converting
    1. any class which is not abstract and _Collections.class.isAssignableFrom( this class ) == true_
+1. @DefaultValue for @PathParam, @QueryParam, @FormParam, @HeaderParam
 1. @Produce, @Template and Producer interface. Implementation examples:
    1. application/json: _json-gson_ module
    1. text/html: _thymeleaf_ module
@@ -109,7 +110,6 @@ Already:
 1. inject HttpServletRequest, HttpServletResponse, HttpSession, ServletContext in method parameters
 
 Comming soon:
-1. @DefaultValue for parameters
 1. @FormPart
 1. ComponentProvider example with _dagger 2_
 

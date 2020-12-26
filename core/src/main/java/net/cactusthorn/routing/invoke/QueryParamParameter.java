@@ -60,18 +60,30 @@ public class QueryParamParameter extends MethodComplexParameter {
         try {
 
             if (array) {
-                return converter.convert(converterType, req.getParameterValues(name));
+                return converter.convert(converterType, arrayValues(req));
             }
 
             if (collection) {
-                return createCollection(collectionType, converterType, converter, req.getParameterValues(name));
+                return createCollection(collectionType, converterType, converter, arrayValues(req));
             }
 
-            return converter.convert(converterType, req.getParameter(name));
+            String value = req.getParameter(name);
+            if (defaultValue() != null && value == null) {
+                value = defaultValue();
+            }
+            return converter.convert(converterType, value);
         } catch (ConverterException ce) {
             throw ce;
         } catch (Exception e) {
             throw new ConverterException("Type Converting problem", e);
         }
+    }
+
+    private String[] arrayValues(HttpServletRequest req) {
+        String[] values = req.getParameterValues(name);
+        if (defaultValue() != null && values == null) {
+            return new String[] {defaultValue()};
+        }
+        return values;
     }
 }

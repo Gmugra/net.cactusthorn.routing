@@ -64,7 +64,7 @@ public class ScannerTest {
         List<EntryPoint> gets = entryPoints.get(GET.class);
 
         for (EntryPoint entryPoint : gets) {
-            assertTrue(entryPoint.match("/api/dddd"));
+            assertTrue(entryPoint.match("/api/dddd/"));
         }
     }
 
@@ -100,7 +100,7 @@ public class ScannerTest {
         List<EntryPoint> gets = entryPoints.get(GET.class);
 
         for (EntryPoint entryPoint : gets) {
-            assertTrue(entryPoint.match("/dddd"));
+            assertTrue(entryPoint.match("/dddd/"));
         }
     }
 
@@ -148,10 +148,10 @@ public class ScannerTest {
         EntryPointScanner f = new EntryPointScanner(Arrays.asList(EntryPoint4.class), new EntryPoint1Provider4(), HOLDER, PROPERTIES);
         Map<Class<? extends Annotation>, List<EntryPoint>> entryPoints = f.scan();
         EntryPoint entryPoint = entryPoints.get(GET.class).get(0);
-        PathTemplate.PathValues values = entryPoint.parse("/api");
+        PathTemplate.PathValues values = entryPoint.parse("/api/");
 
         assertEquals(PathValues.EMPTY, values);
-        assertTrue(entryPoint.match("/api"));
+        assertTrue(entryPoint.match("/api/"));
         assertEquals("*/*", entryPoint.produces());
     }
 }

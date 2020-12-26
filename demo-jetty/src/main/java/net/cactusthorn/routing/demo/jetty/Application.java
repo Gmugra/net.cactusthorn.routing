@@ -9,6 +9,7 @@ import net.cactusthorn.routing.annotation.Template;
 import net.cactusthorn.routing.annotation.Consumes;
 import net.cactusthorn.routing.annotation.Context;
 import net.cactusthorn.routing.annotation.CookieParam;
+import net.cactusthorn.routing.annotation.DefaultValue;
 import net.cactusthorn.routing.annotation.FormParam;
 import net.cactusthorn.routing.annotation.Produces;
 import net.cactusthorn.routing.annotation.QueryParam;
@@ -77,7 +78,7 @@ public class Application {
         }
     }
 
-    @Path("/") //
+    //@Path("/") //
     public static class Component {
 
         @GET //
@@ -85,9 +86,14 @@ public class Application {
             return "ROOT";
         }
 
-        @GET @Path("rest/api/test{ var : \\d+ }") //
-        public String doit(@PathParam("var") int in, @QueryParam("test") Double q) {
+        @GET @Path("/rest/api/test{ var : \\d+ }") //
+        public String doit(@PathParam("var") int in, @DefaultValue("10.5") @QueryParam("test") Double q) {
             return in + " \u00DF " + q;
+        }
+
+        @GET @Path("/rest/api/{var : [abc]*}") //
+        public String empty(@PathParam("var") @DefaultValue("DEFAULT") String sss) {
+            return "|" + sss + "|";
         }
 
         @GET @Path("rest/api/gson") @Produces("application/json") //

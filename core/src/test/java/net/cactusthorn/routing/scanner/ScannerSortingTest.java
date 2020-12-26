@@ -61,9 +61,9 @@ public class ScannerSortingTest {
         Map<Class<? extends Annotation>, List<EntryPoint>> entryPoints = f.scan();
         List<EntryPoint> gets = entryPoints.get(GET.class);
 
-        assertEquals("/api/dddd/sssss", gets.get(0).pathTemplatePattern());
-        assertEquals("/api/(\\d{3})/dddd", gets.get(1).pathTemplatePattern());
-        assertEquals("/api/([^/]+)/dddd", gets.get(2).pathTemplatePattern());
-        assertEquals("/api/dddd", gets.get(3).pathTemplatePattern());
+        assertEquals("/api/dddd/sssss/", gets.get(0).pathTemplatePattern());
+        assertEquals("/api/(\\d{3})/dddd/", gets.get(1).pathTemplatePattern());
+        assertEquals("/api/([^/]+)/dddd/", gets.get(2).pathTemplatePattern());
+        assertEquals("/api/dddd/", gets.get(3).pathTemplatePattern());
     }
 }

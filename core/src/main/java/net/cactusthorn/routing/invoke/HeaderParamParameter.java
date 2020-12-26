@@ -31,7 +31,11 @@ public class HeaderParamParameter extends PathParamParameter {
     Object findValue(HttpServletRequest req, HttpServletResponse res, ServletContext con, RequestData requestData)
             throws ConverterException {
         try {
-            return converter().convert(classType(), req.getHeader(name()));
+            String value = req.getHeader(name());
+            if (defaultValue() != null && value == null) {
+                value = defaultValue();
+            }
+            return converter().convert(classType(), value);
         } catch (ConverterException ce) {
             throw ce;
         } catch (Exception e) {

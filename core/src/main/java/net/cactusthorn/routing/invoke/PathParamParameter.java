@@ -58,7 +58,11 @@ public class PathParamParameter extends MethodComplexParameter {
     Object findValue(HttpServletRequest req, HttpServletResponse res, ServletContext con, RequestData requestData)
             throws ConverterException {
         try {
-            return converter.convert(classType(), requestData.pathValues().value(name));
+            String value = requestData.pathValues().value(name);
+            if (defaultValue() != null && "".equals(value)) {
+                value = defaultValue();
+            }
+            return converter.convert(classType(), value);
         } catch (ConverterException ce) {
             throw ce;
         } catch (Exception e) {

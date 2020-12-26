@@ -81,4 +81,12 @@ public class PathTemplateMatchesTest {
         PathTemplate.PathValues values = t.parse("/customer");
         assertNull(values);
     }
+
+    @Test //
+    public void empty() {
+        PathTemplate t = new PathTemplate("/customer/{var :  [abc]*}/doit");
+        assertTrue(t.match("/customer//doit"));
+        assertTrue(t.match("/customer/acccb/doit"));
+        assertFalse(t.match("/customer/12/doit"));
+    }
 }

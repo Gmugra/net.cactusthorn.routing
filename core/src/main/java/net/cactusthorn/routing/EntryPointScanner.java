@@ -41,8 +41,8 @@ public class EntryPointScanner {
 
     public static final class EntryPoint {
 
-        private static final Comparator<EntryPoint> COMPARATOR =
-                (o1, o2) -> PathTemplate.COMPARATOR.compare(o1.pathTemplate, o2.pathTemplate);
+        private static final Comparator<EntryPoint> COMPARATOR = (o1, o2) -> PathTemplate.COMPARATOR.compare(o1.pathTemplate,
+                o2.pathTemplate);
 
         private PathTemplate pathTemplate;
         private MethodInvoker methodInvoker;
@@ -157,10 +157,7 @@ public class EntryPointScanner {
 
     private PathTemplate createPathTemplate(Method method, String classPath) {
         try {
-            String path = classPath + preparePath(method.getAnnotation(Path.class));
-            if (path.isEmpty()) {
-                path += '/';
-            }
+            String path = classPath.substring(0, classPath.length() - 1) + preparePath(method.getAnnotation(Path.class));
             return new PathTemplate(path);
         } catch (IllegalArgumentException e) {
             throw new RoutingInitializationException("Path template is incorrect %s", e, method);
@@ -213,14 +210,14 @@ public class EntryPointScanner {
 
     private String preparePath(Path classPathAnnotation) {
         if (classPathAnnotation == null) {
-            return "";
+            return "/";
         }
         String path = classPathAnnotation.value();
         if (path.charAt(0) != '/') {
             path = '/' + path;
         }
-        if (path.charAt(path.length() - 1) == '/') {
-            path = path.substring(0, path.length() - 1);
+        if (!"/".equals(path) && path.charAt(path.length() - 1) != '/') {
+            path += '/';
         }
         return path;
     }

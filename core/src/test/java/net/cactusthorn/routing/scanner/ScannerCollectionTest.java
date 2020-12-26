@@ -87,7 +87,7 @@ public class ScannerCollectionTest {
         List<EntryPoint> gets = entryPoints.get(GET.class);
         assertEquals(4, gets.size());
         for (EntryPoint entryPoint : gets) {
-            assertTrue(entryPoint.match("/api/dddd"));
+            assertTrue(entryPoint.match("/api/dddd/"));
         }
     }
 }

@@ -1,5 +1,6 @@
 package net.cactusthorn.routing.invoke;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.lang.reflect.Method;
@@ -9,7 +10,11 @@ import java.util.List;
 import org.junit.jupiter.api.Test;
 
 import net.cactusthorn.routing.RoutingInitializationException;
+import net.cactusthorn.routing.PathTemplate.PathValues;
+import net.cactusthorn.routing.RequestData;
+import net.cactusthorn.routing.annotation.DefaultValue;
 import net.cactusthorn.routing.annotation.PathParam;
+import net.cactusthorn.routing.convert.ConverterException;
 import net.cactusthorn.routing.convert.ConvertersHolder;
 
 public class PathParamParameterTest {
@@ -28,6 +33,12 @@ public class PathParamParameterTest {
         }
 
         public void math(@PathParam("val") Math values) {
+        }
+
+        public void defaultValue(@PathParam("val") @DefaultValue("10") int value) {
+        }
+
+        public void simple(@PathParam("val") int value) {
         }
     }
 
@@ -50,6 +61,51 @@ public class PathParamParameterTest {
         Method m = findMethod("math");
         Parameter p = m.getParameters()[0];
         assertThrows(RoutingInitializationException.class, () -> MethodParameter.Factory.create(m, p, HOLDER, "*/*"));
+    }
+
+    @Test //
+    public void defaultValue() throws ConverterException {
+        Method m = findMethod("defaultValue");
+        Parameter p = m.getParameters()[0];
+        MethodParameter mp = MethodParameter.Factory.create(m, p, HOLDER, "*/*");
+
+        PathValues values = new PathValues();
+        values.put("val", "");
+        RequestData requestData = new RequestData(values);
+
+        int result = (int) mp.findValue(null, null, null, requestData);
+
+        assertEquals(10, result);
+    }
+
+    @Test //
+    public void simple() throws ConverterException {
+        Method m = findMethod("simple");
+        Parameter p = m.getParameters()[0];
+        MethodParameter mp = MethodParameter.Factory.create(m, p, HOLDER, "*/*");
+
+        PathValues values = new PathValues();
+        values.put("val", "");
+        RequestData requestData = new RequestData(values);
+
+        int result = (int) mp.findValue(null, null, null, requestData);
+
+        assertEquals(0, result);
+    }
+
+    @Test //
+    public void simpleWithValue() throws ConverterException {
+        Method m = findMethod("simple");
+        Parameter p = m.getParameters()[0];
+        MethodParameter mp = MethodParameter.Factory.create(m, p, HOLDER, "*/*");
+
+        PathValues values = new PathValues();
+        values.put("val", "20");
+        RequestData requestData = new RequestData(values);
+
+        int result = (int) mp.findValue(null, null, null, requestData);
+
+        assertEquals(20, result);
     }
 
     private Method findMethod(String methodName) {

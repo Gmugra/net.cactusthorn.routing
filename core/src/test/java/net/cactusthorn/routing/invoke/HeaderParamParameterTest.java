@@ -13,6 +13,7 @@ import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
 import net.cactusthorn.routing.RoutingInitializationException;
+import net.cactusthorn.routing.annotation.DefaultValue;
 import net.cactusthorn.routing.annotation.HeaderParam;
 import net.cactusthorn.routing.convert.ConverterException;
 import net.cactusthorn.routing.convert.ConvertersHolder;
@@ -27,6 +28,9 @@ public class HeaderParamParameterTest {
         }
 
         public void simpleArray(@HeaderParam("val") String[] values) {
+        }
+
+        public void defaultValue(@HeaderParam("val") @DefaultValue("D") String value) {
         }
     }
 
@@ -46,6 +50,17 @@ public class HeaderParamParameterTest {
         Mockito.when(request.getHeader("val")).thenReturn("xyz");
         String header = (String) mp.findValue(request, null, null, null);
         assertEquals("xyz", header);
+    }
+
+    @Test //
+    public void defaultValue() throws ConverterException {
+        Method m = findMethod("defaultValue");
+        Parameter p = m.getParameters()[0];
+        MethodParameter mp = MethodParameter.Factory.create(m, p, HOLDER, "*/*");
+
+        Mockito.when(request.getHeader("val")).thenReturn(null);
+        String header = (String) mp.findValue(request, null, null, null);
+        assertEquals("D", header);
     }
 
     @Test //

@@ -15,15 +15,25 @@ import net.cactusthorn.routing.annotation.FormParam;
 import net.cactusthorn.routing.annotation.HeaderParam;
 import net.cactusthorn.routing.annotation.PathParam;
 import net.cactusthorn.routing.annotation.QueryParam;
+import net.cactusthorn.routing.annotation.DefaultValue;
 import net.cactusthorn.routing.convert.ConverterException;
 import net.cactusthorn.routing.convert.ConvertersHolder;
 
 public abstract class MethodParameter {
 
     private Class<?> classType;
+    private String defaultValue;
 
     MethodParameter(Parameter parameter) {
         classType = parameter.getType();
+        DefaultValue defaultValueAnnotation = parameter.getAnnotation(DefaultValue.class);
+        if (defaultValueAnnotation != null) {
+            defaultValue = defaultValueAnnotation.value();
+        }
+    }
+
+    protected String defaultValue() {
+        return defaultValue;
     }
 
     protected Class<?> classType() {
