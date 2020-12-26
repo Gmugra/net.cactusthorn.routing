@@ -63,25 +63,23 @@ public class Application {
         jetty.join();
     }
 ```
-The library is doing only routing, but it's expected that the application will provide implementations for several interfaces:
+The library is doing only routing, but it's expected that the application provides implementations for several interfaces:
 1. ComponentProvider - which will provide EntryPoint instances
-1. multiple Producers: which will generate responses based on Content-Type
+1. multiple Producers which will generate responses based on Content-Type
 1. multiple Consumers to convert request body to Java objects based on Content-Type
 
 The flow is simple:
 1. The Servlet get the HTTP request, and find the method which should process it.
-1. It request the EntryPoint class instance from the CompoentProvider, convert parameters and invoke the method.
+1. It request the EntryPoint class instance from the ComponentProvider, convert parameters, use Consumer to convert request-body and invoke the method.
 1. It get from the method return-Object, find Producer and provide the object to Producer, which write result into response output stream.
-
-
-Providing of such implementations is relative trivial issue, because there are lot of powerful libraries around, which can do any of that.
-And implementation of the interface is question of several dozens of code lines. (look at _json-gson_ & _thymeleaf_ modules as example of Producers with [GSON](https://github.com/google/gson)
-
-And that **is the basic idea**: you build your web application with only the components you prefer. There is nothing superfluous.
 
 ### ComponentProvider
 It seems that implementation for ComponentProvider is not so easy, because you need Scopes (Request and/or Session) or even Singletons.
-But it's not. All of that is natural features of any good dependency injection framework (e.g. [Dagger 2](https://dagger.dev), [Guice](https://github.com/google/guice), [HK2](https://javaee.github.io/hk2/) ). It's anyway very good idea to use dependency injection in your application, so all you need in ComponentProvider - link it to dependency injection framework which you are using: several dozens of code lines.
+But it's not. All of that is natural features of any good dependency injection framework (e.g. [Dagger 2](https://dagger.dev), [Guice](https://github.com/google/guice), [HK2](https://javaee.github.io/hk2/) ). It's anyway good idea to use dependency injection in the application, so all what is necessary in ComponentProvider - link it with dependency injection framework which you are using.
+
+### Producers & Consumers
+Providing implementations is relative trivial issue, because there are lot of powerful libraries around, which can do any of that.
+As result, implementation of the interface is question of several dozens of code lines. Look at _json-gson_ module as example of _application/json_ Producer & Consumer using [GSON](https://github.com/google/gson) and _thymeleaf_ module as example of _text/html_ Producer using [Thymeleaf](https://www.thymeleaf.org)
 
 ### Developing status
 It is an early release.

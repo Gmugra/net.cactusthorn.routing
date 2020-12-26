@@ -5,7 +5,7 @@
 
 root: (GET) http://localhost:8080/
 
-pathParam value: (GET) http://localhost:8080/rest/api/test123
+pathParam value: (GET) http://localhost:8080/rest/api/test123?test=10.5
 
 to get JSON: (GET) http://localhost:8080/rest/api/gson
 
