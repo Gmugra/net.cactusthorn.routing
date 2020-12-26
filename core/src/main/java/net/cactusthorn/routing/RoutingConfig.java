@@ -17,7 +17,7 @@ public final class RoutingConfig {
 
     public enum ConfigProperty {
 
-        READ_BODY_BUFFER_SIZE(new Integer(1024)), RESPONSE_CHARACTER_ENCODING("UTF-8");
+        READ_BODY_BUFFER_SIZE(new Integer(1024)), RESPONSE_CHARACTER_ENCODING("UTF-8"), DEFAULT_REQUEST_CHARACTER_ENCODING("UTF-8");
 
         private final Object ddefault;
 
@@ -131,6 +131,11 @@ public final class RoutingConfig {
 
         public Builder setResponseCharacterEncoding(String encoding) {
             configProperties.put(ConfigProperty.RESPONSE_CHARACTER_ENCODING, encoding);
+            return this;
+        }
+
+        public Builder setDefaultRequestCharacterEncoding(String encoding) {
+            configProperties.put(ConfigProperty.DEFAULT_REQUEST_CHARACTER_ENCODING, encoding);
             return this;
         }
 

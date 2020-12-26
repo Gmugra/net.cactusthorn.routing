@@ -18,19 +18,21 @@ import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import net.cactusthorn.routing.RoutingConfig.ConfigProperty;
-import net.cactusthorn.routing.Template.PathValues;
-import net.cactusthorn.routing.annotation.Consumes;
-import net.cactusthorn.routing.annotation.DELETE;
 import net.cactusthorn.routing.annotation.GET;
-import net.cactusthorn.routing.annotation.HEAD;
-import net.cactusthorn.routing.annotation.OPTIONS;
-import net.cactusthorn.routing.annotation.PATCH;
 import net.cactusthorn.routing.annotation.POST;
 import net.cactusthorn.routing.annotation.PUT;
+import net.cactusthorn.routing.annotation.DELETE;
+import net.cactusthorn.routing.annotation.HEAD;
+import net.cactusthorn.routing.annotation.PATCH;
+import net.cactusthorn.routing.annotation.OPTIONS;
 import net.cactusthorn.routing.annotation.TRACE;
 import net.cactusthorn.routing.annotation.Path;
 import net.cactusthorn.routing.annotation.Produces;
+import net.cactusthorn.routing.annotation.Consumes;
+import net.cactusthorn.routing.annotation.Template;
+
+import net.cactusthorn.routing.RoutingConfig.ConfigProperty;
+import net.cactusthorn.routing.PathTemplate.PathValues;
 import net.cactusthorn.routing.convert.ConverterException;
 import net.cactusthorn.routing.convert.ConvertersHolder;
 import net.cactusthorn.routing.invoke.MethodInvoker;
@@ -39,38 +41,39 @@ public class EntryPointScanner {
 
     public static final class EntryPoint {
 
-        private static final Comparator<EntryPoint> COMPARATOR = (o1, o2) -> Template.COMPARATOR.compare(o1.template, o2.template);
+        private static final Comparator<EntryPoint> COMPARATOR =
+                (o1, o2) -> PathTemplate.COMPARATOR.compare(o1.pathTemplate, o2.pathTemplate);
 
-        private Template template;
+        private PathTemplate pathTemplate;
         private MethodInvoker methodInvoker;
         private String produces;
         private String contentType;
         private Pattern contentTypePattern;
-        private String producerTemplate;
+        private String template;
 
-        private EntryPoint(Template template, String produces, String producerTemplate, String contentType, MethodInvoker methodInvoker) {
+        private EntryPoint(PathTemplate pathTemplate, String produces, String template, String contentType, MethodInvoker methodInvoker) {
+            this.pathTemplate = pathTemplate;
             this.produces = produces;
-            this.producerTemplate = producerTemplate;
+            this.template = template;
             this.contentType = contentType;
             contentTypePattern = Pattern.compile(contentType.replace("*", "(.*)"));
             this.methodInvoker = methodInvoker;
-            this.template = template;
         }
 
         public boolean match(String path) {
-            return template.match(path);
+            return pathTemplate.match(path);
         }
 
         public PathValues parse(String path) {
-            return template.parse(path);
+            return pathTemplate.parse(path);
+        }
+
+        public String pathTemplatePattern() {
+            return pathTemplate.pattern().pattern();
         }
 
         public String template() {
-            return template.pattern().pattern();
-        }
-
-        public String producerTemplate() {
-            return producerTemplate;
+            return template;
         }
 
         public Object invoke(HttpServletRequest req, HttpServletResponse res, ServletContext con, PathValues pathValues)
@@ -127,32 +130,18 @@ public class EntryPointScanner {
                     Class<? extends Annotation> type = annotation.annotationType();
                     if (HTTP_ANNOTATTIONS.contains(type)) {
 
-                        String path = classPath + preparePath(method.getAnnotation(Path.class));
-                        if (path.isEmpty()) {
-                            path += '/';
-                        }
+                        PathTemplate pathTemplate = createPathTemplate(method, classPath);
 
                         String produces = findProduces(method);
+
                         String contentType = findConsumes(method, clazzConsumes);
 
-                        Template template;
-                        try {
-                            template = new Template(path);
-                        } catch (IllegalArgumentException e) {
-                            throw new RoutingInitializationException("Template is incorrect %s", e, method);
-                        }
-
-                        String producerTemplate = null;
-                        net.cactusthorn.routing.annotation.Template templateAnnotation = method
-                                .getAnnotation(net.cactusthorn.routing.annotation.Template.class);
-                        if (templateAnnotation != null) {
-                            producerTemplate = templateAnnotation.value();
-                        }
+                        String template = findTemplate(method);
 
                         MethodInvoker methodInvoker = new MethodInvoker(clazz, method, componentProvider, convertersHolder, contentType,
                                 configProperties);
 
-                        EntryPoint entryPoint = new EntryPoint(template, produces, producerTemplate, contentType, methodInvoker);
+                        EntryPoint entryPoint = new EntryPoint(pathTemplate, produces, template, contentType, methodInvoker);
                         entryPoints.get(type).add(entryPoint);
                     }
                 }
@@ -164,6 +153,26 @@ public class EntryPointScanner {
         }
 
         return entryPoints;
+    }
+
+    private PathTemplate createPathTemplate(Method method, String classPath) {
+        try {
+            String path = classPath + preparePath(method.getAnnotation(Path.class));
+            if (path.isEmpty()) {
+                path += '/';
+            }
+            return new PathTemplate(path);
+        } catch (IllegalArgumentException e) {
+            throw new RoutingInitializationException("Path template is incorrect %s", e, method);
+        }
+    }
+
+    private String findTemplate(Method method) {
+        Template template = method.getAnnotation(Template.class);
+        if (template != null) {
+            return template.value();
+        }
+        return null;
     }
 
     public static final String CONSUMES_DEFAULT = "*/*";
@@ -215,5 +224,4 @@ public class EntryPointScanner {
         }
         return path;
     }
-
 }

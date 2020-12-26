@@ -13,7 +13,7 @@ import org.mockito.Mockito;
 
 import net.cactusthorn.routing.EntryPointScanner.EntryPoint;
 import net.cactusthorn.routing.RoutingConfig.ConfigProperty;
-import net.cactusthorn.routing.Template.PathValues;
+import net.cactusthorn.routing.PathTemplate.PathValues;
 import net.cactusthorn.routing.annotation.GET;
 import net.cactusthorn.routing.annotation.Path;
 import net.cactusthorn.routing.annotation.PathParam;
@@ -119,5 +119,12 @@ public class RoutingConfigTest {
         RoutingConfig config = RoutingConfig.builder(new EntryPointDateProvider()).setReadBodyBufferSize(512).build();
         int value = (int) config.properties().get(ConfigProperty.READ_BODY_BUFFER_SIZE);
         assertEquals(512, value);
+    }
+    
+    @Test //
+    public void defaultRequestCharacterEncoding() {
+        RoutingConfig config = RoutingConfig.builder(new EntryPointDateProvider()).setDefaultRequestCharacterEncoding("KOI8-R").build();
+        String value = (String) config.properties().get(ConfigProperty.DEFAULT_REQUEST_CHARACTER_ENCODING);
+        assertEquals("KOI8-R", value);
     }
 }

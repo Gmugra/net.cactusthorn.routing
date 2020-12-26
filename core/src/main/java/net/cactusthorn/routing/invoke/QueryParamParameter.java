@@ -14,7 +14,7 @@ import net.cactusthorn.routing.convert.Converter;
 import net.cactusthorn.routing.convert.ConverterException;
 import net.cactusthorn.routing.convert.ConvertersHolder;
 
-public final class QueryParamParameter extends MethodComplexParameter {
+public class QueryParamParameter extends MethodComplexParameter {
 
     private String name;
     private Class<?> converterType;
@@ -26,8 +26,7 @@ public final class QueryParamParameter extends MethodComplexParameter {
 
     public QueryParamParameter(Method method, Parameter parameter, ConvertersHolder convertersHolder) {
         super(parameter);
-        QueryParam queryParam = parameter.getAnnotation(QueryParam.class);
-        name = queryParam.value();
+        name = getName(parameter);
 
         Optional<Class<?>> optionalArray = arrayType(method);
         if (optionalArray.isPresent()) {
@@ -48,6 +47,11 @@ public final class QueryParamParameter extends MethodComplexParameter {
 
         converterType = classType();
         converter = findConverter(method, convertersHolder);
+    }
+
+    protected String getName(Parameter parameter) {
+        QueryParam queryParam = parameter.getAnnotation(QueryParam.class);
+        return queryParam.value();
     }
 
     @Override //

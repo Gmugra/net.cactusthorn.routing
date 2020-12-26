@@ -7,6 +7,7 @@ import net.cactusthorn.routing.annotation.PathParam;
 import net.cactusthorn.routing.annotation.Template;
 import net.cactusthorn.routing.annotation.Consumes;
 import net.cactusthorn.routing.annotation.Context;
+import net.cactusthorn.routing.annotation.FormParam;
 import net.cactusthorn.routing.annotation.Produces;
 import net.cactusthorn.routing.annotation.QueryParam;
 import net.cactusthorn.routing.gson.SimpleGsonConsumer;
@@ -15,10 +16,14 @@ import net.cactusthorn.routing.thymeleaf.SimpleThymeleafProducer;
 
 import org.eclipse.jetty.server.Connector;
 import org.eclipse.jetty.server.HttpConnectionFactory;
+
+import java.util.List;
+
 import org.eclipse.jetty.server.ConnectionFactory;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -40,12 +45,12 @@ public class Application {
             .build();
         // @formatter:on
 
-        ServletHolder servletHolder = new ServletHolder(new RoutingServlet(config));
+        ServletHolder servletHolder = new ServletHolder("Routing Servlet", new RoutingServlet(config));
         servletHolder.setInitOrder(0);
 
-        ServletContextHandler servletContext = new ServletContextHandler(ServletContextHandler.SESSIONS);
-        servletContext.setContextPath("/");
-        servletContext.addServlet(servletHolder, "/rest/*");
+        ServletContextHandler servletContextHandler = new ServletContextHandler(ServletContextHandler.SESSIONS);
+        servletContextHandler.setContextPath("/");
+        servletContextHandler.addServlet(servletHolder, "/*");
 
         Server jetty = new Server(8080);
         for (Connector connector : jetty.getConnectors()) {
@@ -56,7 +61,7 @@ public class Application {
             }
         }
         jetty.setStopAtShutdown(true);
-        jetty.setHandler(servletContext);
+        jetty.setHandler(servletContextHandler);
 
         try {
             jetty.start();
@@ -76,24 +81,29 @@ public class Application {
             return "ROOT";
         }
 
-        @GET @Path("api/test{ var : \\d+ }") //
+        @GET @Path("rest/api/test{ var : \\d+ }") //
         public String doit(@PathParam("var") int in, @QueryParam("test") Double q) {
             return in + " \u00DF " + q;
         }
 
-        @GET @Path("api/test/gson") @Produces("application/json") //
+        @GET @Path("rest/api/gson") @Produces("application/json") //
         public DataObject doitGson() {
             return new DataObject("The Name \u00DF", 123);
         }
 
-        @POST @Path("api/test/gson") @Consumes("application/json") //
+        @POST @Path("rest/api/gson") @Consumes("application/json") //
         public String getitGson(@Context DataObject data) {
             return data.getName();
         }
 
-        @GET @Path("api/test/html") @Produces("text/html") @Template("/index.html") //
+        @GET @Path("html") @Produces("text/html") @Template("/index.html") //
         public String getitHtml() {
-            return "TEST VALUE";
+            return "TEST HTML PAGE";
+        }
+
+        @POST @Path("html/form") @Consumes("application/x-www-form-urlencoded") @Produces("text/plain") //
+        public String doHtml(@FormParam("fname") String fname, @FormParam("lname") String lname, @FormParam("box") List<Integer> box) {
+            return fname + " :: " + lname + " :: " + box;
         }
     }
 

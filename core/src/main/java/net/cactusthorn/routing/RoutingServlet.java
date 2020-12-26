@@ -13,7 +13,7 @@ import org.slf4j.LoggerFactory;
 
 import net.cactusthorn.routing.EntryPointScanner.EntryPoint;
 import net.cactusthorn.routing.RoutingConfig.ConfigProperty;
-import net.cactusthorn.routing.Template.PathValues;
+import net.cactusthorn.routing.PathTemplate.PathValues;
 import net.cactusthorn.routing.annotation.*;
 import net.cactusthorn.routing.convert.ConverterException;
 
@@ -29,6 +29,7 @@ public class RoutingServlet extends HttpServlet {
     private transient Map<String, Consumer> consumers;
     private transient ComponentProvider componentProvider;
     private transient String responseCharacterEncoding;
+    private transient String defaultRequestCharacterEncoding;
 
     public RoutingServlet(RoutingConfig config) {
         super();
@@ -37,6 +38,7 @@ public class RoutingServlet extends HttpServlet {
         producers = config.producers();
         consumers = config.consumers();
         responseCharacterEncoding = (String) config.properties().get(ConfigProperty.RESPONSE_CHARACTER_ENCODING);
+        defaultRequestCharacterEncoding = (String) config.properties().get(ConfigProperty.DEFAULT_REQUEST_CHARACTER_ENCODING);
     }
 
     @Override //
@@ -84,12 +86,15 @@ public class RoutingServlet extends HttpServlet {
     }
 
     private void process(HttpServletRequest req, HttpServletResponse resp, List<EntryPoint> entryPoints) throws IOException {
+        String contentType = contentType(req);
+        if (req.getCharacterEncoding() == null) {
+            req.setCharacterEncoding(defaultRequestCharacterEncoding);
+        }
+        String path = getPath(contentType, req);
         if (entryPoints.isEmpty()) {
             resp.sendError(HttpServletResponse.SC_NOT_FOUND, "Not Found");
             return;
         }
-        String path = getPath(req);
-        String contentType = contentType(req);
         for (EntryPoint entryPoint : entryPoints) {
             if (!entryPoint.matchContentType(contentType)) {
                 continue;
@@ -118,7 +123,7 @@ public class RoutingServlet extends HttpServlet {
         return consumes;
     }
 
-    private String getPath(HttpServletRequest req) {
+    private String getPath(String contentType, HttpServletRequest req) {
         String original = req.getPathInfo();
         String path = original;
         if (path == null || path.isEmpty()) {
@@ -126,7 +131,8 @@ public class RoutingServlet extends HttpServlet {
         } else if (!"/".equals(path) && path.charAt(path.length() - 1) == '/') {
             path = path.substring(0, path.length() - 1);
         }
-        LOG.debug("{} PathInfo -> original: \"{}\", corrected: \"{}\"", req.getMethod(), original, path);
+        LOG.debug("{}({} {}) PathInfo -> original: \"{}\", corrected: \"{}\"", req.getMethod(), contentType, req.getCharacterEncoding(),
+                original, path);
         return path;
     }
 
@@ -134,7 +140,7 @@ public class RoutingServlet extends HttpServlet {
         resp.setCharacterEncoding(responseCharacterEncoding);
         if (producers.containsKey(entryPoint.produces())) {
             resp.setContentType(entryPoint.produces());
-            producers.get(entryPoint.produces()).produce(result, entryPoint.producerTemplate(), entryPoint.produces(), req, resp);
+            producers.get(entryPoint.produces()).produce(result, entryPoint.template(), entryPoint.produces(), req, resp);
         } else {
             resp.setContentType(EntryPointScanner.PRODUCES_DEFAULT);
             if (result != null) {

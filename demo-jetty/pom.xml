@@ -7,12 +7,12 @@
     <parent>
         <groupId>net.cactusthorn.routing</groupId>
         <artifactId>root</artifactId>
-        <version>0.17</version>
+        <version>0.18</version>
     </parent>
 
-    <artifactId>demo</artifactId>
+    <artifactId>demo-jetty</artifactId>
     <packaging>jar</packaging>
-    <name>Routing :: Demo</name>
+    <name>Routing :: Demo Jetty</name>
 
     <dependencies>
 

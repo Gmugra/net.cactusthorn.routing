@@ -60,9 +60,10 @@ public class ScannerSortingTest {
         EntryPointScanner f = new EntryPointScanner(Arrays.asList(EntryPoint1.class), new EntryPoint1Provider(), HOLDER, PROPERTIES);
         Map<Class<? extends Annotation>, List<EntryPoint>> entryPoints = f.scan();
         List<EntryPoint> gets = entryPoints.get(GET.class);
-        assertEquals("/api/dddd/sssss", gets.get(0).template());
-        assertEquals("/api/(\\d{3})/dddd", gets.get(1).template());
-        assertEquals("/api/([^/]+)/dddd", gets.get(2).template());
-        assertEquals("/api/dddd", gets.get(3).template());
+
+        assertEquals("/api/dddd/sssss", gets.get(0).pathTemplatePattern());
+        assertEquals("/api/(\\d{3})/dddd", gets.get(1).pathTemplatePattern());
+        assertEquals("/api/([^/]+)/dddd", gets.get(2).pathTemplatePattern());
+        assertEquals("/api/dddd", gets.get(3).pathTemplatePattern());
     }
 }

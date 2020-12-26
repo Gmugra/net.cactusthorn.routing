@@ -30,7 +30,8 @@ Then you provide list of the annotated classes to the servlet, plug the servlet 
 in combination with embedded Jetty it's looks like that:
 ```java
 import net.cactusthorn.routing.*;
-import net.cactusthorn.routing.gson.SimpleGsonProducer;
+import net.cactusthorn.routing.gson.*;
+import net.cactusthorn.routing.thymeleaf.*;
 
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.servlet.ServletContextHandler;
@@ -45,6 +46,7 @@ public class Application {
             .addEntryPoint(MyEntryPoint.class)
             .addProducer("application/json", new SimpleGsonProducer())
             .addConsumer("application/json", new SimpleGsonConsumer())
+            .addProducer("text/html", new SimpleThymeleafProducer("/thymeleaf/"))
             .build();
 
         ServletHolder servletHolder = new ServletHolder(new RoutingServlet(config));
@@ -52,7 +54,7 @@ public class Application {
 
         ServletContextHandler servletContext = new ServletContextHandler(ServletContextHandler.SESSIONS);
         servletContext.setContextPath("/");
-        servletContext.addServlet(servletHolder, "/rest/*");
+        servletContext.addServlet(servletHolder, "/*");
 
         Server jetty = new Server(8080);
         jetty.setHandler(servletContext);
@@ -94,9 +96,9 @@ Already:
    1. classes with a public constructor that accepts a single String argument.
    1. classes with _public static fromString(String arg)_ method.
    1. Possibility to write custom convertors.
-1. @PathParam and @QueryParam for parameters.
-1. Arrays support for @QueryParam
-1. Collections support for @QueryParam
+1. @PathParam, @QueryParam, @FormParam for parameters.
+1. Arrays support for @QueryParam & @FormParam
+1. Collections support for @QueryParam & @FormParam
    1. Interfaces List\<T\>, Set\<T\>, SortedSet\<T\>, Collection\<T\> where T is supported by type converting
    1. any class which is not abstract and _Collections.class.isAssignableFrom( this class ) == true_
 1. @Produce, @Template and Producer interface. Implementation examples:
@@ -110,10 +112,10 @@ Comming soon:
 1. @HeaderParam for parameters
 1. @CookieParam for parameters
 1. @DefaultValue for parameters
+1. @FormPart
 1. ComponentProvider example with _dagger 2_
 
 Comming a bit later
-1. @FormParam, @FormPart
 1. Java Bean Validation Annotations (JSR 380) for parameters (as additional module)
 1. ?
 

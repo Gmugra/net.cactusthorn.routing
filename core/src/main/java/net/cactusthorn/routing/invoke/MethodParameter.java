@@ -10,6 +10,7 @@ import javax.servlet.http.HttpSession;
 
 import net.cactusthorn.routing.RequestData;
 import net.cactusthorn.routing.annotation.Context;
+import net.cactusthorn.routing.annotation.FormParam;
 import net.cactusthorn.routing.annotation.PathParam;
 import net.cactusthorn.routing.annotation.QueryParam;
 import net.cactusthorn.routing.convert.ConverterException;
@@ -40,6 +41,9 @@ public abstract class MethodParameter {
             } else if (parameter.getAnnotation(QueryParam.class) != null) {
 
                 return new QueryParamParameter(method, parameter, convertersHolder);
+            } else if (parameter.getAnnotation(FormParam.class) != null) {
+
+                return new FormParamParameter(method, parameter, convertersHolder, contentType);
             } else if (parameterClassType == HttpServletRequest.class) {
 
                 return new HttpServletRequestParameter(parameter);

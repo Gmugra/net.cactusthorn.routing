@@ -14,10 +14,10 @@ import org.junit.jupiter.api.Test;
 
 import net.cactusthorn.routing.ComponentProvider;
 import net.cactusthorn.routing.EntryPointScanner;
-import net.cactusthorn.routing.Template;
+import net.cactusthorn.routing.PathTemplate;
 import net.cactusthorn.routing.EntryPointScanner.EntryPoint;
 import net.cactusthorn.routing.RoutingConfig.ConfigProperty;
-import net.cactusthorn.routing.Template.PathValues;
+import net.cactusthorn.routing.PathTemplate.PathValues;
 import net.cactusthorn.routing.annotation.*;
 import net.cactusthorn.routing.convert.ConvertersHolder;
 
@@ -148,7 +148,7 @@ public class ScannerTest {
         EntryPointScanner f = new EntryPointScanner(Arrays.asList(EntryPoint4.class), new EntryPoint1Provider4(), HOLDER, PROPERTIES);
         Map<Class<? extends Annotation>, List<EntryPoint>> entryPoints = f.scan();
         EntryPoint entryPoint = entryPoints.get(GET.class).get(0);
-        Template.PathValues values = entryPoint.parse("/api");
+        PathTemplate.PathValues values = entryPoint.parse("/api");
 
         assertEquals(PathValues.EMPTY, values);
         assertTrue(entryPoint.match("/api"));

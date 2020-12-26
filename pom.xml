@@ -6,7 +6,7 @@
 
     <groupId>net.cactusthorn.routing</groupId>
     <artifactId>root</artifactId>
-    <version>0.17</version>
+    <version>0.18</version>
     <packaging>pom</packaging>
     <name>Routing :: Root</name>
 
@@ -55,7 +55,7 @@
         <module>core</module>
         <module>json-gson</module>
         <module>thymeleaf</module>
-        <module>demo</module>
+        <module>demo-jetty</module>
     </modules>
 
     <dependencies>

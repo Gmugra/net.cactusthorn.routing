@@ -5,7 +5,7 @@ import java.io.Reader;
 
 import javax.servlet.http.HttpServletRequest;
 
-import net.cactusthorn.routing.Template.PathValues;
+import net.cactusthorn.routing.PathTemplate.PathValues;
 
 public class RequestData {
 

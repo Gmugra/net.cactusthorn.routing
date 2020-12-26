@@ -23,7 +23,7 @@ import org.mockito.Mockito;
 import net.cactusthorn.routing.ComponentProvider;
 import net.cactusthorn.routing.Consumer;
 import net.cactusthorn.routing.RoutingConfig.ConfigProperty;
-import net.cactusthorn.routing.Template.PathValues;
+import net.cactusthorn.routing.PathTemplate.PathValues;
 import net.cactusthorn.routing.annotation.*;
 import net.cactusthorn.routing.convert.ConverterException;
 import net.cactusthorn.routing.convert.ConvertersHolder;
