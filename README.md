@@ -69,7 +69,7 @@ The library is doing only routing, but it's expected that the application provid
 1. multiple Consumers to convert request body to Java objects based on Content-Type
 
 And that is **the basic idea**: you build your web application with only the components you prefer. There is nothing superfluous.
-The Routing Library JAR itself is less than 100KB (+ ~ 40KB SLF4J JAR ; + ~ 100KB javax.servlet-api JAR).
+The Routing Library JAR itself is less then 100KB (+ ~ 40KB _SLF4J_ JAR ; + ~ 100KB _javax.servlet-api_ JAR).
 
 The flow is simple:
 1. The Servlet get the HTTP request, and find the method which should process it.
