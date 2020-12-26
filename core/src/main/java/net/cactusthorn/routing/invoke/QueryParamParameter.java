@@ -75,7 +75,7 @@ public class QueryParamParameter extends MethodComplexParameter {
         } catch (ConverterException ce) {
             throw ce;
         } catch (Exception e) {
-            throw new ConverterException("Type Converting problem", e);
+            throw new ConverterException("Type Converting failed: request parameter \"%s\"", e, name);
         }
     }
 

@@ -18,7 +18,7 @@ public final class ConsumerConverter implements Converter {
         try {
             return consumer.consume(type, contentType, requestData);
         } catch (Exception e) {
-            throw new ConverterException("Consumer convert problem", e);
+            throw new ConverterException("Consumer converting failed", e);
         }
     }
 

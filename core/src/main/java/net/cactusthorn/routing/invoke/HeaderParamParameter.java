@@ -39,7 +39,7 @@ public class HeaderParamParameter extends PathParamParameter {
         } catch (ConverterException ce) {
             throw ce;
         } catch (Exception e) {
-            throw new ConverterException("Type Converting problem", e);
+            throw new ConverterException("Type Converting failed: header parameter \"%s\"", e, name());
         }
     }
 

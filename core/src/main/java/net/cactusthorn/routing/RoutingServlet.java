@@ -106,7 +106,11 @@ public class RoutingServlet extends HttpServlet {
                     produce(req, resp, entryPoint, result);
                 } catch (ConverterException ce) {
                     // the inability to convert some parameter(s) is interpreted as a path not found
-                    LOG.trace("", ce);
+                    if (LOG.isTraceEnabled()) {
+                        LOG.trace("", ce);
+                    } else if (LOG.isDebugEnabled()) {
+                        LOG.debug("ConverterException: {}", ce.getMessage());
+                    }
                     resp.sendError(HttpServletResponse.SC_NOT_FOUND, "Not Found");
                 }
                 return;

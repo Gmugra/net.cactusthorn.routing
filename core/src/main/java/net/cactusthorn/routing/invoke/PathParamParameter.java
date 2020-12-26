@@ -66,7 +66,7 @@ public class PathParamParameter extends MethodComplexParameter {
         } catch (ConverterException ce) {
             throw ce;
         } catch (Exception e) {
-            throw new ConverterException("Type Converting problem", e);
+            throw new ConverterException("Type Converting failed: path parameter \"%s\"", e, name);
         }
     }
 }

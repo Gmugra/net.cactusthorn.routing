@@ -8,6 +8,10 @@ public class ConverterException extends Exception {
         super(message, cause);
     }
 
+    public ConverterException(String message, Throwable cause, Object param) {
+        super(String.format(message, param), cause);
+    }
+
     public ConverterException(Throwable cause) {
         super(cause);
     }
