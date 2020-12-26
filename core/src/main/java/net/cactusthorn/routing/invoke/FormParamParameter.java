@@ -28,7 +28,7 @@ public class FormParamParameter extends QueryParamParameter {
     }
 
     @Override //
-    protected String getName(Parameter parameter) {
+    protected String initName(Parameter parameter) {
         FormParam formParam = parameter.getAnnotation(FormParam.class);
         return formParam.value();
     }

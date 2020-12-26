@@ -96,7 +96,7 @@ Already:
    1. classes with a public constructor that accepts a single String argument.
    1. classes with _public static fromString(String arg)_ method.
    1. Possibility to write custom convertors.
-1. @PathParam, @QueryParam, @FormParam for parameters.
+1. @PathParam, @QueryParam, @FormParam, @CookieParam, @HeaderParam for parameters.
 1. Arrays support for @QueryParam & @FormParam
 1. Collections support for @QueryParam & @FormParam
    1. Interfaces List\<T\>, Set\<T\>, SortedSet\<T\>, Collection\<T\> where T is supported by type converting
@@ -109,8 +109,6 @@ Already:
 1. inject HttpServletRequest, HttpServletResponse, HttpSession, ServletContext in method parameters
 
 Comming soon:
-1. @HeaderParam for parameters
-1. @CookieParam for parameters
 1. @DefaultValue for parameters
 1. @FormPart
 1. ComponentProvider example with _dagger 2_

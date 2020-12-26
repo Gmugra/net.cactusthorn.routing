@@ -1,12 +1,14 @@
-package net.cactusthorn.routing.demo;
+package net.cactusthorn.routing.demo.jetty;
 
 import net.cactusthorn.routing.annotation.GET;
+import net.cactusthorn.routing.annotation.HeaderParam;
 import net.cactusthorn.routing.annotation.POST;
 import net.cactusthorn.routing.annotation.Path;
 import net.cactusthorn.routing.annotation.PathParam;
 import net.cactusthorn.routing.annotation.Template;
 import net.cactusthorn.routing.annotation.Consumes;
 import net.cactusthorn.routing.annotation.Context;
+import net.cactusthorn.routing.annotation.CookieParam;
 import net.cactusthorn.routing.annotation.FormParam;
 import net.cactusthorn.routing.annotation.Produces;
 import net.cactusthorn.routing.annotation.QueryParam;
@@ -18,6 +20,8 @@ import org.eclipse.jetty.server.Connector;
 import org.eclipse.jetty.server.HttpConnectionFactory;
 
 import java.util.List;
+
+import javax.servlet.http.Cookie;
 
 import org.eclipse.jetty.server.ConnectionFactory;
 import org.eclipse.jetty.server.Server;
@@ -92,8 +96,8 @@ public class Application {
         }
 
         @POST @Path("rest/api/gson") @Consumes("application/json") //
-        public String getitGson(@Context DataObject data) {
-            return data.getName();
+        public String getitGson(@Context DataObject data, @HeaderParam("Accept-Encoding") String acceptEncoding) {
+            return data.getName() + "; header : " + acceptEncoding;
         }
 
         @GET @Path("html") @Produces("text/html") @Template("/index.html") //
@@ -101,10 +105,16 @@ public class Application {
             return "TEST HTML PAGE";
         }
 
-        @POST @Path("html/form") @Consumes("application/x-www-form-urlencoded") @Produces("text/plain") //
-        public String doHtml(@FormParam("fname") String fname, @FormParam("lname") String lname, @FormParam("box") List<Integer> box) {
-            return fname + " :: " + lname + " :: " + box;
+        // @formatter:off
+        @POST @Path("html/form") @Consumes("application/x-www-form-urlencoded") //
+        public String doHtml(
+                @FormParam("fname") String fname,
+                @FormParam("lname") String lname, 
+                @FormParam("box") List<Integer> box,
+                @CookieParam("JSESSIONID") Cookie jsession) {
+            return fname + " :: " + lname + " :: " + box + " :: " + jsession.getValue();
         }
+        // @formatter:on
     }
 
     public static class Provider implements ComponentProvider {

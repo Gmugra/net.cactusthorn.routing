@@ -10,7 +10,9 @@ import javax.servlet.http.HttpSession;
 
 import net.cactusthorn.routing.RequestData;
 import net.cactusthorn.routing.annotation.Context;
+import net.cactusthorn.routing.annotation.CookieParam;
 import net.cactusthorn.routing.annotation.FormParam;
+import net.cactusthorn.routing.annotation.HeaderParam;
 import net.cactusthorn.routing.annotation.PathParam;
 import net.cactusthorn.routing.annotation.QueryParam;
 import net.cactusthorn.routing.convert.ConverterException;
@@ -44,6 +46,12 @@ public abstract class MethodParameter {
             } else if (parameter.getAnnotation(FormParam.class) != null) {
 
                 return new FormParamParameter(method, parameter, convertersHolder, contentType);
+            } else if (parameter.getAnnotation(HeaderParam.class) != null) {
+
+                return new HeaderParamParameter(method, parameter, convertersHolder);
+            } else if (parameter.getAnnotation(CookieParam.class) != null) {
+
+                return new CookieParamParameter(method, parameter);
             } else if (parameterClassType == HttpServletRequest.class) {
 
                 return new HttpServletRequestParameter(parameter);

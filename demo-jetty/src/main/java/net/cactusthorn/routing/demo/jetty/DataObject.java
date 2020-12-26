@@ -1,4 +1,4 @@
-package net.cactusthorn.routing.demo;
+package net.cactusthorn.routing.demo.jetty;
 
 public class DataObject {
 

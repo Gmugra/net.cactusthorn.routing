@@ -26,7 +26,7 @@ public class QueryParamParameter extends MethodComplexParameter {
 
     public QueryParamParameter(Method method, Parameter parameter, ConvertersHolder convertersHolder) {
         super(parameter);
-        name = getName(parameter);
+        name = initName(parameter);
 
         Optional<Class<?>> optionalArray = arrayType(method);
         if (optionalArray.isPresent()) {
@@ -49,7 +49,7 @@ public class QueryParamParameter extends MethodComplexParameter {
         converter = findConverter(method, convertersHolder);
     }
 
-    protected String getName(Parameter parameter) {
+    protected String initName(Parameter parameter) {
         QueryParam queryParam = parameter.getAnnotation(QueryParam.class);
         return queryParam.value();
     }
