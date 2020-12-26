@@ -26,7 +26,7 @@ public class RoutingConfigTest {
         return new java.util.Date();
     };
 
-    public static final Producer TEST_PRODUCER = (object, mediaType, req, resp) -> {
+    public static final Producer TEST_PRODUCER = (object, template, mediaType, req, resp) -> {
         return;
     };
 

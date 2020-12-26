@@ -19,7 +19,7 @@ import net.cactusthorn.routing.annotation.*;
 
 public class RoutingServletTest {
 
-    public static final Producer TEST_PRODUCER = (object, mediaType, req, resp) -> {
+    public static final Producer TEST_PRODUCER = (object, template, mediaType, req, resp) -> {
         resp.getWriter().write(String.valueOf("TEST_PRODUCER"));
     };
 

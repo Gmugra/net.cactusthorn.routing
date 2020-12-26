@@ -26,6 +26,7 @@ public class RoutingServlet extends HttpServlet {
     private transient Map<Class<? extends Annotation>, List<EntryPoint>> allEentryPoints;
     private transient ServletContext servletContext;
     private transient Map<String, Producer> producers;
+    private transient Map<String, Consumer> consumers;
     private transient ComponentProvider componentProvider;
     private transient String responseCharacterEncoding;
 
@@ -34,6 +35,7 @@ public class RoutingServlet extends HttpServlet {
         componentProvider = config.provider();
         allEentryPoints = config.entryPoints();
         producers = config.producers();
+        consumers = config.consumers();
         responseCharacterEncoding = (String) config.properties().get(ConfigProperty.RESPONSE_CHARACTER_ENCODING);
     }
 
@@ -42,6 +44,8 @@ public class RoutingServlet extends HttpServlet {
         super.init();
         servletContext = getServletContext();
         componentProvider.init(servletContext);
+        producers.values().forEach(p -> p.init(servletContext, componentProvider));
+        consumers.values().forEach(p -> p.init(servletContext, componentProvider));
     }
 
     @Override //
@@ -130,7 +134,7 @@ public class RoutingServlet extends HttpServlet {
         resp.setCharacterEncoding(responseCharacterEncoding);
         if (producers.containsKey(entryPoint.produces())) {
             resp.setContentType(entryPoint.produces());
-            producers.get(entryPoint.produces()).produce(result, entryPoint.produces(), req, resp);
+            producers.get(entryPoint.produces()).produce(result, entryPoint.producerTemplate(), entryPoint.produces(), req, resp);
         } else {
             resp.setContentType(EntryPointScanner.PRODUCES_DEFAULT);
             if (result != null) {

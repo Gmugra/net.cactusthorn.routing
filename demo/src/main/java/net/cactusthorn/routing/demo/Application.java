@@ -1,8 +1,17 @@
 package net.cactusthorn.routing.demo;
 
-import net.cactusthorn.routing.annotation.*;
+import net.cactusthorn.routing.annotation.GET;
+import net.cactusthorn.routing.annotation.POST;
+import net.cactusthorn.routing.annotation.Path;
+import net.cactusthorn.routing.annotation.PathParam;
+import net.cactusthorn.routing.annotation.Template;
+import net.cactusthorn.routing.annotation.Consumes;
+import net.cactusthorn.routing.annotation.Context;
+import net.cactusthorn.routing.annotation.Produces;
+import net.cactusthorn.routing.annotation.QueryParam;
 import net.cactusthorn.routing.gson.SimpleGsonConsumer;
 import net.cactusthorn.routing.gson.SimpleGsonProducer;
+import net.cactusthorn.routing.thymeleaf.SimpleThymeleafProducer;
 
 import org.eclipse.jetty.server.Connector;
 import org.eclipse.jetty.server.HttpConnectionFactory;
@@ -27,6 +36,7 @@ public class Application {
             .addEntryPoint(Component.class)
             .addProducer("application/json", new SimpleGsonProducer())
             .addConsumer("application/json", new SimpleGsonConsumer())
+            .addProducer("text/html", new SimpleThymeleafProducer("/thymeleaf/"))
             .build();
         // @formatter:on
 
@@ -38,10 +48,10 @@ public class Application {
         servletContext.addServlet(servletHolder, "/rest/*");
 
         Server jetty = new Server(8080);
-        for(Connector connector : jetty.getConnectors()) {
-            for(ConnectionFactory factory  : connector.getConnectionFactories()) {
-                if(factory instanceof HttpConnectionFactory) {
-                    ((HttpConnectionFactory)factory).getHttpConfiguration().setSendServerVersion(false);
+        for (Connector connector : jetty.getConnectors()) {
+            for (ConnectionFactory factory : connector.getConnectionFactories()) {
+                if (factory instanceof HttpConnectionFactory) {
+                    ((HttpConnectionFactory) factory).getHttpConfiguration().setSendServerVersion(false);
                 }
             }
         }
@@ -80,6 +90,11 @@ public class Application {
         public String getitGson(@Context DataObject data) {
             return data.getName();
         }
+
+        @GET @Path("api/test/html") @Produces("text/html") @Template("/index.html") //
+        public String getitHtml() {
+            return "TEST VALUE";
+        }
     }
 
     public static class Provider implements ComponentProvider {
@@ -90,4 +105,3 @@ public class Application {
         }
     }
 }
-

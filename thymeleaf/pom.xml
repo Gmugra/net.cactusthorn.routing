@@ -10,9 +10,9 @@
         <version>0.17</version>
     </parent>
 
-    <artifactId>json-gson</artifactId>
+    <artifactId>thymeleaf</artifactId>
     <packaging>jar</packaging>
-    <name>Routing :: JSON with Gson</name>
+    <name>Routing :: Thymeleaf </name>
 
     <dependencies>
 
@@ -23,14 +23,8 @@
         </dependency>
 
         <dependency>
-            <groupId>com.google.code.gson</groupId>
-            <artifactId>gson</artifactId>
-        </dependency>
-
-        <dependency>
-            <groupId>ch.qos.logback</groupId>
-            <artifactId>logback-classic</artifactId>
-            <scope>test</scope>
+            <groupId>org.thymeleaf</groupId>
+            <artifactId>thymeleaf</artifactId>
         </dependency>
 
     </dependencies>

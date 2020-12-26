@@ -73,17 +73,16 @@ The flow is simple:
 
 
 Providing of such implementations is relative trivial issue, because there are lot of powerful libraries around, which can do any of that.
-And implementation of the interface is question of several dozens of code lines. (look at _json-gson_ module as example of JSON Producer with [GSON](https://github.com/google/gson))
+And implementation of the interface is question of several dozens of code lines. (look at _json-gson_ & _thymeleaf_ modules as example of Producers with [GSON](https://github.com/google/gson)
 
 And that **is the basic idea**: you build your web application with only the components you prefer. There is nothing superfluous.
 
 ### ComponentProvider
 It seems that implementation for ComponentProvider is not so easy, because you need Scopes (Request and/or Session) or even Singletons.
-But it's not. All of that is natural features of any good dependency injection framework (e.g. [Dagger 2](https://dagger.dev), [Guice](https://github.com/google/guice), [HK2](https://javaee.github.io/hk2/) )
-It's anyway very good idea to use dependency injection in your application, so all you need in ComponentProvider - link it to dependency injection framework which you are using: several dozens of code lines.
+But it's not. All of that is natural features of any good dependency injection framework (e.g. [Dagger 2](https://dagger.dev), [Guice](https://github.com/google/guice), [HK2](https://javaee.github.io/hk2/) ). It's anyway very good idea to use dependency injection in your application, so all you need in ComponentProvider - link it to dependency injection framework which you are using: several dozens of code lines.
 
 ### Developing status
-It is an early release, not everything is implemented.
+It is an early release.
 
 Already:
 1. Full functional Servlet
@@ -98,21 +97,23 @@ Already:
 1. @PathParam and @QueryParam for parameters.
 1. Arrays support for @QueryParam
 1. Collections support for @QueryParam
-   1. Interfaces List<T>, Set<T>, SortedSet<T>, Collection<T> where T is supported by type converting
+   1. Interfaces List\<T\>, Set\<T\>, SortedSet\<T\>, Collection\<T\> where T is supported by type converting
    1. any class which is not abstract and _Collections.class.isAssignableFrom( this class ) == true_
-1. @Produce and Producer interface (example: _json-gson_ module)
+1. @Produce, @Template and Producer interface. Implementation examples:
+   1. application/json: _json-gson_ module
+   1. text/html: _thymeleaf_ module
 1. @Consumes for class and/or method. To specify Content-Type as additional routing filter. Wildcard is supported (e.g. text/* )
 1. Consumer interface support (example: _json-gson_ module)
 1. inject HttpServletRequest, HttpServletResponse, HttpSession, ServletContext in method parameters
 
 Comming soon:
-1. Producer example for text/html with [Thymeleaf](https://www.thymeleaf.org)
-1. ComponentProvider example with _dagger 2_
-
-Comming a bit later
 1. @HeaderParam for parameters
 1. @CookieParam for parameters
 1. @DefaultValue for parameters
+1. ComponentProvider example with _dagger 2_
+
+Comming a bit later
+1. @FormParam, @FormPart
 1. Java Bean Validation Annotations (JSR 380) for parameters (as additional module)
 1. ?
 

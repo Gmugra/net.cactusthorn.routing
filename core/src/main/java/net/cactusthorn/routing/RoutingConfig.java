@@ -17,8 +17,7 @@ public final class RoutingConfig {
 
     public enum ConfigProperty {
 
-        READ_BODY_BUFFER_SIZE(new Integer(1024)),
-        RESPONSE_CHARACTER_ENCODING("UTF-8");
+        READ_BODY_BUFFER_SIZE(new Integer(1024)), RESPONSE_CHARACTER_ENCODING("UTF-8");
 
         private final Object ddefault;
 
@@ -35,15 +34,18 @@ public final class RoutingConfig {
 
     private Map<String, Producer> producers;
 
+    private Map<String, Consumer> consumers;
+
     private ComponentProvider componentProvider;
 
     private Map<ConfigProperty, Object> configProperties;
 
     private RoutingConfig(ComponentProvider componentProvider, Map<Class<? extends Annotation>, List<EntryPoint>> entryPoints,
-            Map<String, Producer> producers, Map<ConfigProperty, Object> configProperties) {
+            Map<String, Producer> producers, Map<String, Consumer> consumers, Map<ConfigProperty, Object> configProperties) {
         this.componentProvider = componentProvider;
         this.entryPoints = entryPoints;
         this.producers = producers;
+        this.consumers = consumers;
         this.configProperties = configProperties;
     }
 
@@ -57,6 +59,10 @@ public final class RoutingConfig {
 
     public Map<String, Producer> producers() {
         return producers;
+    }
+
+    public Map<String, Consumer> consumers() {
+        return consumers;
     }
 
     public ComponentProvider provider() {
@@ -76,6 +82,8 @@ public final class RoutingConfig {
         private final List<Class<?>> entryPointClasses = new ArrayList<>();
 
         private final Map<String, Producer> producers = new HashMap<>();
+
+        private final Map<String, Consumer> consumers = new HashMap<>();
 
         private final Map<ConfigProperty, Object> configProperties = new HashMap<>();
 
@@ -111,6 +119,7 @@ public final class RoutingConfig {
         }
 
         public Builder addConsumer(String mediaType, Consumer consumer) {
+            consumers.put(mediaType, consumer);
             convertersHolder.register(mediaType, consumer);
             return this;
         }
@@ -128,6 +137,7 @@ public final class RoutingConfig {
         public RoutingConfig build() {
 
             Map<String, Producer> unmodifiableProducers = Collections.unmodifiableMap(producers);
+            Map<String, Consumer> unmodifiableConsumers = Collections.unmodifiableMap(consumers);
             Map<ConfigProperty, Object> unmodifiableConfigProperties = Collections.unmodifiableMap(configProperties);
 
             EntryPointScanner scanner = new EntryPointScanner(entryPointClasses, componentProvider, convertersHolder,
@@ -135,7 +145,7 @@ public final class RoutingConfig {
             Map<Class<? extends Annotation>, List<EntryPoint>> entryPoints = scanner.scan();
 
             return new RoutingConfig(componentProvider, Collections.unmodifiableMap(entryPoints), unmodifiableProducers,
-                    unmodifiableConfigProperties);
+                    unmodifiableConsumers, unmodifiableConfigProperties);
         }
     }
 }

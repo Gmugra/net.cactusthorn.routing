@@ -20,7 +20,17 @@ import javax.servlet.http.HttpServletResponse;
 
 import net.cactusthorn.routing.RoutingConfig.ConfigProperty;
 import net.cactusthorn.routing.Template.PathValues;
-import net.cactusthorn.routing.annotation.*;
+import net.cactusthorn.routing.annotation.Consumes;
+import net.cactusthorn.routing.annotation.DELETE;
+import net.cactusthorn.routing.annotation.GET;
+import net.cactusthorn.routing.annotation.HEAD;
+import net.cactusthorn.routing.annotation.OPTIONS;
+import net.cactusthorn.routing.annotation.PATCH;
+import net.cactusthorn.routing.annotation.POST;
+import net.cactusthorn.routing.annotation.PUT;
+import net.cactusthorn.routing.annotation.TRACE;
+import net.cactusthorn.routing.annotation.Path;
+import net.cactusthorn.routing.annotation.Produces;
 import net.cactusthorn.routing.convert.ConverterException;
 import net.cactusthorn.routing.convert.ConvertersHolder;
 import net.cactusthorn.routing.invoke.MethodInvoker;
@@ -36,18 +46,15 @@ public class EntryPointScanner {
         private String produces;
         private String contentType;
         private Pattern contentTypePattern;
+        private String producerTemplate;
 
-        private EntryPoint(Class<?> clazz, Method method, ComponentProvider componentProvider, String template,
-                ConvertersHolder convertersHolder, String produces, String contentType, Map<ConfigProperty, Object> configProperties) {
+        private EntryPoint(Template template, String produces, String producerTemplate, String contentType, MethodInvoker methodInvoker) {
             this.produces = produces;
+            this.producerTemplate = producerTemplate;
             this.contentType = contentType;
             contentTypePattern = Pattern.compile(contentType.replace("*", "(.*)"));
-            methodInvoker = new MethodInvoker(clazz, method, componentProvider, convertersHolder, contentType, configProperties);
-            try {
-                this.template = new Template(template);
-            } catch (IllegalArgumentException e) {
-                throw new RoutingInitializationException("Template is incorrect %s", e, method);
-            }
+            this.methodInvoker = methodInvoker;
+            this.template = template;
         }
 
         public boolean match(String path) {
@@ -60,6 +67,10 @@ public class EntryPointScanner {
 
         public String template() {
             return template.pattern().pattern();
+        }
+
+        public String producerTemplate() {
+            return producerTemplate;
         }
 
         public Object invoke(HttpServletRequest req, HttpServletResponse res, ServletContext con, PathValues pathValues)
@@ -122,10 +133,26 @@ public class EntryPointScanner {
                         }
 
                         String produces = findProduces(method);
-                        String consumes = findConsumes(method, clazzConsumes);
+                        String contentType = findConsumes(method, clazzConsumes);
 
-                        EntryPoint entryPoint = new EntryPoint(clazz, method, componentProvider, path, convertersHolder, produces,
-                                consumes, configProperties);
+                        Template template;
+                        try {
+                            template = new Template(path);
+                        } catch (IllegalArgumentException e) {
+                            throw new RoutingInitializationException("Template is incorrect %s", e, method);
+                        }
+
+                        String producerTemplate = null;
+                        net.cactusthorn.routing.annotation.Template templateAnnotation = method
+                                .getAnnotation(net.cactusthorn.routing.annotation.Template.class);
+                        if (templateAnnotation != null) {
+                            producerTemplate = templateAnnotation.value();
+                        }
+
+                        MethodInvoker methodInvoker = new MethodInvoker(clazz, method, componentProvider, convertersHolder, contentType,
+                                configProperties);
+
+                        EntryPoint entryPoint = new EntryPoint(template, produces, producerTemplate, contentType, methodInvoker);
                         entryPoints.get(type).add(entryPoint);
                     }
                 }

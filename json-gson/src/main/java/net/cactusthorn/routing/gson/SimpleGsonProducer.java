@@ -28,7 +28,8 @@ public class SimpleGsonProducer implements Producer {
     }
 
     @Override //
-    public void produce(Object object, String mediaType, HttpServletRequest req, HttpServletResponse resp) throws IOException {
+    public void produce(Object object, String template, String mediaType, HttpServletRequest req, HttpServletResponse resp)
+            throws IOException {
         if (object == null) {
             LOG.warn("Entry point return Object is NULL");
         }

@@ -7,7 +7,7 @@
     <parent>
         <groupId>net.cactusthorn.routing</groupId>
         <artifactId>root</artifactId>
-        <version>0.16</version>
+        <version>0.17</version>
     </parent>
 
     <artifactId>demo</artifactId>
@@ -25,6 +25,12 @@
         <dependency>
             <groupId>net.cactusthorn.routing</groupId>
             <artifactId>json-gson</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>net.cactusthorn.routing</groupId>
+            <artifactId>thymeleaf</artifactId>
             <version>${project.version}</version>
         </dependency>
 

@@ -6,7 +6,7 @@
 
     <groupId>net.cactusthorn.routing</groupId>
     <artifactId>root</artifactId>
-    <version>0.16</version>
+    <version>0.17</version>
     <packaging>pom</packaging>
     <name>Routing :: Root</name>
 
@@ -29,6 +29,7 @@
         <dependency.servlet>3.1.0</dependency.servlet>
         <dependency.jetty>9.4.35.v20201120</dependency.jetty>
         <dependency.gson>2.8.6</dependency.gson>
+        <dependency.thymeleaf>3.0.11.RELEASE</dependency.thymeleaf>
 
         <plugin.compiler>3.8.1</plugin.compiler>
         <plugin.jar>3.2.0</plugin.jar>
@@ -53,6 +54,7 @@
     <modules>
         <module>core</module>
         <module>json-gson</module>
+        <module>thymeleaf</module>
         <module>demo</module>
     </modules>
 
@@ -105,6 +107,12 @@
                 <groupId>com.google.code.gson</groupId>
                 <artifactId>gson</artifactId>
                 <version>${dependency.gson}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.thymeleaf</groupId>
+                <artifactId>thymeleaf</artifactId>
+                <version>${dependency.thymeleaf}</version>
             </dependency>
 
             <dependency>

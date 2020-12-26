@@ -43,7 +43,7 @@ public class SimpleGsonProducerTest {
 
         SimpleGsonProducer producer = new SimpleGsonProducer();
 
-        producer.produce(data, null, null, response);
+        producer.produce(data, null, null, null, response);
 
         assertEquals(json, stringWriter.toString());
     }

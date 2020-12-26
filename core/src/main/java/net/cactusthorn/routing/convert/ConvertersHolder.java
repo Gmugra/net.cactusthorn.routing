@@ -67,7 +67,7 @@ public class ConvertersHolder {
         converters.put(clazz, converter);
     }
 
-    public <T> void register(String contentType, Consumer consumer) {
+    public void register(String contentType, Consumer consumer) {
         consumers.put(contentType, new ConsumerConverter(contentType, consumer));
     }
 }
