@@ -3,7 +3,7 @@
 
 Lightweight Java library for HTTP requests routing in context of Servlet API
 
-The library provides an annotation based API in [JAX-RS specification](https://www.oracle.com/technical-resources/articles/java/jax-rs.html) "like" style to redirect HTTP request to a specific method-class. **And nothing more**.
+The library provides an annotation based API in [JAX-RS specification](https://www.oracle.com/technical-resources/articles/java/jax-rs.html) "like" style to redirect HTTP request to a specific method-class. **And nothing more**. 
 
 Usual annotations in usual way e.g.:
 ```java
@@ -68,9 +68,12 @@ The library is doing only routing, but it's expected that the application provid
 1. multiple Producers which will generate responses based on Content-Type
 1. multiple Consumers to convert request body to Java objects based on Content-Type
 
+And that is **the basic idea**: you build your web application with only the components you prefer. There is nothing superfluous.
+The Routing Library JAR itself is less than 100KB (+ ~ 40KB SLF4J JAR ; + ~ 100KB javax.servlet-api JAR).
+
 The flow is simple:
 1. The Servlet get the HTTP request, and find the method which should process it.
-1. It request the EntryPoint class instance from the ComponentProvider, convert parameters, use Consumer to convert request-body and invoke the method.
+1. It request the EntryPoint class instance from the ComponentProvider, convert parameters(if necessary use Consumer to convert request-body) and invoke the method.
 1. It get from the method return-Object, find Producer and provide the object to Producer, which write result into response output stream.
 
 ### ComponentProvider
