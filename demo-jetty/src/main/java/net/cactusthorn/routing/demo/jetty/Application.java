@@ -78,12 +78,16 @@ public class Application {
         }
     }
 
-    //@Path("/") //
+    // @Path("/") //
     public static class Component {
 
         @GET //
         public String doroot() {
             return "ROOT";
+        }
+
+        @GET @Path("/nocontent") //
+        public void nocontent() {
         }
 
         @GET @Path("/rest/api/test{ var : \\d+ }") //

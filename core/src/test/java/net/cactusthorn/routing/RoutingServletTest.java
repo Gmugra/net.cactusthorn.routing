@@ -7,6 +7,7 @@ import java.io.PrintWriter;
 import java.io.StringWriter;
 
 import javax.servlet.ServletException;
+import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -16,11 +17,12 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 
 import net.cactusthorn.routing.annotation.*;
+import net.cactusthorn.routing.producer.Producer;
 
 public class RoutingServletTest {
 
     public static final Producer TEST_PRODUCER = (object, template, mediaType, req, resp) -> {
-        resp.getWriter().write(String.valueOf("TEST_PRODUCER"));
+        resp.getWriter().write(String.valueOf(object));
     };
 
     @Path("/") //
@@ -76,13 +78,34 @@ public class RoutingServletTest {
         }
 
         @GET @Produces("aa/bb") @Path("api/produce") //
-        public void produce() {
-            return;
+        public String produce() {
+            return "TEST_PRODUCER";
         }
 
         @GET @Path("api/wrong/{var}") //
         public void wrong(@PathParam("var") Integer var) {
             return;
+        }
+
+        @GET @Path("api/nocontent") //
+        public void nocontent() {
+        }
+
+        @GET @Path("api/response") //
+        public Response response() {
+            return Response.builder().setBody("FROM RESPONSE").setContentType("aa/bb").build();
+        }
+
+        @GET @Path("api/response/nocontent") //
+        public Response responseNoContent() {
+            return Response.builder().build();
+        }
+
+        @GET @Path("api/response/all") @Produces("aa/bb") //
+        public Response responseAll() {
+            Cookie cookie = new Cookie("a", "b");
+            return Response.builder().skipProducer().setBody("FROM RESPONSE").setCharacterEncoding("KOI8-R").setTemplate("TTT").setStatus(201)
+                    .addCookie(cookie).addHeader("h", "v").addIntHeader("hi", 10).addDateHeader("hd", 20L).build();
         }
     }
 
@@ -258,5 +281,78 @@ public class RoutingServletTest {
         Mockito.verify(resp).sendError(code.capture(), Mockito.any());
 
         assertEquals(404, code.getValue());
+    }
+
+    @Test //
+    public void response() throws ServletException, IOException {
+        Mockito.when(req.getPathInfo()).thenReturn("/api/response");
+        servlet.doGet(req, resp);
+        assertEquals("FROM RESPONSE", stringWriter.toString());
+    }
+
+    @Test //
+    public void nocontent() throws ServletException, IOException {
+        Mockito.when(req.getPathInfo()).thenReturn("/api/nocontent");
+
+        servlet.doGet(req, resp);
+
+        ArgumentCaptor<Integer> code = ArgumentCaptor.forClass(Integer.class);
+
+        Mockito.verify(resp).setStatus(code.capture());
+
+        assertEquals(204, code.getValue());
+    }
+
+    @Test //
+    public void responseNocontent() throws ServletException, IOException {
+        Mockito.when(req.getPathInfo()).thenReturn("/api/response/nocontent");
+
+        servlet.doGet(req, resp);
+
+        ArgumentCaptor<Integer> code = ArgumentCaptor.forClass(Integer.class);
+
+        Mockito.verify(resp).setStatus(code.capture());
+
+        assertEquals(204, code.getValue());
+    }
+
+    @Test //
+    public void responseAll() throws ServletException, IOException {
+        Mockito.when(req.getPathInfo()).thenReturn("/api/response/all");
+        servlet.doGet(req, resp);
+
+        ArgumentCaptor<Integer> code = ArgumentCaptor.forClass(Integer.class);
+        ArgumentCaptor<String> characterEncoding = ArgumentCaptor.forClass(String.class);
+        ArgumentCaptor<Cookie> cookie = ArgumentCaptor.forClass(Cookie.class);
+
+        ArgumentCaptor<String> headerName = ArgumentCaptor.forClass(String.class);
+        ArgumentCaptor<String> headerValue = ArgumentCaptor.forClass(String.class);
+
+        ArgumentCaptor<String> intHeaderName = ArgumentCaptor.forClass(String.class);
+        ArgumentCaptor<Integer> intHeaderValue = ArgumentCaptor.forClass(Integer.class);
+
+        ArgumentCaptor<String> dateHeaderName = ArgumentCaptor.forClass(String.class);
+        ArgumentCaptor<Long> dateHeaderValue = ArgumentCaptor.forClass(Long.class);
+
+        Mockito.verify(resp).setStatus(code.capture());
+        Mockito.verify(resp).setCharacterEncoding(characterEncoding.capture());
+        Mockito.verify(resp).addCookie(cookie.capture());
+
+        Mockito.verify(resp).addHeader(headerName.capture(), headerValue.capture());
+        Mockito.verify(resp).addIntHeader(intHeaderName.capture(), intHeaderValue.capture());
+        Mockito.verify(resp).addDateHeader(dateHeaderName.capture(), dateHeaderValue.capture());
+
+        assertEquals(201, code.getValue());
+        assertEquals("b", cookie.getValue().getValue());
+        assertEquals("KOI8-R", characterEncoding.getValue());
+
+        assertEquals("h", headerName.getValue());
+        assertEquals("v", headerValue.getValue());
+
+        assertEquals("hi", intHeaderName.getValue());
+        assertEquals(10, intHeaderValue.getValue());
+
+        assertEquals("hd", dateHeaderName.getValue());
+        assertEquals(20L, dateHeaderValue.getValue());
     }
 }

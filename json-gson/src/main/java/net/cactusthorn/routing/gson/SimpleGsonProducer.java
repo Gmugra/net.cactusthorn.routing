@@ -11,7 +11,8 @@ import org.slf4j.LoggerFactory;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.stream.JsonWriter;
-import net.cactusthorn.routing.Producer;
+
+import net.cactusthorn.routing.producer.Producer;
 
 public class SimpleGsonProducer implements Producer {
 

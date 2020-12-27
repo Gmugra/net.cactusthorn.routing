@@ -19,6 +19,7 @@ import net.cactusthorn.routing.annotation.Path;
 import net.cactusthorn.routing.annotation.PathParam;
 import net.cactusthorn.routing.convert.Converter;
 import net.cactusthorn.routing.convert.ConverterException;
+import net.cactusthorn.routing.producer.Producer;
 
 public class RoutingConfigTest {
 

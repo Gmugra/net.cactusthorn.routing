@@ -6,6 +6,8 @@ import java.util.Map;
 import net.cactusthorn.routing.EntryPointScanner.EntryPoint;
 import net.cactusthorn.routing.convert.Converter;
 import net.cactusthorn.routing.convert.ConvertersHolder;
+import net.cactusthorn.routing.producer.Producer;
+import net.cactusthorn.routing.producer.TextPlainProducer;
 
 import java.lang.annotation.Annotation;
 import java.util.ArrayList;
@@ -17,7 +19,11 @@ public final class RoutingConfig {
 
     public enum ConfigProperty {
 
-        READ_BODY_BUFFER_SIZE(new Integer(1024)), RESPONSE_CHARACTER_ENCODING("UTF-8"), DEFAULT_REQUEST_CHARACTER_ENCODING("UTF-8");
+        // @formatter:off
+        READ_BODY_BUFFER_SIZE(1024),
+        RESPONSE_CHARACTER_ENCODING("UTF-8"),
+        DEFAULT_REQUEST_CHARACTER_ENCODING("UTF-8");
+        // @formatter:on
 
         private final Object ddefault;
 
@@ -40,14 +46,22 @@ public final class RoutingConfig {
 
     private Map<ConfigProperty, Object> configProperties;
 
-    private RoutingConfig(ComponentProvider componentProvider, Map<Class<? extends Annotation>, List<EntryPoint>> entryPoints,
-            Map<String, Producer> producers, Map<String, Consumer> consumers, Map<ConfigProperty, Object> configProperties) {
+    // @formatter:off
+    private RoutingConfig(
+                ComponentProvider componentProvider,
+                Map<Class<? extends Annotation>,
+                List<EntryPoint>> entryPoints,
+                Map<String, Producer> producers,
+                Map<String, Consumer> consumers,
+                Map<ConfigProperty, Object> configProperties) {
+
         this.componentProvider = componentProvider;
         this.entryPoints = entryPoints;
         this.producers = producers;
         this.consumers = consumers;
         this.configProperties = configProperties;
     }
+    // @formatter:off
 
     public static Builder builder(ComponentProvider componentProvider) {
         return new Builder(componentProvider);
@@ -96,6 +110,8 @@ public final class RoutingConfig {
             for (ConfigProperty property : ConfigProperty.values()) {
                 configProperties.put(property, property.ddefault());
             }
+
+            addProducer(TextPlainProducer.MEDIA_TYPE, new TextPlainProducer());
         }
 
         public Builder addConverter(Class<?> clazz, Converter converter) {

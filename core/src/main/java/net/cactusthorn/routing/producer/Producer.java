@@ -1,10 +1,12 @@
-package net.cactusthorn.routing;
+package net.cactusthorn.routing.producer;
 
 import java.io.IOException;
 
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+
+import net.cactusthorn.routing.ComponentProvider;
 
 public interface Producer {
 

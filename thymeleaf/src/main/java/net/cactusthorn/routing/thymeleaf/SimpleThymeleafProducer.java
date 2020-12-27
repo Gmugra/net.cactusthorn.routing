@@ -17,7 +17,7 @@ import org.thymeleaf.templateresolver.ClassLoaderTemplateResolver;
 import org.thymeleaf.context.WebContext;
 
 import net.cactusthorn.routing.ComponentProvider;
-import net.cactusthorn.routing.Producer;
+import net.cactusthorn.routing.producer.Producer;
 
 public class SimpleThymeleafProducer implements Producer {
 

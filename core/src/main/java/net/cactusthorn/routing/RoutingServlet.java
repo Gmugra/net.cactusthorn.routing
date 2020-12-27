@@ -16,6 +16,7 @@ import net.cactusthorn.routing.RoutingConfig.ConfigProperty;
 import net.cactusthorn.routing.PathTemplate.PathValues;
 import net.cactusthorn.routing.annotation.*;
 import net.cactusthorn.routing.convert.ConverterException;
+import net.cactusthorn.routing.producer.Producer;
 
 public class RoutingServlet extends HttpServlet {
 
@@ -141,15 +142,54 @@ public class RoutingServlet extends HttpServlet {
     }
 
     private void produce(HttpServletRequest req, HttpServletResponse resp, EntryPoint entryPoint, Object result) throws IOException {
-        resp.setCharacterEncoding(responseCharacterEncoding);
-        if (producers.containsKey(entryPoint.produces())) {
-            resp.setContentType(entryPoint.produces());
-            producers.get(entryPoint.produces()).produce(result, entryPoint.template(), entryPoint.produces(), req, resp);
-        } else {
-            resp.setContentType(EntryPointScanner.PRODUCES_DEFAULT);
-            if (result != null) {
-                resp.getWriter().write(String.valueOf(result));
+        if (result == null) {
+            resp.setStatus(HttpServletResponse.SC_NO_CONTENT);
+            return;
+        }
+        String contentType = entryPoint.produces();
+        String template = entryPoint.template();
+        String characterEncoding = responseCharacterEncoding;
+        Object body = result;
+        boolean skipProducer = false;
+        if (result.getClass() == Response.class) {
+            Response response = (Response) result;
+
+            response.cookies().forEach(c -> resp.addCookie(c));
+
+            response.headers().entrySet().forEach(e -> e.getValue().forEach(v -> resp.addHeader(e.getKey(), v)));
+            response.intHeaders().entrySet().forEach(e -> e.getValue().forEach(v -> resp.addIntHeader(e.getKey(), v)));
+            response.dateHeaders().entrySet().forEach(e -> e.getValue().forEach(v -> resp.addDateHeader(e.getKey(), v)));
+
+            body = response.body();
+            if (body == null) {
+                resp.setStatus(HttpServletResponse.SC_NO_CONTENT);
+                return;
             }
+
+            resp.setStatus(response.statusCode());
+
+            if (response.characterEncoding() != null) {
+                characterEncoding = response.characterEncoding();
+            }
+
+            if (response.contentType() != null) {
+                contentType = response.contentType();
+            }
+
+            if (response.template() != null) {
+                template = response.template();
+            }
+
+            skipProducer = response.skipProducer();
+        }
+        resp.setCharacterEncoding(characterEncoding);
+        resp.setContentType(contentType);
+        if (skipProducer) {
+            resp.getWriter().write(String.valueOf(body));
+            LOG.debug("Producer processing skipped!");
+        } else {
+            producers.get(entryPoint.produces()).produce(body, template, contentType, req, resp);
+            LOG.debug("Producer processing done for Content-Type: {}", contentType);
         }
     }
 }

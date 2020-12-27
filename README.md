@@ -109,6 +109,7 @@ Already:
 1. @Consumes for class and/or method. To specify Content-Type as additional routing filter. Wildcard is supported (e.g. text/* )
 1. Consumer interface support (example: _json-gson_ module)
 1. inject HttpServletRequest, HttpServletResponse, HttpSession, ServletContext in method parameters
+1. Response class to manualy construct response
 
 Comming soon:
 1. @FormPart
