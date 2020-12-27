@@ -2,27 +2,28 @@ package net.cactusthorn.routing.invoke;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
+import java.util.Collection;
 
 import javax.servlet.ServletContext;
-import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.Part;
 
 import net.cactusthorn.routing.RequestData;
 import net.cactusthorn.routing.RoutingInitializationException;
-import net.cactusthorn.routing.annotation.CookieParam;
+import net.cactusthorn.routing.annotation.FormPart;
 import net.cactusthorn.routing.convert.ConverterException;
 
-public class CookieParamParameter extends MethodParameter {
+public class FormPartParameter extends MethodParameter {
 
-    protected static final String WRONG_TYPE = "@CookieParam can be used only for javax.servlet.http.Cookie type; Method: %s";
+    protected static final String WRONG_TYPE = "@FormPart can be used only for javax.servlet.http.Part type; Method: %s";
 
     private String name;
 
-    public CookieParamParameter(Method method, Parameter parameter) {
+    public FormPartParameter(Method method, Parameter parameter) {
         super(parameter);
-        name = parameter.getAnnotation(CookieParam.class).value();
-        if (classType() != Cookie.class) {
+        name = parameter.getAnnotation(FormPart.class).value();
+        if (classType() != Part.class) {
             throw new RoutingInitializationException(WRONG_TYPE, method);
         }
     }
@@ -31,13 +32,13 @@ public class CookieParamParameter extends MethodParameter {
     Object findValue(HttpServletRequest req, HttpServletResponse res, ServletContext con, RequestData requestData)
             throws ConverterException {
         try {
-            Cookie[] cookies = req.getCookies();
-            if (cookies == null) {
+            Collection<Part> parts = req.getParts();
+            if (parts == null) {
                 return null;
             }
-            for (Cookie cookie : cookies) {
-                if (name.equals(cookie.getName())) {
-                    return cookie;
+            for (Part part : req.getParts()) {
+                if (name.equals(part.getName())) {
+                    return part;
                 }
             }
             return null;

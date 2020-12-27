@@ -142,16 +142,12 @@ public class RoutingServlet extends HttpServlet {
     }
 
     private void produce(HttpServletRequest req, HttpServletResponse resp, EntryPoint entryPoint, Object result) throws IOException {
-        if (result == null) {
-            resp.setStatus(HttpServletResponse.SC_NO_CONTENT);
-            return;
-        }
         String contentType = entryPoint.produces();
         String template = entryPoint.template();
         String characterEncoding = responseCharacterEncoding;
         Object body = result;
         boolean skipProducer = false;
-        if (result.getClass() == Response.class) {
+        if (result != null && result.getClass() == Response.class) {
             Response response = (Response) result;
 
             response.cookies().forEach(c -> resp.addCookie(c));
@@ -161,10 +157,6 @@ public class RoutingServlet extends HttpServlet {
             response.dateHeaders().entrySet().forEach(e -> e.getValue().forEach(v -> resp.addDateHeader(e.getKey(), v)));
 
             body = response.body();
-            if (body == null) {
-                resp.setStatus(HttpServletResponse.SC_NO_CONTENT);
-                return;
-            }
 
             resp.setStatus(response.statusCode());
 
@@ -188,7 +180,7 @@ public class RoutingServlet extends HttpServlet {
             resp.getWriter().write(String.valueOf(body));
             LOG.debug("Producer processing skipped!");
         } else {
-            producers.get(entryPoint.produces()).produce(body, template, contentType, req, resp);
+            producers.get(contentType).produce(body, template, contentType, req, resp);
             LOG.debug("Producer processing done for Content-Type: {}", contentType);
         }
     }

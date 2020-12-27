@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+
+<html xmlns:th="http://www.thymeleaf.org">
+
+  <head>
+    <title>Micro :: Test</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <meta charset="UTF-8">
+  </head>
+
+  <body>
+    <p th:text="${model}">test?</p><br/><br/>
+
+    <form action="/html/doupload" method="POST" accept-charset="UTF-8" enctype="multipart/form-data">
+        <label for="fname">First name:</label>
+        <input type="text" id="fname" name="fname"/><br/><br/>
+
+        <label for="myFile">File:</label>
+        <input type="file" id="myFile" name="myfile"/><br/><br/>
+        
+        <label for="myFile2">File2:</label>
+        <input type="file" id="myFile2" name="myfile2"/><br/><br/>
+
+        <input type="submit" value="Submit"/>
+    </form>
+  </body>
+
+</html>

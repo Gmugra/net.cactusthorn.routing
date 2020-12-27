@@ -89,8 +89,13 @@ public class EntryPointScanner {
             return contentType;
         }
 
+        public static final String FORM_DATA = "multipart/form-data";
+
         public boolean matchContentType(String contenttype) {
             if (this.contentType.equals(contenttype)) {
+                return true;
+            }
+            if (FORM_DATA.equals(this.contentType) && contenttype != null && contenttype.startsWith("multipart/form-data")) {
                 return true;
             }
             return contentTypePattern.matcher(contenttype).find();

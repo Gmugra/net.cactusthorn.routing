@@ -72,8 +72,12 @@ public class ConsumesTest {
         public void all() {
         }
 
-        @POST //
+        @PUT //
         public void text() {
+        }
+
+        @POST @Consumes("multipart/form-data") //
+        public void formdata() {
         }
     }
 
@@ -89,7 +93,7 @@ public class ConsumesTest {
     public void global() {
         EntryPointScanner scanner = new EntryPointScanner(Arrays.asList(EntryPoint2.class), new EntryPoint1Provider2(), HOLDER, PROPERTIES);
         Map<Class<? extends Annotation>, List<EntryPoint>> entryPoints = scanner.scan();
-        EntryPoint entryPoint = entryPoints.get(POST.class).get(0);
+        EntryPoint entryPoint = entryPoints.get(PUT.class).get(0);
         assertTrue(entryPoint.matchContentType("text/html"));
         assertFalse(entryPoint.matchContentType("application/json"));
     }
@@ -101,5 +105,13 @@ public class ConsumesTest {
         EntryPoint entryPoint = entryPoints.get(GET.class).get(0);
         assertFalse(entryPoint.matchContentType("text/html"));
         assertTrue(entryPoint.matchContentType("application/json"));
+    }
+
+    @Test //
+    public void formData() {
+        EntryPointScanner scanner = new EntryPointScanner(Arrays.asList(EntryPoint2.class), new EntryPoint1Provider2(), HOLDER, PROPERTIES);
+        Map<Class<? extends Annotation>, List<EntryPoint>> entryPoints = scanner.scan();
+        EntryPoint entryPoint = entryPoints.get(POST.class).get(0);
+        assertTrue(entryPoint.matchContentType("multipart/form-data; boundary=----WebKitFormBoundaryqoNsVh2QtLJ19YqS"));
     }
 }

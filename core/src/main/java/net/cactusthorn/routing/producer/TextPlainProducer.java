@@ -13,6 +13,7 @@ public class TextPlainProducer implements Producer {
     public void produce(Object object, String template, String mediaType, HttpServletRequest req, HttpServletResponse resp)
             throws IOException {
         if (object == null) {
+            resp.setStatus(HttpServletResponse.SC_NO_CONTENT);
             return;
         }
         resp.getWriter().write(String.valueOf(object));

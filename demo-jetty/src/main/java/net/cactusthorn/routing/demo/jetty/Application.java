@@ -1,5 +1,6 @@
 package net.cactusthorn.routing.demo.jetty;
 
+import net.cactusthorn.routing.*;
 import net.cactusthorn.routing.annotation.GET;
 import net.cactusthorn.routing.annotation.HeaderParam;
 import net.cactusthorn.routing.annotation.POST;
@@ -11,6 +12,7 @@ import net.cactusthorn.routing.annotation.Context;
 import net.cactusthorn.routing.annotation.CookieParam;
 import net.cactusthorn.routing.annotation.DefaultValue;
 import net.cactusthorn.routing.annotation.FormParam;
+import net.cactusthorn.routing.annotation.FormPart;
 import net.cactusthorn.routing.annotation.Produces;
 import net.cactusthorn.routing.annotation.QueryParam;
 import net.cactusthorn.routing.gson.SimpleGsonConsumer;
@@ -20,9 +22,13 @@ import net.cactusthorn.routing.thymeleaf.SimpleThymeleafProducer;
 import org.eclipse.jetty.server.Connector;
 import org.eclipse.jetty.server.HttpConnectionFactory;
 
+import java.io.IOException;
+import java.nio.file.Files;
 import java.util.List;
 
+import javax.servlet.MultipartConfigElement;
 import javax.servlet.http.Cookie;
+import javax.servlet.http.Part;
 
 import org.eclipse.jetty.server.ConnectionFactory;
 import org.eclipse.jetty.server.Server;
@@ -31,8 +37,6 @@ import org.eclipse.jetty.servlet.ServletHolder;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import net.cactusthorn.routing.*;
 
 public class Application {
 
@@ -50,8 +54,13 @@ public class Application {
             .build();
         // @formatter:on
 
+        // location="/tmp", fileSizeThreshold=1024*1024, maxFileSize=1024*1024*5,
+        // maxRequestSize=1024*1024*5*5
+        MultipartConfigElement multipartConfig = new MultipartConfigElement("/tmp", 1024 * 1024, 1024 * 1024 * 5, 1024 * 1024 * 5 * 5);
+
         ServletHolder servletHolder = new ServletHolder("Routing Servlet", new RoutingServlet(config));
         servletHolder.setInitOrder(0);
+        servletHolder.getRegistration().setMultipartConfig(multipartConfig);
 
         ServletContextHandler servletContextHandler = new ServletContextHandler(ServletContextHandler.SESSIONS);
         servletContextHandler.setContextPath("/");
@@ -113,6 +122,35 @@ public class Application {
         @GET @Path("html") @Produces("text/html") @Template("/index.html") //
         public String getitHtml() {
             return "TEST HTML PAGE";
+        }
+
+        @GET @Path("html/upload") //
+        public Response showUpload() {
+            return Response.builder().setContentType("text/html").setTemplate("/fileupload.html").build();
+        }
+
+        @POST @Path("html/doupload") @Consumes("multipart/form-data") //
+        public String upload(@FormParam("fname") String fname, @FormPart("myfile") Part part, @FormPart("myfile2") Part part2)
+                throws IOException {
+
+            String result = fname + " :: ";
+
+            java.nio.file.Path tmpDir = Files.createTempDirectory("");
+            String fileName = part.getSubmittedFileName();
+            if (!"".equals(fileName)) {
+                java.nio.file.Path path = tmpDir.resolve(fileName);
+                Files.copy(part.getInputStream(), path);
+                result += path + " :: ";
+            }
+
+            String fileName2 = part2.getSubmittedFileName();
+            if (!"".equals(fileName)) {
+                java.nio.file.Path path = tmpDir.resolve(fileName2);
+                Files.copy(part2.getInputStream(), path);
+                result += path;
+            }
+
+            return result;
         }
 
         // @formatter:off

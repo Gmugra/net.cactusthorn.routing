@@ -12,6 +12,7 @@ import net.cactusthorn.routing.RequestData;
 import net.cactusthorn.routing.annotation.Context;
 import net.cactusthorn.routing.annotation.CookieParam;
 import net.cactusthorn.routing.annotation.FormParam;
+import net.cactusthorn.routing.annotation.FormPart;
 import net.cactusthorn.routing.annotation.HeaderParam;
 import net.cactusthorn.routing.annotation.PathParam;
 import net.cactusthorn.routing.annotation.QueryParam;
@@ -56,6 +57,9 @@ public abstract class MethodParameter {
             } else if (parameter.getAnnotation(FormParam.class) != null) {
 
                 return new FormParamParameter(method, parameter, convertersHolder, contentType);
+            } else if (parameter.getAnnotation(FormPart.class) != null) {
+
+                return new FormPartParameter(method, parameter);
             } else if (parameter.getAnnotation(HeaderParam.class) != null) {
 
                 return new HeaderParamParameter(method, parameter, convertersHolder);

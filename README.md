@@ -97,7 +97,7 @@ Already:
    1. classes with a public constructor that accepts a single String argument.
    1. classes with _public static fromString(String arg)_ method.
    1. Possibility to write custom convertors.
-1. @PathParam, @QueryParam, @FormParam, @CookieParam, @HeaderParam for parameters.
+1. @PathParam, @QueryParam, @FormParam, @CookieParam, @HeaderParam, @FormPart for parameters.
 1. Arrays support for @QueryParam & @FormParam
 1. Collections support for @QueryParam & @FormParam
    1. Interfaces List\<T\>, Set\<T\>, SortedSet\<T\>, Collection\<T\> where T is supported by type converting
@@ -109,10 +109,9 @@ Already:
 1. @Consumes for class and/or method. To specify Content-Type as additional routing filter. Wildcard is supported (e.g. text/* )
 1. Consumer interface support (example: _json-gson_ module)
 1. inject HttpServletRequest, HttpServletResponse, HttpSession, ServletContext in method parameters
-1. Response class to manualy construct response
+1. Response class to manually construct response
 
 Comming soon:
-1. @FormPart
 1. ComponentProvider example with _dagger 2_
 
 Comming a bit later

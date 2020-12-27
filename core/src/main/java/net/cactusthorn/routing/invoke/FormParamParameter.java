@@ -15,7 +15,7 @@ public class FormParamParameter extends QueryParamParameter {
 
     // @formatter:off
     public static final Set<String> CONTENT_TYPE = Collections
-            .unmodifiableSet(new HashSet<>(Arrays.asList(new String[] {"application/x-www-form-urlencoded"})));
+            .unmodifiableSet(new HashSet<>(Arrays.asList(new String[] {"application/x-www-form-urlencoded", "multipart/form-data"})));
     // @formatter:off
 
     protected static final String WRONG_CONTENT_TYPE = "@FormParam can be used only with @Consumes content types: %s; Method: %s";
