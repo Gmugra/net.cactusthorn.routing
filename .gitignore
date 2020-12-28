@@ -5,6 +5,8 @@
 !.gitignore
 !.gitkeep
 
+!.travis.yml
+
 # Log file
 *.log
 
