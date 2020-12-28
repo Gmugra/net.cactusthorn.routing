@@ -49,6 +49,7 @@
         <plugin.project-info-reports>3.1.1</plugin.project-info-reports>
         <plugin.checkstyle>3.1.1</plugin.checkstyle>
             <dependency.checkstyle>8.38</dependency.checkstyle>
+        <plugin.coveralls>4.3.0</plugin.coveralls>
 
     </properties>
 
@@ -270,6 +271,12 @@
                     <groupId>org.jacoco</groupId>
                     <artifactId>jacoco-maven-plugin</artifactId>
                     <version>${plugin.jacoco}</version>
+                </plugin>
+
+                <plugin>
+                    <groupId>org.eluder.coveralls</groupId>
+                    <artifactId>coveralls-maven-plugin</artifactId>
+                    <version>${plugin.coveralls}</version>
                 </plugin>
 
                 <plugin>
