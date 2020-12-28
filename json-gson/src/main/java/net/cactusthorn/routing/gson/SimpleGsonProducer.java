@@ -33,6 +33,10 @@ public class SimpleGsonProducer implements Producer {
             throws IOException {
         if (object == null) {
             LOG.warn("Entry point return Object is NULL");
+            if (resp.getStatus() == HttpServletResponse.SC_OK) {
+                resp.setStatus(HttpServletResponse.SC_NO_CONTENT);
+            }
+            return;
         }
         try (JsonWriter writer = new JsonWriter(resp.getWriter())) {
             gson.toJson(object, object.getClass(), writer);

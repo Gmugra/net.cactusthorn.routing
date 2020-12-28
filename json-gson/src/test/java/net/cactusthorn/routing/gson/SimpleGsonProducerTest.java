@@ -12,15 +12,22 @@ import java.nio.charset.StandardCharsets;
 
 import javax.servlet.http.HttpServletResponse;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
+
+import com.google.gson.GsonBuilder;
 
 public class SimpleGsonProducerTest {
 
-    @Test //
-    public void produce() throws IOException {
+    private HttpServletResponse response;
+    private StringWriter stringWriter;
+    private DataObject data;
+    private String json;
 
-        String json;
+    @BeforeEach //
+    public void setUp() throws IOException {
         try (InputStream is = SimpleGsonProducerTest.class.getClassLoader().getResourceAsStream("test.json");
                 Reader reader = new InputStreamReader(is, StandardCharsets.UTF_8)) {
 
@@ -33,18 +40,45 @@ public class SimpleGsonProducerTest {
             json = builder.toString();
         }
 
-        DataObject data = new DataObject("The Name \u00DF", 123);
+        data = new DataObject("The Name \u00DF", 123);
 
-        StringWriter stringWriter = new StringWriter();
+        stringWriter = new StringWriter();
         PrintWriter writer = new PrintWriter(stringWriter);
 
-        HttpServletResponse response = Mockito.mock(HttpServletResponse.class);
+        response = Mockito.mock(HttpServletResponse.class);
         Mockito.when(response.getWriter()).thenReturn(writer);
+    }
 
+    @Test //
+    public void produce() throws IOException {
         SimpleGsonProducer producer = new SimpleGsonProducer();
 
         producer.produce(data, null, null, null, response);
 
         assertEquals(json, stringWriter.toString());
+    }
+
+    @Test //
+    public void produceWithCustomGson() throws IOException {
+        SimpleGsonProducer producer = new SimpleGsonProducer(new GsonBuilder().create());
+
+        producer.produce(data, null, null, null, response);
+
+        assertEquals(json, stringWriter.toString());
+    }
+
+    @Test //
+    public void produceNullData() throws IOException {
+
+        Mockito.when(response.getStatus()).thenReturn(HttpServletResponse.SC_OK);
+
+        SimpleGsonProducer producer = new SimpleGsonProducer();
+        producer.produce(null, null, null, null, response);
+
+        ArgumentCaptor<Integer> code = ArgumentCaptor.forClass(Integer.class);
+
+        Mockito.verify(response).setStatus(code.capture());
+
+        assertEquals(HttpServletResponse.SC_NO_CONTENT, code.getValue());
     }
 }

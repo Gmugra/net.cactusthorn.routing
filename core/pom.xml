@@ -36,12 +36,11 @@
 
     <build>
         <plugins>
-                <plugin>
+            <plugin>
                 <artifactId>maven-checkstyle-plugin</artifactId>
                 <configuration>
                     <logViolationsToConsole>true</logViolationsToConsole>
                     <configLocation>${project.parent.basedir}/checkstyle_checks.xml</configLocation>
-                    <!--propertyExpansion>suppressionsFile=/checkstyle_suppressions.xml</propertyExpansion-->
                 </configuration>
                 <executions>
                     <execution>
