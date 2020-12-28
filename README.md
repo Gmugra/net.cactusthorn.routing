@@ -3,7 +3,7 @@
 
 Lightweight Java library for HTTP requests routing in context of Servlet API
 
-[![Build Status](https://travis-ci.com/Gmugra/net.cactusthorn.routing.svg?branch=main)](https://travis-ci.com/Gmugra/net.cactusthorn.routing) [![Coverage Status](https://coveralls.io/repos/github/Gmugra/net.cactusthorn.routing/badge.svg?branch=main)](https://coveralls.io/github/Gmugra/net.cactusthorn.routing?branch=main)
+[![Build Status](https://travis-ci.com/Gmugra/net.cactusthorn.routing.svg?branch=main)](https://travis-ci.com/Gmugra/net.cactusthorn.routing) [![Coverage Status](https://coveralls.io/repos/github/Gmugra/net.cactusthorn.routing/badge.svg?branch=main)](https://coveralls.io/github/Gmugra/net.cactusthorn.routing?branch=main) ![GitHub release (latest by date)](https://img.shields.io/github/v/release/Gmugra/net.cactusthorn.routing)
 
 ## Introduction
 
