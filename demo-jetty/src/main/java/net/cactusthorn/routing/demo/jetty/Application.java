@@ -7,6 +7,8 @@ import net.cactusthorn.routing.thymeleaf.SimpleThymeleafProducer;
 
 import net.cactusthorn.routing.demo.jetty.dagger.*;
 
+import java.time.LocalDate;
+
 import javax.servlet.MultipartConfigElement;
 
 import org.eclipse.jetty.server.*;
@@ -32,6 +34,7 @@ public class Application {
             .addProducer("application/json", new SimpleGsonProducer())
             .addConsumer("application/json", new SimpleGsonConsumer())
             .addProducer("text/html", new SimpleThymeleafProducer("/thymeleaf/"))
+            .addConverter(LocalDate.class, new LocalDateConverter())
             .build();
         // @formatter:on
 

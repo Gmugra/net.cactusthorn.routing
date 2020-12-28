@@ -2,6 +2,7 @@ package net.cactusthorn.routing.demo.jetty.entrypoint;
 
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.time.LocalDate;
 
 import javax.inject.Inject;
 
@@ -41,5 +42,10 @@ public class SimpleEntryPoint implements EntryPoint {
     @GET @Path("/seeother") //
     public Response seeother() throws URISyntaxException {
         return Response.builder().seeOther(new URI("/rest/api/test30?test=33.45")).build();
+    }
+
+    @GET @Path("/localdate/{date : \\d{8}}") //
+    public String localdate(@PathParam("date") LocalDate date) throws URISyntaxException {
+        return date.toString();
     }
 }
