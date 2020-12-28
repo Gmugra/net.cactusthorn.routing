@@ -5,6 +5,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.net.URI;
+import java.net.URISyntaxException;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.Cookie;
@@ -106,6 +108,11 @@ public class RoutingServletTest {
             Cookie cookie = new Cookie("a", "b");
             return Response.builder().skipProducer().setBody("FROM RESPONSE").setCharacterEncoding("KOI8-R").setTemplate("TTT")
                     .setStatus(201).addCookie(cookie).addHeader("h", "v").addIntHeader("hi", 10).addDateHeader("hd", 20L).build();
+        }
+
+        @GET @Path("api/redirect") //
+        public Response redirect() throws URISyntaxException {
+            return Response.builder().seeOther(new URI("/xyz")).build();
         }
     }
 
@@ -356,5 +363,21 @@ public class RoutingServletTest {
 
         assertEquals("hd", dateHeaderName.getValue());
         assertEquals(20L, dateHeaderValue.getValue());
+    }
+
+    @Test //
+    public void redirect() throws ServletException, IOException {
+        Mockito.when(req.getPathInfo()).thenReturn("/api/redirect");
+
+        servlet.doGet(req, resp);
+
+        ArgumentCaptor<String> header = ArgumentCaptor.forClass(String.class);
+        ArgumentCaptor<Integer> code = ArgumentCaptor.forClass(Integer.class);
+
+        Mockito.verify(resp).setStatus(code.capture());
+        Mockito.verify(resp).setHeader(Mockito.eq("Location"), header.capture());
+
+        assertEquals("/xyz", header.getValue());
+        assertEquals(303, code.getValue());
     }
 }

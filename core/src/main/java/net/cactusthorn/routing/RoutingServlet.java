@@ -14,6 +14,7 @@ import org.slf4j.LoggerFactory;
 import net.cactusthorn.routing.EntryPointScanner.EntryPoint;
 import net.cactusthorn.routing.RoutingConfig.ConfigProperty;
 import net.cactusthorn.routing.PathTemplate.PathValues;
+import net.cactusthorn.routing.Response.Redirect;
 import net.cactusthorn.routing.annotation.*;
 import net.cactusthorn.routing.convert.ConverterException;
 import net.cactusthorn.routing.producer.Producer;
@@ -155,20 +156,27 @@ public class RoutingServlet extends HttpServlet {
 
     private void produce(HttpServletRequest req, HttpServletResponse resp, EntryPoint entryPoint, Response response) throws IOException {
 
-        if (response.statusCode() != HttpServletResponse.SC_OK) {
-            resp.setStatus(response.statusCode());
-        }
-
         response.cookies().forEach(c -> resp.addCookie(c));
 
         response.headers().entrySet().forEach(e -> e.getValue().forEach(v -> resp.addHeader(e.getKey(), v)));
         response.intHeaders().entrySet().forEach(e -> e.getValue().forEach(v -> resp.addIntHeader(e.getKey(), v)));
         response.dateHeaders().entrySet().forEach(e -> e.getValue().forEach(v -> resp.addDateHeader(e.getKey(), v)));
 
+        if (response.redirect().isPresent()) {
+            Redirect redirect = response.redirect().get();
+            resp.setHeader("Location", redirect.uri().toString());
+            resp.setStatus(redirect.code());
+            return;
+        }
+
         resp.setCharacterEncoding(response.characterEncoding().orElse(responseCharacterEncoding));
 
         String contentType = response.contentType().orElse(entryPoint.produces());
         resp.setContentType(contentType);
+
+        if (response.statusCode() != HttpServletResponse.SC_OK) {
+            resp.setStatus(response.statusCode());
+        }
 
         String template = response.template().orElse(entryPoint.template());
 

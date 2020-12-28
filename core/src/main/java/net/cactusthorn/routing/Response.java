@@ -1,5 +1,6 @@
 package net.cactusthorn.routing;
 
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -8,8 +9,27 @@ import java.util.Map;
 import java.util.Optional;
 
 import javax.servlet.http.Cookie;
+import javax.servlet.http.HttpServletResponse;
 
 public final class Response {
+
+    static class Redirect {
+        private int code;
+        private URI uri;
+
+        Redirect(int code, URI uri) {
+            this.code = code;
+            this.uri = uri;
+        }
+
+        int code() {
+            return code;
+        }
+
+        URI uri() {
+            return uri;
+        }
+    }
 
     private int statusCode;
     private Object body;
@@ -22,6 +42,8 @@ public final class Response {
     private Map<String, List<Integer>> intHeaders = new HashMap<>();
     private Map<String, List<Long>> dateHeaders = new HashMap<>();
 
+    private Redirect redirect;
+
     // @formatter:off
     private Response(
                 int statusCode,
@@ -33,7 +55,8 @@ public final class Response {
                 List<Cookie> cookies,
                 Map<String, List<String>> headers,
                 Map<String, List<Integer>> intHeaders,
-                Map<String, List<Long>> dateHeaders) {
+                Map<String, List<Long>> dateHeaders,
+                Redirect redirect) {
         this.statusCode = statusCode;
         this.body = body;
         this.contentType = contentType;
@@ -44,6 +67,7 @@ public final class Response {
         this.headers = headers;
         this.intHeaders = intHeaders;
         this.dateHeaders = dateHeaders;
+        this.redirect = redirect;
     }
     // @formatter:on
 
@@ -91,6 +115,10 @@ public final class Response {
         return dateHeaders;
     }
 
+    public Optional<Redirect> redirect() {
+        return Optional.ofNullable(redirect);
+    }
+
     public static final class Builder {
 
         private static final int DEFAULT_STATUS_CODE = 200;
@@ -105,6 +133,7 @@ public final class Response {
         private final Map<String, List<Integer>> intHeaders = new HashMap<>();
         private final Map<String, List<Long>> dateHeaders = new HashMap<>();
         private boolean skipProducer;
+        private Redirect redirect;
 
         private Builder() {
         }
@@ -282,13 +311,33 @@ public final class Response {
             return this;
         }
 
+        public Builder movedTemporarily(URI uri) {
+            redirect = new Redirect(HttpServletResponse.SC_MOVED_TEMPORARILY, uri);
+            return this;
+        }
+
+        public Builder movedPermanently(URI uri) {
+            redirect = new Redirect(HttpServletResponse.SC_MOVED_PERMANENTLY, uri);
+            return this;
+        }
+
+        public Builder seeOther(URI uri) {
+            redirect = new Redirect(HttpServletResponse.SC_SEE_OTHER, uri);
+            return this;
+        }
+
+        public Builder redirect(int statusCode, URI uri) {
+            redirect = new Redirect(statusCode, uri);
+            return this;
+        }
+
         public Response build() {
             List<Cookie> unmodifiableCookies = Collections.unmodifiableList(cookies);
             Map<String, List<String>> unmodifiableHeaders = Collections.unmodifiableMap(headers);
             Map<String, List<Integer>> unmodifiableIntHeaders = Collections.unmodifiableMap(intHeaders);
             Map<String, List<Long>> unmodifiableDateHeaders = Collections.unmodifiableMap(dateHeaders);
             return new Response(statuscode, bbody, contenttype, ttemplate, characterencoding, skipProducer, unmodifiableCookies,
-                    unmodifiableHeaders, unmodifiableIntHeaders, unmodifiableDateHeaders);
+                    unmodifiableHeaders, unmodifiableIntHeaders, unmodifiableDateHeaders, redirect);
         }
     }
 

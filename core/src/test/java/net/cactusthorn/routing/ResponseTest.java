@@ -2,9 +2,15 @@ package net.cactusthorn.routing;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+import java.net.URI;
+import java.net.URISyntaxException;
+
 import javax.servlet.http.Cookie;
+import javax.servlet.http.HttpServletResponse;
 
 import org.junit.jupiter.api.Test;
+
+import net.cactusthorn.routing.Response.Redirect;
 
 public class ResponseTest {
 
@@ -87,5 +93,41 @@ public class ResponseTest {
         assertFalse(response.skipProducer());
         response = Response.builder().skipProducer().build();
         assertTrue(response.skipProducer());
+    }
+
+    @Test //
+    public void seeOther() throws URISyntaxException {
+        URI uri = new URI("/xxx");
+        Response response = Response.builder().seeOther(uri).build();
+        Redirect redirect = response.redirect().get();
+        assertEquals(HttpServletResponse.SC_SEE_OTHER, redirect.code());
+        assertEquals(uri, redirect.uri());
+    }
+
+    @Test //
+    public void movedTemporarily() throws URISyntaxException {
+        URI uri = new URI("/yyy");
+        Response response = Response.builder().movedTemporarily(uri).build();
+        Redirect redirect = response.redirect().get();
+        assertEquals(HttpServletResponse.SC_MOVED_TEMPORARILY, redirect.code());
+        assertEquals(uri, redirect.uri());
+    }
+
+    @Test //
+    public void movedPermanently() throws URISyntaxException {
+        URI uri = new URI("/zzz");
+        Response response = Response.builder().movedPermanently(uri).build();
+        Redirect redirect = response.redirect().get();
+        assertEquals(HttpServletResponse.SC_MOVED_PERMANENTLY, redirect.code());
+        assertEquals(uri, redirect.uri());
+    }
+
+    @Test //
+    public void redirect() throws URISyntaxException {
+        URI uri = new URI("/rrr");
+        Response response = Response.builder().redirect(300, uri).build();
+        Redirect redirect = response.redirect().get();
+        assertEquals(300, redirect.code());
+        assertEquals(uri, redirect.uri());
     }
 }
