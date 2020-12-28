@@ -8,6 +8,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.servlet.http.HttpServletRequest;
+
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
@@ -42,7 +44,7 @@ public class ConsumesTest {
     public static class EntryPoint1Provider1 implements ComponentProvider {
 
         @Override //
-        public Object provide(Class<?> clazz) {
+        public Object provide(Class<?> clazz, HttpServletRequest request) {
             return new EntryPoint1();
         }
     }
@@ -84,7 +86,7 @@ public class ConsumesTest {
     public static class EntryPoint1Provider2 implements ComponentProvider {
 
         @Override //
-        public Object provide(Class<?> clazz) {
+        public Object provide(Class<?> clazz, HttpServletRequest request) {
             return new EntryPoint1();
         }
     }

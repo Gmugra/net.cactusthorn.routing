@@ -5,6 +5,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import javax.servlet.http.Cookie;
 
@@ -58,16 +59,16 @@ public final class Response {
         return body;
     }
 
-    public String contentType() {
-        return contentType;
+    public Optional<String> contentType() {
+        return Optional.ofNullable(contentType);
     }
 
-    public String template() {
-        return template;
+    public Optional<String> template() {
+        return Optional.ofNullable(template);
     }
 
-    public String characterEncoding() {
-        return characterEncoding;
+    public Optional<String> characterEncoding() {
+        return Optional.ofNullable(characterEncoding);
     }
 
     public boolean skipProducer() {

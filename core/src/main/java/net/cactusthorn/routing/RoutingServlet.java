@@ -142,46 +142,44 @@ public class RoutingServlet extends HttpServlet {
     }
 
     private void produce(HttpServletRequest req, HttpServletResponse resp, EntryPoint entryPoint, Object result) throws IOException {
-        String contentType = entryPoint.produces();
-        String template = entryPoint.template();
-        String characterEncoding = responseCharacterEncoding;
-        Object body = result;
-        boolean skipProducer = false;
         if (result != null && result.getClass() == Response.class) {
-            Response response = (Response) result;
-
-            response.cookies().forEach(c -> resp.addCookie(c));
-
-            response.headers().entrySet().forEach(e -> e.getValue().forEach(v -> resp.addHeader(e.getKey(), v)));
-            response.intHeaders().entrySet().forEach(e -> e.getValue().forEach(v -> resp.addIntHeader(e.getKey(), v)));
-            response.dateHeaders().entrySet().forEach(e -> e.getValue().forEach(v -> resp.addDateHeader(e.getKey(), v)));
-
-            body = response.body();
-
-            resp.setStatus(response.statusCode());
-
-            if (response.characterEncoding() != null) {
-                characterEncoding = response.characterEncoding();
-            }
-
-            if (response.contentType() != null) {
-                contentType = response.contentType();
-            }
-
-            if (response.template() != null) {
-                template = response.template();
-            }
-
-            skipProducer = response.skipProducer();
+            produce(req, resp, entryPoint, (Response) result);
+            return;
         }
-        resp.setCharacterEncoding(characterEncoding);
+        resp.setCharacterEncoding(responseCharacterEncoding);
+        String contentType = entryPoint.produces();
         resp.setContentType(contentType);
-        if (skipProducer) {
-            resp.getWriter().write(String.valueOf(body));
-            LOG.debug("Producer processing skipped!");
-        } else {
-            producers.get(contentType).produce(body, template, contentType, req, resp);
-            LOG.debug("Producer processing done for Content-Type: {}", contentType);
+        producers.get(contentType).produce(result, entryPoint.template(), contentType, req, resp);
+        LOG.debug("Producer processing done for Content-Type: {}", contentType);
+    }
+
+    private void produce(HttpServletRequest req, HttpServletResponse resp, EntryPoint entryPoint, Response response) throws IOException {
+
+        if (response.statusCode() != HttpServletResponse.SC_OK) {
+            resp.setStatus(response.statusCode());
         }
+
+        response.cookies().forEach(c -> resp.addCookie(c));
+
+        response.headers().entrySet().forEach(e -> e.getValue().forEach(v -> resp.addHeader(e.getKey(), v)));
+        response.intHeaders().entrySet().forEach(e -> e.getValue().forEach(v -> resp.addIntHeader(e.getKey(), v)));
+        response.dateHeaders().entrySet().forEach(e -> e.getValue().forEach(v -> resp.addDateHeader(e.getKey(), v)));
+
+        resp.setCharacterEncoding(response.characterEncoding().orElse(responseCharacterEncoding));
+
+        String contentType = response.contentType().orElse(entryPoint.produces());
+        resp.setContentType(contentType);
+
+        String template = response.template().orElse(entryPoint.template());
+
+        if (response.skipProducer()) {
+            if (response.body() != null) {
+                resp.getWriter().write(String.valueOf(response.body()));
+            }
+            LOG.debug("Producer processing skipped!");
+            return;
+        }
+        producers.get(contentType).produce(response.body(), template, contentType, req, resp);
+        LOG.debug("Producer processing done for Content-Type: {}", contentType);
     }
 }

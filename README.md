@@ -3,7 +3,7 @@
 
 Lightweight Java library for HTTP requests routing in context of Servlet API
 
-The library provides an annotation based API in [JAX-RS specification](https://www.oracle.com/technical-resources/articles/java/jax-rs.html) "like" style to redirect HTTP request to a specific method-class. **And nothing more**. 
+The library provides an annotation based API in [JAX-RS specification](https://www.oracle.com/technical-resources/articles/java/jax-rs.html) "like" style to redirect HTTP request to a specific method. **And nothing more**.
 
 Usual annotations in usual way e.g.:
 ```java
@@ -25,32 +25,41 @@ public class MyEntryPoint {
     }
 }
 ```
-Then you provide list of the annotated classes to the servlet, plug the servlet in the servlet-container, and... it works.
+Provide list of the annotated classes to the servlet, plug the servlet in the servlet-container, and... it works.
 
-in combination with embedded Jetty it's looks like that:
+In combination with embedded Jetty it's looks like that:
 ```java
 import net.cactusthorn.routing.*;
 import net.cactusthorn.routing.gson.*;
 import net.cactusthorn.routing.thymeleaf.*;
 
-import org.eclipse.jetty.server.Server;
-import org.eclipse.jetty.servlet.ServletContextHandler;
-import org.eclipse.jetty.servlet.ServletHolder;
+import org.eclipse.jetty.server.*;
+import org.eclipse.jetty.servlet.*;
+
+import javax.servlet.MultipartConfigElement;
 
 public class Application {
 
     public static void main(String... args) {
 
+        ComponentProvider provider = new MyComponentProvider(...);
+        Collection<Class<?>> entryPoints = ...
+        Converter converter = new MyLocalDateConverter(...);
+
         RoutingConfig config =
-            RoutingConfig.builder(new MyProvider())
-            .addEntryPoint(MyEntryPoint.class)
+            RoutingConfig.builder(provider)
+            .addEntryPoint(entryPoints)
             .addProducer("application/json", new SimpleGsonProducer())
             .addConsumer("application/json", new SimpleGsonConsumer())
             .addProducer("text/html", new SimpleThymeleafProducer("/thymeleaf/"))
+            .addConverter(java.time.LocalDate.class, converter);
             .build();
+
+        MultipartConfigElement mpConfig = new MultipartConfigElement("/tmp", 1024 * 1024, 1024 * 1024 * 5, 1024 * 1024 * 5 * 5);
 
         ServletHolder servletHolder = new ServletHolder(new RoutingServlet(config));
         servletHolder.setInitOrder(0);
+        servletHolder.getRegistration().setMultipartConfig(mpConfig);
 
         ServletContextHandler servletContext = new ServletContextHandler(ServletContextHandler.SESSIONS);
         servletContext.setContextPath("/");
@@ -62,6 +71,7 @@ public class Application {
         jetty.start();
         jetty.join();
     }
+}
 ```
 The library is doing only routing, but it's expected that the application provides implementations for several interfaces:
 1. ComponentProvider - which will provide EntryPoint instances
@@ -73,30 +83,40 @@ The Routing Library JAR itself is less then 100KB (+ ~ 40KB _SLF4J_ JAR ; + ~ 10
 
 The flow is simple:
 1. The Servlet get the HTTP request, and find the method which should process it.
-1. It request the EntryPoint class instance from the ComponentProvider, convert parameters(if necessary use Consumer to convert request-body) and invoke the method.
+1. It get the EntryPoint instance from the ComponentProvider, convert parameters(if necessary use Consumer to convert request-body) and invoke the method.
 1. It get from the method return-Object, find Producer and provide the object to Producer, which write result into response output stream.
 
 ### ComponentProvider
-It seems that implementation for ComponentProvider is not so easy, because you need Scopes (Request and/or Session) or even Singletons.
+It seems that implementation for ComponentProvider is not so easy, because you need "scopes" (Request and/or Session) or even Singletons.
 But it's not. All of that is natural features of any good dependency injection framework (e.g. [Dagger 2](https://dagger.dev), [Guice](https://github.com/google/guice), [HK2](https://javaee.github.io/hk2/) ). It's anyway good idea to use dependency injection in the application, so all what is necessary in ComponentProvider - link it with dependency injection framework which you are using.
 
 ### Producers & Consumers
 Providing implementations is relative trivial issue, because there are lot of powerful libraries around, which can do any of that.
-As result, implementation of the interface is question of several dozens of code lines. Look at _json-gson_ module as example of _application/json_ Producer & Consumer using [GSON](https://github.com/google/gson) and _thymeleaf_ module as example of _text/html_ Producer using [Thymeleaf](https://www.thymeleaf.org)
+As result, implementation of the interface is question of several lines of code. Look at **json-gson** module as example of _application/json_ Producer & Consumer using [GSON](https://github.com/google/gson) and **thymeleaf** module as example of _text/html_ Producer using [Thymeleaf](https://www.thymeleaf.org)
 
-### Developing status
-It is an early release.
+## Example
 
-Already:
-1. Full functional Servlet
+The **demo-jetty** module is full functional example.
+
+It uses the embedded [Jetty](https://www.eclipse.org/jetty/) as servlet-container,
+and [Dagger 2](https://dagger.dev) for dependency injection and as the basis for the _ComponentProvider_.
+
+More or less there are examples of everything:
+Various "simple" requests, JSON, File uploading (multipart/form-data), HTML with Thymeleaf, Scopes.
+
+
+## Developing status
+It's full functional.
+
+The library is supporting:
 1. @Path for class and/or method (regular expressions support; routing priority like in JAX-RS)
 1. @GET @POST and so on
 1. Types converting for:
-   1. primitive types 
-   1. classes with _public static valeuOf(String arg)_ method. 
+   1. primitive types
+   1. classes with _public static valeuOf(String arg)_ method.
    1. classes with a public constructor that accepts a single String argument.
    1. classes with _public static fromString(String arg)_ method.
-   1. Possibility to write custom convertors.
+   1. _Converter_ interface: to write custom converters.
 1. @PathParam, @QueryParam, @FormParam, @CookieParam, @HeaderParam, @FormPart for parameters.
 1. Arrays support for @QueryParam & @FormParam
 1. Collections support for @QueryParam & @FormParam
@@ -104,15 +124,14 @@ Already:
    1. any class which is not abstract and _Collections.class.isAssignableFrom( this class ) == true_
 1. @DefaultValue for @PathParam, @QueryParam, @FormParam, @HeaderParam
 1. @Produce, @Template and Producer interface. Implementation examples:
-   1. application/json: _json-gson_ module
-   1. text/html: _thymeleaf_ module
+   1. application/json: _SimpleGsonProducer_ (**json-gson** module)
+   1. text/html: _SimpleThymeleafProducer_ (**thymeleaf** module)
 1. @Consumes for class and/or method. To specify Content-Type as additional routing filter. Wildcard is supported (e.g. text/* )
-1. Consumer interface support (example: _json-gson_ module)
+1. Consumer interface. Implementation examples:
+   1. application/json: _SimpleGsonConsumer_ (**json-gson** module)
 1. inject HttpServletRequest, HttpServletResponse, HttpSession, ServletContext in method parameters
-1. Response class to manually construct response
+1. _Response_ class to manually construct response.
 
-Comming soon:
-1. ComponentProvider example with _dagger 2_
 
 Comming a bit later
 1. Java Bean Validation Annotations (JSR 380) for parameters (as additional module)

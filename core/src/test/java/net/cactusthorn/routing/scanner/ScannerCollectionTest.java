@@ -8,6 +8,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.servlet.http.HttpServletRequest;
+
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
@@ -62,7 +64,7 @@ public class ScannerCollectionTest {
     public static class EntryPointProvider implements ComponentProvider {
 
         @Override //
-        public Object provide(Class<?> clazz) {
+        public Object provide(Class<?> clazz, HttpServletRequest request) {
             if (clazz == EntryPoint1.class) {
                 return new EntryPoint1();
             }

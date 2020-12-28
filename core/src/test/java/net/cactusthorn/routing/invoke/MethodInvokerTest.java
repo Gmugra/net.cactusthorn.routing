@@ -72,7 +72,7 @@ public class MethodInvokerTest {
     public static class EntryPoint1Provider implements ComponentProvider {
 
         @Override //
-        public Object provide(Class<?> clazz) {
+        public Object provide(Class<?> clazz, HttpServletRequest request) {
             return new EntryPoint1();
         }
     }

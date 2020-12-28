@@ -6,7 +6,7 @@
 
     <groupId>net.cactusthorn.routing</groupId>
     <artifactId>root</artifactId>
-    <version>0.22</version>
+    <version>0.23</version>
     <packaging>pom</packaging>
     <name>Routing :: Root</name>
 
@@ -30,6 +30,7 @@
         <dependency.jetty>9.4.35.v20201120</dependency.jetty>
         <dependency.gson>2.8.6</dependency.gson>
         <dependency.thymeleaf>3.0.11.RELEASE</dependency.thymeleaf>
+        <dependency.dagger>2.30.1</dependency.dagger>
 
         <plugin.compiler>3.8.1</plugin.compiler>
         <plugin.jar>3.2.0</plugin.jar>
@@ -124,6 +125,12 @@
                 <groupId>org.eclipse.jetty</groupId>
                 <artifactId>jetty-servlet</artifactId>
                 <version>${dependency.jetty}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>com.google.dagger</groupId>
+                <artifactId>dagger</artifactId>
+                <version>${dependency.dagger}</version>
             </dependency>
 
             <dependency>

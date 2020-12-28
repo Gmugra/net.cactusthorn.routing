@@ -46,7 +46,7 @@ public final class MethodInvoker {
     public Object invoke(HttpServletRequest req, HttpServletResponse res, ServletContext con, PathValues pathValues)
             throws ConverterException {
 
-        Object object = componentProvider.provide(clazz);
+        Object object = componentProvider.provide(clazz, req);
         RequestData requestData;
         if (containsBody()) {
             requestData = new RequestData(req, pathValues, (int) configProperties.get(ConfigProperty.READ_BODY_BUFFER_SIZE));

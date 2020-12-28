@@ -104,15 +104,15 @@ public class RoutingServletTest {
         @GET @Path("api/response/all") @Produces("aa/bb") //
         public Response responseAll() {
             Cookie cookie = new Cookie("a", "b");
-            return Response.builder().skipProducer().setBody("FROM RESPONSE").setCharacterEncoding("KOI8-R").setTemplate("TTT").setStatus(201)
-                    .addCookie(cookie).addHeader("h", "v").addIntHeader("hi", 10).addDateHeader("hd", 20L).build();
+            return Response.builder().skipProducer().setBody("FROM RESPONSE").setCharacterEncoding("KOI8-R").setTemplate("TTT")
+                    .setStatus(201).addCookie(cookie).addHeader("h", "v").addIntHeader("hi", 10).addDateHeader("hd", 20L).build();
         }
     }
 
     public static class EntryPoint1Provider implements ComponentProvider {
 
         @Override //
-        public Object provide(Class<?> clazz) {
+        public Object provide(Class<?> clazz, HttpServletRequest request) {
             return new EntryPoint1();
         }
     }
@@ -293,6 +293,7 @@ public class RoutingServletTest {
     @Test //
     public void nocontent() throws ServletException, IOException {
         Mockito.when(req.getPathInfo()).thenReturn("/api/nocontent");
+        Mockito.when(resp.getStatus()).thenReturn(HttpServletResponse.SC_OK);
 
         servlet.doGet(req, resp);
 
@@ -306,7 +307,15 @@ public class RoutingServletTest {
     @Test //
     public void responseNocontent() throws ServletException, IOException {
         Mockito.when(req.getPathInfo()).thenReturn("/api/response/nocontent");
+        Mockito.when(resp.getStatus()).thenReturn(HttpServletResponse.SC_OK);
+
         servlet.doGet(req, resp);
+
+        ArgumentCaptor<Integer> code = ArgumentCaptor.forClass(Integer.class);
+
+        Mockito.verify(resp).setStatus(code.capture());
+
+        assertEquals(204, code.getValue());
     }
 
     @Test //

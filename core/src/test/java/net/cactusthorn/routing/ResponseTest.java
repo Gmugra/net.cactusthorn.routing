@@ -17,13 +17,13 @@ public class ResponseTest {
     @Test //
     public void contentType() {
         Response response = Response.builder().setContentType("aa/bb").build();
-        assertEquals("aa/bb", response.contentType());
+        assertEquals("aa/bb", response.contentType().get());
     }
 
     @Test //
     public void characterEncoding() {
         Response response = Response.builder().setCharacterEncoding("KOI8-R").build();
-        assertEquals("KOI8-R", response.characterEncoding());
+        assertEquals("KOI8-R", response.characterEncoding().get());
     }
 
     @Test //
@@ -35,7 +35,7 @@ public class ResponseTest {
     @Test //
     public void template() {
         Response response = Response.builder().setTemplate("t").build();
-        assertEquals("t", response.template());
+        assertEquals("t", response.template().get());
     }
 
     @Test //

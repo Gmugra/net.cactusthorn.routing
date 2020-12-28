@@ -45,7 +45,7 @@ public class RoutingConfigTest {
     public static class EntryPointWrongProvider implements ComponentProvider {
 
         @Override //
-        public Object provide(Class<?> clazz) {
+        public Object provide(Class<?> clazz, HttpServletRequest request) {
             return new EntryPointWrong();
         }
     }
@@ -67,7 +67,7 @@ public class RoutingConfigTest {
     public static class EntryPointDateProvider implements ComponentProvider {
 
         @Override //
-        public Object provide(Class<?> clazz) {
+        public Object provide(Class<?> clazz, HttpServletRequest request) {
             return new EntryPointDate();
         }
     }
