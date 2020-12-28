@@ -3,6 +3,10 @@
 
 Lightweight Java library for HTTP requests routing in context of Servlet API
 
+[![Build Status](https://travis-ci.com/Gmugra/net.cactusthorn.routing.svg?branch=main)](https://travis-ci.com/Gmugra/net.cactusthorn.routing) [![Coverage Status](https://coveralls.io/repos/github/Gmugra/net.cactusthorn.routing/badge.svg?branch=main)](https://coveralls.io/github/Gmugra/net.cactusthorn.routing?branch=main)
+
+## Introduction
+
 The library provides an annotation based API in [JAX-RS specification](https://www.oracle.com/technical-resources/articles/java/jax-rs.html) "like" style to redirect HTTP request to a specific method. **And nothing more**.
 
 Usual annotations in usual way e.g.:
@@ -86,11 +90,11 @@ The flow is simple:
 1. It get the EntryPoint instance from the ComponentProvider, convert parameters(if necessary use Consumer to convert request-body) and invoke the method.
 1. It get from the method return-Object, find Producer and provide the object to Producer, which write result into response output stream.
 
-### ComponentProvider
+#### ComponentProvider
 It seems that implementation for ComponentProvider is not so easy, because you need "scopes" (Request and/or Session) or even Singletons.
 But it's not. All of that is natural features of any good dependency injection framework (e.g. [Dagger 2](https://dagger.dev), [Guice](https://github.com/google/guice), [HK2](https://javaee.github.io/hk2/) ). It's anyway good idea to use dependency injection in the application, so all what is necessary in ComponentProvider - link it with dependency injection framework which you are using.
 
-### Producers & Consumers
+#### Producers & Consumers
 Providing implementations is relative trivial issue, because there are lot of powerful libraries around, which can do any of that.
 As result, implementation of the interface is question of several lines of code. Look at **json-gson** module as example of _application/json_ Producer & Consumer using [GSON](https://github.com/google/gson) and **thymeleaf** module as example of _text/html_ Producer using [Thymeleaf](https://www.thymeleaf.org)
 
