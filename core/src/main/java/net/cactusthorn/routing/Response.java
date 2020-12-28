@@ -113,6 +113,8 @@ public final class Response {
          * Sets the status code for this response.
          *
          * @param statusCode the status code
+         *
+         * @return the updated builder
          */
         public Builder setStatus(int statusCode) {
             statuscode = statusCode;
@@ -150,6 +152,7 @@ public final class Response {
          *
          * @param cookie the Cookie to return to the client
          *
+         * @return the updated builder
          */
         public Builder addCookie(Cookie cookie) {
             cookies.add(cookie);
@@ -165,6 +168,8 @@ public final class Response {
          * @param value the header value If it contains octet string, it should be
          *              encoded according to RFC 2047
          *              (http://www.ietf.org/rfc/rfc2047.txt)
+         *
+         * @return the updated builder
          */
         public Builder setHeader(String name, String value) {
             List<String> list = new ArrayList<>();
@@ -181,6 +186,8 @@ public final class Response {
          * @param value the additional header value If it contains octet string, it
          *              should be encoded according to RFC 2047
          *              (http://www.ietf.org/rfc/rfc2047.txt)
+         *
+         * @return the updated builder
          *
          * @see #setHeader
          */
@@ -201,6 +208,8 @@ public final class Response {
          *
          * @param name  the name of the header
          * @param value the assigned integer value
+         *
+         * @return the updated builder
          */
         public Builder setIntHeader(String name, int value) {
             List<Integer> list = new ArrayList<>();
@@ -215,6 +224,8 @@ public final class Response {
          *
          * @param name  the name of the header
          * @param value the assigned integer value
+         *
+         * @return the updated builder
          *
          * @see #setIntHeader
          */
@@ -238,8 +249,7 @@ public final class Response {
          * @param name the name of the header to set
          * @param date the assigned date value
          *
-         * @see #containsHeader
-         * @see #addDateHeader
+         * @return the updated builder
          */
         public Builder setDateHeader(String name, long date) {
             List<Long> list = new ArrayList<>();
@@ -256,6 +266,8 @@ public final class Response {
          *
          * @param name the name of the header to set
          * @param date the additional date value
+         *
+         * @return the updated builder
          *
          * @see #setDateHeader
          */

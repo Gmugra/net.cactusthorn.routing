@@ -8,9 +8,28 @@
     <artifactId>root</artifactId>
     <version>0.23</version>
     <packaging>pom</packaging>
-    <name>Routing :: Root</name>
 
+    <name>Routing :: Root</name>
+    <description>Lightweight Java library for HTTP requests routing</description>
     <url>https://github.com/Gmugra/net.cactusthorn.routing</url>
+
+    <licenses>
+        <license>
+            <name>BSD 3-Clause License</name>
+            <url>https://github.com/Gmugra/net.cactusthorn.routing/blob/main/LICENSE</url>
+            <distribution>repo</distribution>
+        </license>
+    </licenses>
+    <developers>
+        <developer>
+            <name>Alexei Khatskevich</name>
+        </developer>
+    </developers>
+
+    <scm>
+        <url>https://github.com/Gmugra/net.cactusthorn.routing</url>
+        <connection>scm:git:https://github.com/Gmugra/net.cactusthorn.routing.git</connection>
+    </scm>
 
     <properties>
 
@@ -42,6 +61,7 @@
         <plugin.assembly>3.3.0</plugin.assembly>
         <plugin.jacoco>0.8.6</plugin.jacoco>
         <plugin.source>3.2.1</plugin.source>
+        <plugin.javadoc>3.2.0</plugin.javadoc>
         <plugin.enforcer>3.0.0-M3</plugin.enforcer>
         <plugin.jxr>3.0.0</plugin.jxr>
         <plugin.site>3.9.1</plugin.site>
@@ -253,6 +273,11 @@
                 </plugin>
 
                 <plugin>
+                    <artifactId>maven-javadoc-plugin</artifactId>
+                    <version>${plugin.javadoc}</version>
+                </plugin>
+
+                <plugin>
                     <artifactId>maven-jar-plugin</artifactId>
                     <version>${plugin.jar}</version>
                     <configuration>
@@ -397,6 +422,25 @@
                                 <configuration>
                                     <title>Coverage with JaCoCo</title>
                                 </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+
+        <profile>
+            <id>javadoc</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <artifactId>maven-javadoc-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <id>attach-javadocs</id>
+                                <goals>
+                                    <goal>jar</goal>
+                                </goals>
                             </execution>
                         </executions>
                     </plugin>
