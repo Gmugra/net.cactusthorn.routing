@@ -14,6 +14,10 @@
     <packaging>jar</packaging>
     <name>Routing :: Core</name>
 
+    <properties>
+        <pmd.skip>false</pmd.skip>
+    </properties>
+
     <dependencies>
 
         <dependency>

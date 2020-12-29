@@ -16,6 +16,7 @@
 
     <properties>
         <maven.javadoc.skip>true</maven.javadoc.skip>
+        <pmd.skip>false</pmd.skip>
     </properties>
 
     <dependencies>
