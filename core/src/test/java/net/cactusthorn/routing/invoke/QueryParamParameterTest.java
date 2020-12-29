@@ -15,7 +15,6 @@ import org.mockito.Mockito;
 import net.cactusthorn.routing.RoutingInitializationException;
 import net.cactusthorn.routing.RequestData;
 import net.cactusthorn.routing.annotation.QueryParam;
-import net.cactusthorn.routing.convert.ConverterException;
 import net.cactusthorn.routing.convert.ConvertersHolder;
 
 public class QueryParamParameterTest {

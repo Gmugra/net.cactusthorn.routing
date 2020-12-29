@@ -225,7 +225,7 @@
                 <executions>
                     <execution>
                         <id>pmd-check</id>
-                        <phase>compile</phase>
+                        <phase>test</phase>
                         <goals>
                             <goal>check</goal>
                         </goals>
