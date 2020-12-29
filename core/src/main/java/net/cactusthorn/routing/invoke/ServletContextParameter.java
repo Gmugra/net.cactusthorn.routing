@@ -7,7 +7,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import net.cactusthorn.routing.RequestData;
-import net.cactusthorn.routing.convert.ConverterException;
 
 public final class ServletContextParameter extends MethodParameter {
 
@@ -17,8 +16,7 @@ public final class ServletContextParameter extends MethodParameter {
 
     @Override //
     ServletContext findValue(HttpServletRequest req, HttpServletResponse res, ServletContext con, RequestData requestData)
-            throws ConverterException {
+            throws Exception {
         return con;
     }
-
 }

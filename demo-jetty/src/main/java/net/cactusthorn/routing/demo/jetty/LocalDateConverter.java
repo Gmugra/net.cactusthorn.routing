@@ -6,7 +6,6 @@ import net.cactusthorn.routing.convert.ConverterException;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
-import java.time.format.DateTimeParseException;
 
 public class LocalDateConverter implements Converter {
 
@@ -17,11 +16,7 @@ public class LocalDateConverter implements Converter {
         if (value == null || value.trim().isEmpty()) {
             return null;
         }
-        try {
-            return LocalDate.parse(value, FORMATTER);
-        } catch (DateTimeParseException e) {
-            throw new ConverterException("LocalDate converting failed", e);
-        }
+        return LocalDate.parse(value, FORMATTER);
     }
 
 }

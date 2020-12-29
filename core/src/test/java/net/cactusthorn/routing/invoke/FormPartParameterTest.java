@@ -12,7 +12,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.Part;
 
@@ -93,7 +92,7 @@ public class FormPartParameterTest {
     }
 
     @Test //
-    public void simple() throws ConverterException, IOException, ServletException {
+    public void simple() throws Exception {
         Method m = findMethod("simple");
         Parameter p = m.getParameters()[0];
         MethodParameter mp = MethodParameter.Factory.create(m, p, HOLDER, "*/*");
@@ -107,7 +106,7 @@ public class FormPartParameterTest {
     }
 
     @Test //
-    public void notfound() throws ConverterException, IOException, ServletException {
+    public void notfound() throws Exception {
         Method m = findMethod("simple");
         Parameter p = m.getParameters()[0];
         MethodParameter mp = MethodParameter.Factory.create(m, p, HOLDER, "*/*");
@@ -118,7 +117,7 @@ public class FormPartParameterTest {
     }
 
     @Test //
-    public void notfound2() throws ConverterException, IOException, ServletException {
+    public void notfound2() throws Exception {
         Method m = findMethod("simple");
         Parameter p = m.getParameters()[0];
         MethodParameter mp = MethodParameter.Factory.create(m, p, HOLDER, "*/*");

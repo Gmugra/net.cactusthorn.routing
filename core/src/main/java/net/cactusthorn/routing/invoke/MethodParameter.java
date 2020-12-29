@@ -17,7 +17,6 @@ import net.cactusthorn.routing.annotation.HeaderParam;
 import net.cactusthorn.routing.annotation.PathParam;
 import net.cactusthorn.routing.annotation.QueryParam;
 import net.cactusthorn.routing.annotation.DefaultValue;
-import net.cactusthorn.routing.convert.ConverterException;
 import net.cactusthorn.routing.convert.ConvertersHolder;
 
 public abstract class MethodParameter {
@@ -42,7 +41,7 @@ public abstract class MethodParameter {
     }
 
     abstract Object findValue(HttpServletRequest req, HttpServletResponse res, ServletContext con, RequestData requestData)
-            throws ConverterException;
+            throws Exception;
 
     static final class Factory {
 

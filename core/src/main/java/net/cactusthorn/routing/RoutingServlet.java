@@ -111,7 +111,7 @@ public class RoutingServlet extends HttpServlet {
                     if (LOG.isTraceEnabled()) {
                         LOG.trace("", ce);
                     } else if (LOG.isDebugEnabled()) {
-                        LOG.debug("ConverterException: {}", ce.getMessage());
+                        LOG.debug("{} : converterException: {}", req.getPathInfo(), ce.getMessage());
                     }
                     resp.sendError(HttpServletResponse.SC_NOT_FOUND, "Not Found");
                 }

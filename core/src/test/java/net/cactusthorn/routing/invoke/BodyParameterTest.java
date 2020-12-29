@@ -7,6 +7,7 @@ import java.lang.reflect.Parameter;
 
 import org.junit.jupiter.api.Test;
 
+import net.cactusthorn.routing.RoutingInitializationException;
 import net.cactusthorn.routing.convert.ConvertersHolder;
 
 public class BodyParameterTest {
@@ -23,7 +24,7 @@ public class BodyParameterTest {
     public void exception() {
         Method m = findMethod("context");
         Parameter p = m.getParameters()[0];
-        assertThrows(IllegalArgumentException.class, () -> new BodyParameter(m, p, HOLDER, "aa/bb"));
+        assertThrows(RoutingInitializationException.class, () -> new BodyParameter(m, p, HOLDER, "aa/bb"));
     }
 
     private Method findMethod(String methodName) {

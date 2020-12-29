@@ -9,8 +9,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import net.cactusthorn.routing.RequestData;
+import net.cactusthorn.routing.RoutingInitializationException;
 import net.cactusthorn.routing.convert.ConsumerConverter;
-import net.cactusthorn.routing.convert.ConverterException;
 import net.cactusthorn.routing.convert.ConvertersHolder;
 
 public final class BodyParameter extends MethodParameter {
@@ -21,15 +21,14 @@ public final class BodyParameter extends MethodParameter {
         super(parameter);
         Optional<ConsumerConverter> optional = convertersHolder.findConsumerConverter(contentType);
         if (!optional.isPresent()) {
-            throw new IllegalArgumentException(
-                    "@Context: consumer for contentType " + contentType + " unknown; Method: " + method.toGenericString());
+            throw new RoutingInitializationException(
+                    "@Context: consumer for contentType %s unknown; Method: %s", contentType, method);
         }
         converter = optional.get();
     }
 
     @Override //
-    Object findValue(HttpServletRequest req, HttpServletResponse res, ServletContext con, RequestData requestData)
-            throws ConverterException {
+    Object findValue(HttpServletRequest req, HttpServletResponse res, ServletContext con, RequestData requestData) throws Exception {
         return converter.convert(requestData, classType());
     }
 

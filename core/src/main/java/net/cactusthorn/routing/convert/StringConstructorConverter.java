@@ -14,15 +14,12 @@ public class StringConstructorConverter implements Converter {
     private final Map<Class<?>, Constructor<?>> constructors = new HashMap<>();
 
     @Override //
-    public Object convert(RequestData requestData, Class<?> type, String value) throws ConverterException {
-        try {
-            if (value == null) {
-                return null;
-            }
-            return constructors.get(type).newInstance(value);
-        } catch (InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
-            throw new ConverterException("The problem with method invocation", e);
+    public Object convert(RequestData requestData, Class<?> type, String value)
+            throws InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
+        if (value == null) {
+            return null;
         }
+        return constructors.get(type).newInstance(value);
     }
 
     boolean register(Class<?> type) {

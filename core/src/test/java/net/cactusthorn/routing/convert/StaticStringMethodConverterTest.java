@@ -2,6 +2,7 @@ package net.cactusthorn.routing.convert;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.UUID;
 
 import org.junit.jupiter.api.Test;
@@ -27,28 +28,29 @@ public class StaticStringMethodConverterTest {
     }
 
     @Test //
-    public void invoke() throws ConverterException {
+    public void invoke() throws Exception {
         StaticStringMethodConverter c = new StaticStringMethodConverter("valueOf");
         c.register(Integer.class);
         assertEquals(123, c.convert(null, Integer.class, "123"));
     }
 
     @Test //
-    public void wrong() {
+    public void wrong() throws Exception {
         StaticStringMethodConverter c = new StaticStringMethodConverter("valueOf");
         c.register(Integer.class);
-        assertThrows(ConverterException.class, () -> c.convert(Integer.class, "12dd"));
+        Exception exception = assertThrows(InvocationTargetException.class, () -> c.convert(Integer.class, "12dd"));
+        assertEquals(NumberFormatException.class, exception.getCause().getClass());
     }
 
     @Test //
-    public void nullValue() throws ConverterException {
+    public void nullValue() throws Exception {
         StaticStringMethodConverter c = new StaticStringMethodConverter("valueOf");
         c.register(Integer.class);
         @SuppressWarnings("unused") Integer i = (Integer) c.convert(Integer.class, (String) null);
     }
 
     @Test //
-    public void fromString() throws ConverterException {
+    public void fromString() throws Exception {
         StaticStringMethodConverter c = new StaticStringMethodConverter("fromString");
         c.register(UUID.class);
         UUID uuid = (UUID) c.convert(UUID.class, "46400000-8cc0-11bd-b43e-10d46e4ef14d");

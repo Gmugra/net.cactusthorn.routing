@@ -14,7 +14,6 @@ import net.cactusthorn.routing.PathTemplate.PathValues;
 import net.cactusthorn.routing.RequestData;
 import net.cactusthorn.routing.annotation.DefaultValue;
 import net.cactusthorn.routing.annotation.PathParam;
-import net.cactusthorn.routing.convert.ConverterException;
 import net.cactusthorn.routing.convert.ConvertersHolder;
 
 public class PathParamParameterTest {
@@ -64,7 +63,7 @@ public class PathParamParameterTest {
     }
 
     @Test //
-    public void defaultValue() throws ConverterException {
+    public void defaultValue() throws Exception {
         Method m = findMethod("defaultValue");
         Parameter p = m.getParameters()[0];
         MethodParameter mp = MethodParameter.Factory.create(m, p, HOLDER, "*/*");
@@ -79,7 +78,7 @@ public class PathParamParameterTest {
     }
 
     @Test //
-    public void simple() throws ConverterException {
+    public void simple() throws Exception {
         Method m = findMethod("simple");
         Parameter p = m.getParameters()[0];
         MethodParameter mp = MethodParameter.Factory.create(m, p, HOLDER, "*/*");
@@ -94,7 +93,7 @@ public class PathParamParameterTest {
     }
 
     @Test //
-    public void simpleWithValue() throws ConverterException {
+    public void simpleWithValue() throws Exception {
         Method m = findMethod("simple");
         Parameter p = m.getParameters()[0];
         MethodParameter mp = MethodParameter.Factory.create(m, p, HOLDER, "*/*");

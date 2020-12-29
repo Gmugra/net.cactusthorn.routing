@@ -14,7 +14,6 @@ import org.mockito.Mockito;
 
 import net.cactusthorn.routing.RoutingInitializationException;
 import net.cactusthorn.routing.annotation.CookieParam;
-import net.cactusthorn.routing.convert.ConverterException;
 import net.cactusthorn.routing.convert.ConvertersHolder;
 
 public class CookieParamParameterTest {
@@ -38,7 +37,7 @@ public class CookieParamParameterTest {
     }
 
     @Test //
-    public void simple() throws ConverterException {
+    public void simple() throws Exception {
         Method m = findMethod("simple");
         Parameter p = m.getParameters()[0];
         MethodParameter mp = MethodParameter.Factory.create(m, p, HOLDER, "*/*");
@@ -51,14 +50,14 @@ public class CookieParamParameterTest {
     }
 
     @Test //
-    public void wrongType() throws ConverterException {
+    public void wrongType() throws Exception {
         Method m = findMethod("wrongType");
         Parameter p = m.getParameters()[0];
         assertThrows(RoutingInitializationException.class, () -> MethodParameter.Factory.create(m, p, HOLDER, "*/*"));
     }
 
     @Test //
-    public void nullCookies() throws ConverterException {
+    public void nullCookies() throws Exception {
         Method m = findMethod("simple");
         Parameter p = m.getParameters()[0];
         MethodParameter mp = MethodParameter.Factory.create(m, p, HOLDER, "*/*");
@@ -69,12 +68,12 @@ public class CookieParamParameterTest {
     }
 
     @Test //
-    public void nullCookie() throws ConverterException {
+    public void nullCookie() throws Exception {
         Method m = findMethod("simple");
         Parameter p = m.getParameters()[0];
         MethodParameter mp = MethodParameter.Factory.create(m, p, HOLDER, "*/*");
 
-        Cookie[] cookies = new Cookie[] {new Cookie("xxx", "xxx")};
+        Cookie[] cookies = new Cookie[] { new Cookie("xxx", "xxx") };
 
         Mockito.when(request.getCookies()).thenReturn(cookies);
         Cookie cookie = (Cookie) mp.findValue(request, null, null, null);

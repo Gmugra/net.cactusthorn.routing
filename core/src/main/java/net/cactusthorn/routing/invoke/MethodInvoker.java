@@ -62,7 +62,12 @@ public final class MethodInvoker {
         }
 
         for (int i = 0; i < parameters.size(); i++) {
-            values[i] = parameters.get(i).findValue(req, res, con, requestData);
+            MethodParameter parameter = parameters.get(i);
+            try {
+                values[i] = parameter.findValue(req, res, con, requestData);
+            } catch (Exception e) {
+                throw new ConverterException(e, i + 1, parameter.getClass().getSimpleName());
+            }
         }
 
         try {

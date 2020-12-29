@@ -7,7 +7,7 @@ import org.junit.jupiter.api.Test;
 public class BooleanConverterTest {
 
     @Test //
-    public void test() throws ConverterException {
+    public void test() throws Exception {
         BooleanConverter c = new BooleanConverter();
         Boolean result = (Boolean) c.convert(Boolean.class, "true");
         assertTrue(result);
@@ -18,7 +18,7 @@ public class BooleanConverterTest {
     }
 
     @Test //
-    public void testArray() throws ConverterException {
+    public void testArray() throws Exception {
         BooleanConverter c = new BooleanConverter();
         String[] value = new String[] { "true", null, "false" };
         Boolean[] valuesAsBoolean = new Boolean[] { true, null, false };
@@ -27,7 +27,7 @@ public class BooleanConverterTest {
     }
 
     @Test //
-    public void testNullArray() throws ConverterException {
+    public void testNullArray() throws Exception {
         BooleanConverter c = new BooleanConverter();
         Object result = (Object) c.convert(Boolean.class, (String[]) null);
         assertNull(result);

@@ -25,7 +25,6 @@ import net.cactusthorn.routing.Consumer;
 import net.cactusthorn.routing.RoutingConfig.ConfigProperty;
 import net.cactusthorn.routing.PathTemplate.PathValues;
 import net.cactusthorn.routing.annotation.*;
-import net.cactusthorn.routing.convert.ConverterException;
 import net.cactusthorn.routing.convert.ConvertersHolder;
 
 public class MethodInvokerTest {
@@ -115,7 +114,7 @@ public class MethodInvokerTest {
     }
 
     @Test //
-    public void invokeM1() throws ConverterException {
+    public void invokeM1() throws Exception {
 
         Method method = findMethod("m1");
         MethodInvoker caller = new MethodInvoker(EntryPoint1.class, method, provider, holder, "*/*", configProperties);
@@ -129,7 +128,7 @@ public class MethodInvokerTest {
     }
 
     @Test //
-    public void invokeM0() throws ConverterException {
+    public void invokeM0() throws Exception {
 
         Method method = findMethod("m0");
         MethodInvoker caller = new MethodInvoker(EntryPoint1.class, method, provider, holder, "*/*", configProperties);
@@ -142,7 +141,7 @@ public class MethodInvokerTest {
     }
 
     @Test //
-    public void invokeM2() throws ConverterException {
+    public void invokeM2() throws Exception {
 
         Method method = findMethod("m2");
         MethodInvoker caller = new MethodInvoker(EntryPoint1.class, method, provider, holder, "*/*", configProperties);
@@ -155,7 +154,7 @@ public class MethodInvokerTest {
     }
 
     @Test //
-    public void invokeM3() throws ConverterException {
+    public void invokeM3() throws Exception {
 
         Method method = findMethod("m3");
         MethodInvoker caller = new MethodInvoker(EntryPoint1.class, method, provider, holder, "*/*", configProperties);
@@ -169,7 +168,7 @@ public class MethodInvokerTest {
     }
 
     @Test //
-    public void invokeM4() throws ConverterException {
+    public void invokeM4() throws Exception {
 
         Method method = findMethod("m4");
         MethodInvoker caller = new MethodInvoker(EntryPoint1.class, method, provider, holder, "*/*", configProperties);
@@ -180,7 +179,7 @@ public class MethodInvokerTest {
     }
 
     @Test //
-    public void invokeM5() throws ConverterException {
+    public void invokeM5() throws Exception {
 
         Method method = findMethod("m5");
         MethodInvoker caller = new MethodInvoker(EntryPoint1.class, method, provider, holder, "*/*", configProperties);
@@ -191,7 +190,7 @@ public class MethodInvokerTest {
     }
 
     @Test //
-    public void invokeM6() throws ConverterException {
+    public void invokeM6() throws Exception {
 
         Method method = findMethod("m6");
         MethodInvoker caller = new MethodInvoker(EntryPoint1.class, method, provider, holder, "*/*", configProperties);
@@ -202,7 +201,7 @@ public class MethodInvokerTest {
     }
 
     @Test //
-    public void invokeM7() throws IOException, ConverterException {
+    public void invokeM7() throws Exception {
 
         BufferedReader reader = new BufferedReader(new StringReader("TO HAVE BODY"));
         Mockito.when(request.getReader()).thenReturn(reader);

@@ -61,14 +61,14 @@ public class QueryParamParameterTest {
     }
 
     @Test //
-    public void collectionNoGeneric() throws ConverterException {
+    public void collectionNoGeneric() {
         Method m = findMethod("collectionNoGeneric");
         Parameter p = m.getParameters()[0];
         assertThrows(RoutingInitializationException.class, () -> MethodParameter.Factory.create(m, p, HOLDER, "*/*"));
     }
 
     @Test //
-    public void linkedList() throws ConverterException {
+    public void linkedList() throws Exception {
         Method m = findMethod("linkedList");
         Parameter p = m.getParameters()[0];
         MethodParameter mp = MethodParameter.Factory.create(m, p, HOLDER, "*/*");
@@ -84,7 +84,7 @@ public class QueryParamParameterTest {
     }
 
     @Test //
-    public void sortedSet() throws ConverterException {
+    public void sortedSet() throws Exception {
         Method m = findMethod("sortedSet");
         Parameter p = m.getParameters()[0];
         MethodParameter mp = MethodParameter.Factory.create(m, p, HOLDER, "*/*");
@@ -100,7 +100,7 @@ public class QueryParamParameterTest {
     }
 
     @Test //
-    public void set() throws ConverterException {
+    public void set() throws Exception {
         Method m = findMethod("set");
         Parameter p = m.getParameters()[0];
         MethodParameter mp = MethodParameter.Factory.create(m, p, HOLDER, "*/*");
@@ -115,7 +115,7 @@ public class QueryParamParameterTest {
     }
 
     @Test //
-    public void list() throws ConverterException {
+    public void list() throws Exception {
         Method m = findMethod("list");
         Parameter p = m.getParameters()[0];
         MethodParameter mp = MethodParameter.Factory.create(m, p, HOLDER, "*/*");
@@ -131,7 +131,7 @@ public class QueryParamParameterTest {
     }
 
     @Test //
-    public void collection() throws ConverterException {
+    public void collection() throws Exception {
         Method m = findMethod("collection");
         Parameter p = m.getParameters()[0];
         MethodParameter mp = MethodParameter.Factory.create(m, p, HOLDER, "*/*");
@@ -147,7 +147,7 @@ public class QueryParamParameterTest {
     }
 
     @Test //
-    public void nullCcollection() throws ConverterException {
+    public void nullCcollection() throws Exception {
         Method m = findMethod("collection");
         Parameter p = m.getParameters()[0];
         MethodParameter mp = MethodParameter.Factory.create(m, p, HOLDER, "*/*");
@@ -162,7 +162,7 @@ public class QueryParamParameterTest {
     }
 
     @Test //
-    public void array() throws ConverterException {
+    public void array() throws Exception {
         Method m = findMethod("array");
         Parameter p = m.getParameters()[0];
         MethodParameter mp = MethodParameter.Factory.create(m, p, HOLDER, "*/*");
@@ -182,7 +182,7 @@ public class QueryParamParameterTest {
     }
 
     @Test //
-    public void wrong() throws ConverterException {
+    public void wrong() {
         Method m = findMethod("wrong");
         Parameter p = m.getParameters()[0];
         MethodParameter mp = MethodParameter.Factory.create(m, p, HOLDER, "*/*");
@@ -190,7 +190,7 @@ public class QueryParamParameterTest {
         Mockito.when(request.getParameter("val")).thenReturn("abc");
         RequestData data = new RequestData(null);
 
-        assertThrows(ConverterException.class, () -> mp.findValue(request, null, null, data));
+        assertThrows(NumberFormatException.class, () -> mp.findValue(request, null, null, data));
     }
 
     private Method findMethod(String methodName) {

@@ -9,7 +9,7 @@ public final class NullConverter implements Converter {
     private PrimitiveConverter primitiveConverter = new PrimitiveConverter();
 
     @Override //
-    public Object convert(RequestData requestData, Class<?> type, String value) throws ConverterException {
+    public Object convert(RequestData requestData, Class<?> type, String value) throws Exception {
         if (type.isPrimitive()) {
             return primitiveConverter.convert(type, (String) null);
         }

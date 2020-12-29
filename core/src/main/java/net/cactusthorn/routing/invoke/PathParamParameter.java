@@ -12,7 +12,6 @@ import net.cactusthorn.routing.RequestData;
 import net.cactusthorn.routing.RoutingInitializationException;
 import net.cactusthorn.routing.annotation.PathParam;
 import net.cactusthorn.routing.convert.Converter;
-import net.cactusthorn.routing.convert.ConverterException;
 import net.cactusthorn.routing.convert.ConvertersHolder;
 
 public class PathParamParameter extends MethodComplexParameter {
@@ -55,18 +54,11 @@ public class PathParamParameter extends MethodComplexParameter {
     }
 
     @Override //
-    Object findValue(HttpServletRequest req, HttpServletResponse res, ServletContext con, RequestData requestData)
-            throws ConverterException {
-        try {
-            String value = requestData.pathValues().value(name);
-            if (defaultValue() != null && "".equals(value)) {
-                value = defaultValue();
-            }
-            return converter.convert(classType(), value);
-        } catch (ConverterException ce) {
-            throw ce;
-        } catch (Exception e) {
-            throw new ConverterException("Type Converting failed: path parameter \"%s\"", e, name);
+    Object findValue(HttpServletRequest req, HttpServletResponse res, ServletContext con, RequestData requestData) throws Exception {
+        String value = requestData.pathValues().value(name);
+        if (defaultValue() != null && "".equals(value)) {
+            value = defaultValue();
         }
+        return converter.convert(classType(), value);
     }
 }

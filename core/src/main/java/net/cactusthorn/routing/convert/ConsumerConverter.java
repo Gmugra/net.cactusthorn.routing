@@ -14,16 +14,12 @@ public final class ConsumerConverter implements Converter {
     }
 
     @Override //
-    public Object convert(RequestData requestData, Class<?> type, String value) throws ConverterException {
-        try {
-            return consumer.consume(type, contentType, requestData);
-        } catch (Exception e) {
-            throw new ConverterException("Consumer converting failed", e);
-        }
+    public Object convert(RequestData requestData, Class<?> type, String value) {
+        return consumer.consume(type, contentType, requestData);
     }
 
     @Override //
-    public Object convert(RequestData requestData, Class<?> type, String[] value) throws ConverterException {
+    public Object convert(RequestData requestData, Class<?> type, String[] value) {
         throw new UnsupportedOperationException("Array support is senseless for consumer converting");
     }
 

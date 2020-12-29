@@ -42,7 +42,7 @@ public class FormParamParameterTest {
     }
 
     @Test //
-    public void simple() throws ConverterException {
+    public void simple() throws Exception {
         Method m = findMethod("simple");
         Parameter p = m.getParameters()[0];
         MethodParameter mp = MethodParameter.Factory.create(m, p, HOLDER, "application/x-www-form-urlencoded");
@@ -53,7 +53,7 @@ public class FormParamParameterTest {
     }
 
     @Test //
-    public void defaultArray() throws ConverterException {
+    public void defaultArray() throws Exception {
         Method m = findMethod("defaultArray");
         Parameter p = m.getParameters()[0];
         MethodParameter mp = MethodParameter.Factory.create(m, p, HOLDER, "application/x-www-form-urlencoded");
@@ -65,7 +65,7 @@ public class FormParamParameterTest {
     }
 
     @Test //
-    public void defaultValue() throws ConverterException {
+    public void defaultValue() throws Exception {
         Method m = findMethod("defaultValue");
         Parameter p = m.getParameters()[0];
         MethodParameter mp = MethodParameter.Factory.create(m, p, HOLDER, "application/x-www-form-urlencoded");

@@ -10,7 +10,7 @@ public final class StringConverter implements Converter {
     }
 
     @Override //
-    public Object convert(RequestData requestData, Class<?> type, String[] value) throws ConverterException {
+    public Object convert(RequestData requestData, Class<?> type, String[] value) {
         if (value == null) {
             return null;
         }

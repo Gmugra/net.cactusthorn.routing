@@ -15,7 +15,6 @@ import org.mockito.Mockito;
 import net.cactusthorn.routing.RoutingInitializationException;
 import net.cactusthorn.routing.annotation.DefaultValue;
 import net.cactusthorn.routing.annotation.HeaderParam;
-import net.cactusthorn.routing.convert.ConverterException;
 import net.cactusthorn.routing.convert.ConvertersHolder;
 
 public class HeaderParamParameterTest {
@@ -42,7 +41,7 @@ public class HeaderParamParameterTest {
     }
 
     @Test //
-    public void simple() throws ConverterException {
+    public void simple() throws Exception {
         Method m = findMethod("simple");
         Parameter p = m.getParameters()[0];
         MethodParameter mp = MethodParameter.Factory.create(m, p, HOLDER, "*/*");
@@ -53,7 +52,7 @@ public class HeaderParamParameterTest {
     }
 
     @Test //
-    public void defaultValue() throws ConverterException {
+    public void defaultValue() throws Exception {
         Method m = findMethod("defaultValue");
         Parameter p = m.getParameters()[0];
         MethodParameter mp = MethodParameter.Factory.create(m, p, HOLDER, "*/*");
@@ -64,7 +63,7 @@ public class HeaderParamParameterTest {
     }
 
     @Test //
-    public void simpleArray() throws ConverterException {
+    public void simpleArray() {
         Method m = findMethod("simpleArray");
         Parameter p = m.getParameters()[0];
         assertThrows(RoutingInitializationException.class, () -> MethodParameter.Factory.create(m, p, HOLDER, "*/*"));

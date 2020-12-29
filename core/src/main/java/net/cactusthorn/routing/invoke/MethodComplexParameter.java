@@ -5,7 +5,6 @@ import java.util.*;
 
 import net.cactusthorn.routing.RoutingInitializationException;
 import net.cactusthorn.routing.convert.Converter;
-import net.cactusthorn.routing.convert.ConverterException;
 import net.cactusthorn.routing.convert.ConvertersHolder;
 
 public abstract class MethodComplexParameter extends MethodParameter {
@@ -82,25 +81,12 @@ public abstract class MethodComplexParameter extends MethodParameter {
 
     @SuppressWarnings("unchecked") //
     protected Object createCollection(Class<?> collectionType, Class<?> converterType, Converter converter, String[] values)
-            throws ConverterException {
+            throws Exception {
         if (values == null) {
             return null;
         }
-
-        Constructor<? extends Collection<Object>> constructor;
-        try {
-            constructor = (Constructor<? extends Collection<Object>>) collectionType.getConstructor();
-        } catch (NoSuchMethodException | SecurityException e) {
-            throw new ConverterException(e);
-        }
-
-        Collection<Object> newCollection;
-        try {
-            newCollection = constructor.newInstance();
-        } catch (InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
-            throw new ConverterException(e);
-        }
-
+        Constructor<? extends Collection<Object>> constructor = (Constructor<? extends Collection<Object>>) collectionType.getConstructor();
+        Collection<Object> newCollection = constructor.newInstance();
         for (String value : values) {
             newCollection.add(converter.convert(converterType, value));
         }

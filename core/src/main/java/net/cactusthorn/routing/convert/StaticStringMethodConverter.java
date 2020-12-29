@@ -20,16 +20,13 @@ public final class StaticStringMethodConverter implements Converter {
     }
 
     @Override //
-    public Object convert(RequestData requestData, Class<?> type, String value) throws ConverterException {
-        try {
-            if (value == null) {
-                return null;
-            }
-            Method method = methods.get(type);
-            return method.invoke(null, value);
-        } catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
-            throw new ConverterException("The problem with method invocation", e);
+    public Object convert(RequestData requestData, Class<?> type, String value)
+            throws IllegalAccessException, IllegalArgumentException, InvocationTargetException {
+        if (value == null) {
+            return null;
         }
+        Method method = methods.get(type);
+        return method.invoke(null, value);
     }
 
     boolean register(Class<?> type) {

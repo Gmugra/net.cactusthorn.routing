@@ -6,21 +6,21 @@ import net.cactusthorn.routing.RequestData;
 
 public interface Converter {
 
-    default Object convert(Class<?> type, String value) throws ConverterException {
+    default Object convert(Class<?> type, String value) throws Exception {
         return convert(null, type, value);
     }
 
-    default Object convert(RequestData requestData, Class<?> type) throws ConverterException {
+    default Object convert(RequestData requestData, Class<?> type) throws Exception {
         return convert(requestData, type, (String) null);
     }
 
-    default Object convert(Class<?> type, String[] value) throws ConverterException {
+    default Object convert(Class<?> type, String[] value) throws Exception {
         return convert(null, type, value);
     }
 
-    Object convert(RequestData requestData, Class<?> type, String value) throws ConverterException;
+    Object convert(RequestData requestData, Class<?> type, String value) throws Exception;
 
-    default Object convert(RequestData requestData, Class<?> type, String[] value) throws ConverterException {
+    default Object convert(RequestData requestData, Class<?> type, String[] value) throws Exception {
         if (value == null) {
             return null;
         }

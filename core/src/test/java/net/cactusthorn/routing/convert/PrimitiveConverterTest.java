@@ -7,7 +7,7 @@ import org.junit.jupiter.api.Test;
 public class PrimitiveConverterTest {
 
     @Test //
-    public void byteTest() throws ConverterException {
+    public void byteTest() throws Exception {
         PrimitiveConverter c = new PrimitiveConverter();
         byte v = (byte) c.convert(Byte.TYPE, "1");
         assertEquals((byte) 1, v);
@@ -18,7 +18,7 @@ public class PrimitiveConverterTest {
     }
 
     @Test //
-    public void byteArrayTest() throws ConverterException {
+    public void byteArrayTest() throws Exception {
         PrimitiveConverter c = new PrimitiveConverter();
         String[] value = new String[] { "125", "34" };
         byte[] valuesAsByte = new byte[] { (byte) 125, (byte) 34 };
@@ -27,14 +27,14 @@ public class PrimitiveConverterTest {
     }
 
     @Test //
-    public void byteNullArrayTest() throws ConverterException {
+    public void byteNullArrayTest() throws Exception {
         PrimitiveConverter c = new PrimitiveConverter();
         Object result = c.convert(Byte.TYPE, (String[]) null);
         assertNull(result);
     }
 
     @Test //
-    public void shortTest() throws ConverterException {
+    public void shortTest() throws Exception {
         PrimitiveConverter c = new PrimitiveConverter();
         short v = (short) c.convert(Short.TYPE, "1");
         assertEquals((short) 1, v);
@@ -45,7 +45,7 @@ public class PrimitiveConverterTest {
     }
 
     @Test //
-    public void intTest() throws ConverterException {
+    public void intTest() throws Exception {
         PrimitiveConverter c = new PrimitiveConverter();
         int v = (int) c.convert(Integer.TYPE, "1");
         assertEquals(1, v);
@@ -56,7 +56,7 @@ public class PrimitiveConverterTest {
     }
 
     @Test //
-    public void longTest() throws ConverterException {
+    public void longTest() throws Exception {
         PrimitiveConverter c = new PrimitiveConverter();
         long v = (long) c.convert(Long.TYPE, "1");
         assertEquals(1L, v);
@@ -67,7 +67,7 @@ public class PrimitiveConverterTest {
     }
 
     @Test //
-    public void floatTest() throws ConverterException {
+    public void floatTest() throws Exception {
         PrimitiveConverter c = new PrimitiveConverter();
         float v = (float) c.convert(Float.TYPE, "1.1");
         assertEquals(1.1f, v);
@@ -78,7 +78,7 @@ public class PrimitiveConverterTest {
     }
 
     @Test //
-    public void doubleTest() throws ConverterException {
+    public void doubleTest() throws Exception {
         PrimitiveConverter c = new PrimitiveConverter();
         double v = (double) c.convert(Double.TYPE, "1.1");
         assertEquals(1.1d, v);
@@ -89,7 +89,7 @@ public class PrimitiveConverterTest {
     }
 
     @Test //
-    public void charTest() throws ConverterException {
+    public void charTest() throws Exception {
         PrimitiveConverter c = new PrimitiveConverter();
         char v = (char) c.convert(Character.TYPE, "abc");
         assertEquals('a', v);
@@ -100,7 +100,7 @@ public class PrimitiveConverterTest {
     }
 
     @Test //
-    public void boolTest() throws ConverterException {
+    public void boolTest() throws Exception {
         PrimitiveConverter c = new PrimitiveConverter();
         boolean v = (boolean) c.convert(Boolean.TYPE, "true");
         assertTrue(v);

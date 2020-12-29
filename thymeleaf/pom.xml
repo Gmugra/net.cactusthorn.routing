@@ -7,7 +7,7 @@
     <parent>
         <groupId>net.cactusthorn.routing</groupId>
         <artifactId>root</artifactId>
-        <version>0.23</version>
+        <version>0.24</version>
     </parent>
 
     <artifactId>thymeleaf</artifactId>

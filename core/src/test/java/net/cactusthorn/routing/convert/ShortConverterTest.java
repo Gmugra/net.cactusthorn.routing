@@ -9,7 +9,7 @@ import org.junit.jupiter.api.Test;
 public class ShortConverterTest {
 
     @Test //
-    public void test() throws ConverterException {
+    public void test() throws Exception {
         ShortConverter c = new ShortConverter();
         Short result = (Short) c.convert(Short.class, "125");
         assertEquals((short)125, result);
@@ -20,7 +20,7 @@ public class ShortConverterTest {
     }
 
     @Test //
-    public void testArray() throws ConverterException {
+    public void testArray() throws Exception {
         ShortConverter c = new ShortConverter();
         String[] value = new String[] { "125", "  ", "3456" };
         Short[] valuesAsShort = new Short[] { 125, null, 3456 };
@@ -29,7 +29,7 @@ public class ShortConverterTest {
     }
 
     @Test //
-    public void testNullArray() throws ConverterException {
+    public void testNullArray() throws Exception {
         ShortConverter c = new ShortConverter();
         Object result = (Object) c.convert(Short.class, (String[]) null);
         assertNull(result);

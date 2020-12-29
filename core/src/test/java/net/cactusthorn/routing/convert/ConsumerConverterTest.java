@@ -25,6 +25,6 @@ public class ConsumerConverterTest {
     @Test //
     public void error() {
         ConsumerConverter c = new ConsumerConverter("aa/bb", EXCEPTION_CONSUMER);
-        assertThrows(ConverterException.class, () -> c.convert(null, java.util.Date.class, (String)null));
+        assertThrows(RuntimeException.class, () -> c.convert(null, java.util.Date.class, (String)null));
     }
 }

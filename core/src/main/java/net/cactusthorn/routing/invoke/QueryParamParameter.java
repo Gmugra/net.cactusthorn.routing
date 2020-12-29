@@ -11,7 +11,6 @@ import javax.servlet.http.HttpServletResponse;
 import net.cactusthorn.routing.RequestData;
 import net.cactusthorn.routing.annotation.QueryParam;
 import net.cactusthorn.routing.convert.Converter;
-import net.cactusthorn.routing.convert.ConverterException;
 import net.cactusthorn.routing.convert.ConvertersHolder;
 
 public class QueryParamParameter extends MethodComplexParameter {
@@ -55,28 +54,18 @@ public class QueryParamParameter extends MethodComplexParameter {
     }
 
     @Override //
-    Object findValue(HttpServletRequest req, HttpServletResponse res, ServletContext con, RequestData requestData)
-            throws ConverterException {
-        try {
-
-            if (array) {
-                return converter.convert(converterType, arrayValues(req));
-            }
-
-            if (collection) {
-                return createCollection(collectionType, converterType, converter, arrayValues(req));
-            }
-
-            String value = req.getParameter(name);
-            if (defaultValue() != null && value == null) {
-                value = defaultValue();
-            }
-            return converter.convert(converterType, value);
-        } catch (ConverterException ce) {
-            throw ce;
-        } catch (Exception e) {
-            throw new ConverterException("Type Converting failed: request parameter \"%s\"", e, name);
+    Object findValue(HttpServletRequest req, HttpServletResponse res, ServletContext con, RequestData requestData) throws Exception {
+        if (array) {
+            return converter.convert(converterType, arrayValues(req));
         }
+        if (collection) {
+            return createCollection(collectionType, converterType, converter, arrayValues(req));
+        }
+        String value = req.getParameter(name);
+        if (defaultValue() != null && value == null) {
+            value = defaultValue();
+        }
+        return converter.convert(converterType, value);
     }
 
     private String[] arrayValues(HttpServletRequest req) {

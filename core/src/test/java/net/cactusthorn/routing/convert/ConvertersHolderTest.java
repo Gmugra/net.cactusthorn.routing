@@ -20,7 +20,7 @@ public class ConvertersHolderTest {
     };
 
     @Test //
-    public void register() throws ConverterException {
+    public void register() throws Exception {
         ConvertersHolder holder = new ConvertersHolder();
         holder.register(java.util.Date.class, TEST_CONVERTER);
         Converter converter = holder.findConverter(java.util.Date.class).get();
@@ -33,7 +33,7 @@ public class ConvertersHolderTest {
     }
 
     @Test //
-    public void valueOf() throws ConverterException {
+    public void valueOf() throws Exception {
         ConvertersHolder holder = new ConvertersHolder();
         Converter converter = holder.findConverter(TestEnum.class).get();
         assertEquals(StaticStringMethodConverter.class, converter.getClass());
@@ -70,14 +70,14 @@ public class ConvertersHolderTest {
     }
 
     @Test //
-    public void fromString() throws ConverterException {
+    public void fromString() throws Exception {
         ConvertersHolder holder = new ConvertersHolder();
         Converter converter = holder.findConverter(UUID.class).get();
         assertEquals(StaticStringMethodConverter.class, converter.getClass());
     }
 
     @Test //
-    public void constructor() throws ConverterException {
+    public void constructor() throws Exception {
         ConvertersHolder holder = new ConvertersHolder();
         Converter converter = holder.findConverter(StringBuilder.class).get();
         assertEquals(StringConstructorConverter.class, converter.getClass());
