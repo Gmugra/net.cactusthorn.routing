@@ -12,7 +12,7 @@ public class BooleanConverterTest {
         Boolean result = (Boolean) c.convert(Boolean.class, "true");
         assertTrue(result);
         result = (Boolean) c.convert(null, null, (String) null);
-        assertNull(result);
+        assertFalse(result);
         result = (Boolean) c.convert(null, null, "  ");
         assertFalse(result);
     }
@@ -21,7 +21,7 @@ public class BooleanConverterTest {
     public void testArray() throws Exception {
         BooleanConverter c = new BooleanConverter();
         String[] value = new String[] { "true", null, "false" };
-        Boolean[] valuesAsBoolean = new Boolean[] { true, null, false };
+        Boolean[] valuesAsBoolean = new Boolean[] { true, false, false };
         Boolean[] result = (Boolean[]) c.convert(Boolean.class, value);
         assertArrayEquals(valuesAsBoolean, result);
     }
@@ -29,7 +29,7 @@ public class BooleanConverterTest {
     @Test //
     public void testNullArray() throws Exception {
         BooleanConverter c = new BooleanConverter();
-        Object result = (Object) c.convert(Boolean.class, (String[]) null);
+        Boolean[] result = (Boolean[]) c.convert(Boolean.class, (String[]) null);
         assertNull(result);
     }
 }

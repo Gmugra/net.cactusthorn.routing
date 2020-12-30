@@ -7,7 +7,7 @@ public class BooleanConverter implements Converter {
     @Override //
     public Boolean convert(RequestData requestData, Class<?> type, String value) {
         if (value == null) {
-            return null;
+            return Boolean.FALSE;
         }
         return Boolean.valueOf(value);
     }

@@ -28,7 +28,7 @@ public class RoutingServlet extends HttpServlet {
 
     private static final Logger LOG = LoggerFactory.getLogger(RoutingServlet.class);
 
-    private transient Map<Class<? extends Annotation>, List<EntryPoint>> allEentryPoints;
+    private transient Map<Class<? extends Annotation>, List<EntryPoint>> allEntryPoints;
     private transient ServletContext servletContext;
     private transient Map<String, Producer> producers;
     private transient Map<String, Consumer> consumers;
@@ -40,7 +40,7 @@ public class RoutingServlet extends HttpServlet {
     public RoutingServlet(RoutingConfig config) {
         super();
         componentProvider = config.provider();
-        allEentryPoints = config.entryPoints();
+        allEntryPoints = config.entryPoints();
         producers = config.producers();
         consumers = config.consumers();
         responseCharacterEncoding = (String) config.properties().get(ConfigProperty.RESPONSE_CHARACTER_ENCODING);
@@ -60,37 +60,37 @@ public class RoutingServlet extends HttpServlet {
 
     @Override //
     protected void doHead(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        process(req, resp, allEentryPoints.get(HEAD.class));
+        process(req, resp, allEntryPoints.get(HEAD.class));
     }
 
     @Override //
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        process(req, resp, allEentryPoints.get(POST.class));
+        process(req, resp, allEntryPoints.get(POST.class));
     }
 
     @Override //
     protected void doPut(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        process(req, resp, allEentryPoints.get(PUT.class));
+        process(req, resp, allEntryPoints.get(PUT.class));
     }
 
     @Override //
     protected void doDelete(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        process(req, resp, allEentryPoints.get(DELETE.class));
+        process(req, resp, allEntryPoints.get(DELETE.class));
     }
 
     @Override //
     protected void doOptions(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        process(req, resp, allEentryPoints.get(OPTIONS.class));
+        process(req, resp, allEntryPoints.get(OPTIONS.class));
     }
 
     @Override //
     protected void doTrace(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        process(req, resp, allEentryPoints.get(TRACE.class));
+        process(req, resp, allEntryPoints.get(TRACE.class));
     }
 
     @Override //
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        process(req, resp, allEentryPoints.get(GET.class));
+        process(req, resp, allEntryPoints.get(GET.class));
     }
 
     private void process(HttpServletRequest req, HttpServletResponse resp, List<EntryPoint> entryPoints) throws IOException {

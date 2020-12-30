@@ -80,6 +80,8 @@
         <plugin.checkstyle>3.1.1</plugin.checkstyle>
             <dependency.checkstyle>8.38</dependency.checkstyle>
         <plugin.coveralls>4.3.0</plugin.coveralls>
+        <plugin.spotbugs>4.1.4</plugin.spotbugs>
+            <dependency.spotbugs>4.2.0</dependency.spotbugs>
         <plugin.gpg>1.6</plugin.gpg>
         <plugin.nexus-staging>1.6.8</plugin.nexus-staging>
         <plugin.release>3.0.0-M1</plugin.release>
@@ -249,6 +251,25 @@
             </plugin>
 
             <plugin>
+                <groupId>com.github.spotbugs</groupId>
+                <artifactId>spotbugs-maven-plugin</artifactId>
+                <configuration>
+                    <effort>Max</effort>
+                    <threshold>Low</threshold>
+                    <maxRank>15</maxRank>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>spotbugs-check</id>
+                        <phase>test</phase>
+                        <goals>
+                            <goal>check</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>flatten-maven-plugin</artifactId>
                 <configuration>
@@ -406,6 +427,19 @@
                             </goals>
                         </execution>
                     </executions>
+                </plugin>
+
+                <plugin>
+                    <groupId>com.github.spotbugs</groupId>
+                    <artifactId>spotbugs-maven-plugin</artifactId>
+                    <version>${plugin.spotbugs}</version>
+                    <dependencies>
+                        <dependency>
+                            <groupId>com.github.spotbugs</groupId>
+                            <artifactId>spotbugs</artifactId>
+                            <version>${dependency.spotbugs}</version>
+                        </dependency>
+                    </dependencies>
                 </plugin>
 
                 <plugin>
