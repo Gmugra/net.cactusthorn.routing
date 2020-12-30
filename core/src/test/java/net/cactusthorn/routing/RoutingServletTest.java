@@ -20,11 +20,17 @@ import org.mockito.Mockito;
 
 import net.cactusthorn.routing.annotation.*;
 import net.cactusthorn.routing.producer.Producer;
+import net.cactusthorn.routing.validate.ParametersValidationException;
+import net.cactusthorn.routing.validate.ParametersValidator;
 
 public class RoutingServletTest {
 
     public static final Producer TEST_PRODUCER = (object, template, mediaType, req, resp) -> {
         resp.getWriter().write(String.valueOf(object));
+    };
+
+    public static final ParametersValidator TEST_VALIDATOR = (object, method, parameters) -> {
+        throw new ParametersValidationException("abc");
     };
 
     @Path("/") //
@@ -150,7 +156,7 @@ public class RoutingServletTest {
 
         Mockito.verify(resp).sendError(code.capture(), Mockito.any());
 
-        assertEquals(404, code.getValue());
+        assertEquals(HttpServletResponse.SC_BAD_REQUEST, code.getValue());
     }
 
     @Test //
@@ -379,5 +385,22 @@ public class RoutingServletTest {
 
         assertEquals("/xyz", header.getValue());
         assertEquals(303, code.getValue());
+    }
+
+    @Test //
+    public void validation() throws ServletException, IOException {
+        RoutingConfig c = RoutingConfig.builder(new EntryPoint1Provider()).addEntryPoint(EntryPoint1.class)
+                .setParametersValidator(TEST_VALIDATOR).build();
+        RoutingServlet s = new RoutingServlet(c);
+
+        Mockito.when(req.getPathInfo()).thenReturn("/api/get");
+
+        s.doGet(req, resp);
+
+        ArgumentCaptor<Integer> code = ArgumentCaptor.forClass(Integer.class);
+
+        Mockito.verify(resp).sendError(code.capture(), Mockito.any());
+
+        assertEquals(400, code.getValue());
     }
 }

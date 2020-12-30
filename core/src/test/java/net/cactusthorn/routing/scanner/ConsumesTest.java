@@ -7,6 +7,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -16,13 +17,15 @@ import org.junit.jupiter.api.Test;
 import net.cactusthorn.routing.*;
 import net.cactusthorn.routing.annotation.*;
 import net.cactusthorn.routing.convert.ConvertersHolder;
+import net.cactusthorn.routing.validate.ParametersValidator;
 import net.cactusthorn.routing.EntryPointScanner.EntryPoint;
 import net.cactusthorn.routing.RoutingConfig.ConfigProperty;
 
 public class ConsumesTest {
 
     static final ConvertersHolder HOLDER = new ConvertersHolder();
-    static Map<ConfigProperty, Object> PROPERTIES = new HashMap<>();
+    static final Map<ConfigProperty, Object> PROPERTIES = new HashMap<>();
+    private static final Optional<ParametersValidator> VALIDATOR = Optional.ofNullable(null);
 
     @BeforeAll //
     static void setUp() {
@@ -51,7 +54,8 @@ public class ConsumesTest {
 
     @Test //
     public void all() {
-        EntryPointScanner scanner = new EntryPointScanner(Arrays.asList(EntryPoint1.class), new EntryPoint1Provider1(), HOLDER, PROPERTIES);
+        EntryPointScanner scanner = new EntryPointScanner(Arrays.asList(EntryPoint1.class), new EntryPoint1Provider1(), HOLDER, PROPERTIES,
+                VALIDATOR);
         Map<Class<? extends Annotation>, List<EntryPoint>> entryPoints = scanner.scan();
         EntryPoint entryPoint = entryPoints.get(GET.class).get(0);
         assertEquals("*/*", entryPoint.consumes());
@@ -60,7 +64,8 @@ public class ConsumesTest {
 
     @Test //
     public void post() {
-        EntryPointScanner scanner = new EntryPointScanner(Arrays.asList(EntryPoint1.class), new EntryPoint1Provider1(), HOLDER, PROPERTIES);
+        EntryPointScanner scanner = new EntryPointScanner(Arrays.asList(EntryPoint1.class), new EntryPoint1Provider1(), HOLDER, PROPERTIES,
+                VALIDATOR);
         Map<Class<? extends Annotation>, List<EntryPoint>> entryPoints = scanner.scan();
         EntryPoint entryPoint = entryPoints.get(POST.class).get(0);
         assertTrue(entryPoint.matchContentType("text/html"));
@@ -93,7 +98,8 @@ public class ConsumesTest {
 
     @Test //
     public void global() {
-        EntryPointScanner scanner = new EntryPointScanner(Arrays.asList(EntryPoint2.class), new EntryPoint1Provider2(), HOLDER, PROPERTIES);
+        EntryPointScanner scanner = new EntryPointScanner(Arrays.asList(EntryPoint2.class), new EntryPoint1Provider2(), HOLDER, PROPERTIES,
+                VALIDATOR);
         Map<Class<? extends Annotation>, List<EntryPoint>> entryPoints = scanner.scan();
         EntryPoint entryPoint = entryPoints.get(PUT.class).get(0);
         assertTrue(entryPoint.matchContentType("text/html"));
@@ -102,7 +108,8 @@ public class ConsumesTest {
 
     @Test //
     public void override() {
-        EntryPointScanner scanner = new EntryPointScanner(Arrays.asList(EntryPoint2.class), new EntryPoint1Provider2(), HOLDER, PROPERTIES);
+        EntryPointScanner scanner = new EntryPointScanner(Arrays.asList(EntryPoint2.class), new EntryPoint1Provider2(), HOLDER, PROPERTIES,
+                VALIDATOR);
         Map<Class<? extends Annotation>, List<EntryPoint>> entryPoints = scanner.scan();
         EntryPoint entryPoint = entryPoints.get(GET.class).get(0);
         assertFalse(entryPoint.matchContentType("text/html"));
@@ -111,7 +118,8 @@ public class ConsumesTest {
 
     @Test //
     public void formData() {
-        EntryPointScanner scanner = new EntryPointScanner(Arrays.asList(EntryPoint2.class), new EntryPoint1Provider2(), HOLDER, PROPERTIES);
+        EntryPointScanner scanner = new EntryPointScanner(Arrays.asList(EntryPoint2.class), new EntryPoint1Provider2(), HOLDER, PROPERTIES,
+                VALIDATOR);
         Map<Class<? extends Annotation>, List<EntryPoint>> entryPoints = scanner.scan();
         EntryPoint entryPoint = entryPoints.get(POST.class).get(0);
         assertTrue(entryPoint.matchContentType("multipart/form-data; boundary=----WebKitFormBoundaryqoNsVh2QtLJ19YqS"));

@@ -1,10 +1,9 @@
 package net.cactusthorn.routing;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.*;
 
 import java.util.Arrays;
+import java.util.Optional;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -20,6 +19,8 @@ import net.cactusthorn.routing.annotation.PathParam;
 import net.cactusthorn.routing.convert.Converter;
 import net.cactusthorn.routing.convert.ConverterException;
 import net.cactusthorn.routing.producer.Producer;
+import net.cactusthorn.routing.validate.ParametersValidationException;
+import net.cactusthorn.routing.validate.ParametersValidator;
 
 public class RoutingConfigTest {
 
@@ -33,6 +34,9 @@ public class RoutingConfigTest {
 
     public static final Consumer TEST_CONSUMER = (clazz, mediaType, req) -> {
         return null;
+    };
+
+    private static final ParametersValidator TEST_VALIDATOR = (object, method, parameters) -> {
     };
 
     public static class EntryPointWrong {
@@ -73,7 +77,7 @@ public class RoutingConfigTest {
     }
 
     @Test //
-    public void converter() throws ConverterException {
+    public void converter() throws ConverterException, ParametersValidationException {
         RoutingConfig config = RoutingConfig.builder(new EntryPointDateProvider()).addEntryPoint(Arrays.asList(EntryPointDate.class))
                 .addConverter(java.util.Date.class, TEST_CONVERTER).build();
 
@@ -121,11 +125,18 @@ public class RoutingConfigTest {
         int value = (int) config.properties().get(ConfigProperty.READ_BODY_BUFFER_SIZE);
         assertEquals(512, value);
     }
-    
+
     @Test //
     public void defaultRequestCharacterEncoding() {
         RoutingConfig config = RoutingConfig.builder(new EntryPointDateProvider()).setDefaultRequestCharacterEncoding("KOI8-R").build();
         String value = (String) config.properties().get(ConfigProperty.DEFAULT_REQUEST_CHARACTER_ENCODING);
         assertEquals("KOI8-R", value);
+    }
+
+    @Test //
+    public void parametersValidator() {
+        RoutingConfig config = RoutingConfig.builder(new EntryPointDateProvider()).setParametersValidator(TEST_VALIDATOR).build();
+        Optional<ParametersValidator> validator = config.validator();
+        assertTrue(validator.isPresent());
     }
 }

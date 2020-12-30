@@ -4,6 +4,7 @@ import java.io.*;
 import java.lang.annotation.Annotation;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import javax.servlet.*;
 import javax.servlet.http.*;
@@ -18,6 +19,8 @@ import net.cactusthorn.routing.Response.Redirect;
 import net.cactusthorn.routing.annotation.*;
 import net.cactusthorn.routing.convert.ConverterException;
 import net.cactusthorn.routing.producer.Producer;
+import net.cactusthorn.routing.validate.ParametersValidationException;
+import net.cactusthorn.routing.validate.ParametersValidator;
 
 public class RoutingServlet extends HttpServlet {
 
@@ -32,6 +35,7 @@ public class RoutingServlet extends HttpServlet {
     private transient ComponentProvider componentProvider;
     private transient String responseCharacterEncoding;
     private transient String defaultRequestCharacterEncoding;
+    private transient Optional<ParametersValidator> parametersValidator;
 
     public RoutingServlet(RoutingConfig config) {
         super();
@@ -41,6 +45,7 @@ public class RoutingServlet extends HttpServlet {
         consumers = config.consumers();
         responseCharacterEncoding = (String) config.properties().get(ConfigProperty.RESPONSE_CHARACTER_ENCODING);
         defaultRequestCharacterEncoding = (String) config.properties().get(ConfigProperty.DEFAULT_REQUEST_CHARACTER_ENCODING);
+        parametersValidator = config.validator();
     }
 
     @Override //
@@ -50,6 +55,7 @@ public class RoutingServlet extends HttpServlet {
         componentProvider.init(servletContext);
         producers.values().forEach(p -> p.init(servletContext, componentProvider));
         consumers.values().forEach(p -> p.init(servletContext, componentProvider));
+        parametersValidator.ifPresent(v -> v.init(servletContext, componentProvider));
     }
 
     @Override //
@@ -107,13 +113,9 @@ public class RoutingServlet extends HttpServlet {
                     Object result = entryPoint.invoke(req, resp, servletContext, values);
                     produce(req, resp, entryPoint, result);
                 } catch (ConverterException ce) {
-                    // the inability to convert some parameter(s) is interpreted as a path not found
-                    if (LOG.isTraceEnabled()) {
-                        LOG.trace("", ce);
-                    } else if (LOG.isDebugEnabled()) {
-                        LOG.debug("{} : converterException: {}", req.getPathInfo(), ce.getMessage());
-                    }
-                    resp.sendError(HttpServletResponse.SC_NOT_FOUND, "Not Found");
+                    resp.sendError(HttpServletResponse.SC_BAD_REQUEST, ce.getMessage());
+                } catch (ParametersValidationException ve) {
+                    resp.sendError(HttpServletResponse.SC_BAD_REQUEST, ve.getMessage());
                 }
                 return;
             }

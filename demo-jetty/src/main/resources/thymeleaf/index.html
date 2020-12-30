@@ -9,22 +9,31 @@
   </head>
 
   <body>
-    <p th:text="${model}">test?</p><br/><br/>
+    <p>TEST LINKS</p><br/><br/>
 
-    <form action="/html/form" method="POST" accept-charset="UTF-8">
-        <label for="fname">First name:</label>
-        <input type="text" id="fname" name="fname"><br/><br/>
+    <a th:href="@{/nocontent}">Response HTTP 204 : "no content"</a><br/><br/>
 
-        <label for="lname">Last name:</label>
-        <input type="text" id="lname" name="lname"><br/><br/>
+    <a th:href="@{/rest/api/test13(test=11.35)}">With PathParam and QueryParam</a><br/><br/>
 
-        <label for="box">Box:</label><br/>
-        <input type="checkbox" name="box" title="10" value="10">10</input><br/>
-        <input type="checkbox" name="box" title="20" value="20">20</input><br/>
-        <input type="checkbox" name="box" title="30" value="30">30</input><br/><br/>
+    <a th:href="@{/rest/api/test13}">With QueryParam default value</a><br/><br/>
 
-        <input type="submit" value="Submit"/>
-    </form>
+    <a th:href="@{/rest/api//}">With PathParam default value</a><br/><br/>
+
+    <a th:href="@{/rest/api/validation}">ParametersValidationException: HTTP 400</a><br/><br/>
+
+    <a th:href="@{/rest/api/validation(test=abc)}">Another one ParametersValidationException: HTTP 400</a><br/><br/>
+
+    <a th:href="@{/rest/api/test13(test=ssss)}">ConverterException: HTTP 400</a><br/><br/>
+
+    <a th:href="@{/seeother}">Redirect HTTP 303 : "see other"</a><br/><br/>
+
+    <a th:href="@{/localdate/10102020}">Custom converter</a><br/><br/>
+
+    <a th:href="@{/rest/api/gson}">JSON Response</a><br/><br/>
+
+    <a th:href="@{/html}">Simple HTML form</a><br/><br/>
+
+    <a th:href="@{/html/upload}">HTML form with files uploading</a><br/><br/>
   </body>
 
 </html>

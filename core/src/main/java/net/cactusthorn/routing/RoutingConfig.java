@@ -2,12 +2,14 @@ package net.cactusthorn.routing;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import net.cactusthorn.routing.EntryPointScanner.EntryPoint;
 import net.cactusthorn.routing.convert.Converter;
 import net.cactusthorn.routing.convert.ConvertersHolder;
 import net.cactusthorn.routing.producer.Producer;
 import net.cactusthorn.routing.producer.TextPlainProducer;
+import net.cactusthorn.routing.validate.ParametersValidator;
 
 import java.lang.annotation.Annotation;
 import java.util.ArrayList;
@@ -46,6 +48,8 @@ public final class RoutingConfig {
 
     private Map<ConfigProperty, Object> configProperties;
 
+    private ParametersValidator validator;
+
     // @formatter:off
     private RoutingConfig(
                 ComponentProvider componentProvider,
@@ -53,13 +57,15 @@ public final class RoutingConfig {
                 List<EntryPoint>> entryPoints,
                 Map<String, Producer> producers,
                 Map<String, Consumer> consumers,
-                Map<ConfigProperty, Object> configProperties) {
+                Map<ConfigProperty, Object> configProperties,
+                ParametersValidator validator) {
 
         this.componentProvider = componentProvider;
         this.entryPoints = entryPoints;
         this.producers = producers;
         this.consumers = consumers;
         this.configProperties = configProperties;
+        this.validator = validator;
     }
     // @formatter:off
 
@@ -87,6 +93,10 @@ public final class RoutingConfig {
         return configProperties;
     }
 
+    public Optional<ParametersValidator> validator() {
+        return Optional.ofNullable(validator);
+    }
+
     public static final class Builder {
 
         private ComponentProvider componentProvider;
@@ -100,6 +110,8 @@ public final class RoutingConfig {
         private final Map<String, Consumer> consumers = new HashMap<>();
 
         private final Map<ConfigProperty, Object> configProperties = new HashMap<>();
+
+        private ParametersValidator validator;
 
         private Builder(ComponentProvider componentProvider) {
             if (componentProvider == null) {
@@ -155,6 +167,11 @@ public final class RoutingConfig {
             return this;
         }
 
+        public Builder setParametersValidator(ParametersValidator parametersValidator) {
+            validator = parametersValidator;
+            return this;
+        }
+
         public RoutingConfig build() {
 
             Map<String, Producer> unmodifiableProducers = Collections.unmodifiableMap(producers);
@@ -162,11 +179,11 @@ public final class RoutingConfig {
             Map<ConfigProperty, Object> unmodifiableConfigProperties = Collections.unmodifiableMap(configProperties);
 
             EntryPointScanner scanner = new EntryPointScanner(entryPointClasses, componentProvider, convertersHolder,
-                    unmodifiableConfigProperties);
+                    unmodifiableConfigProperties, Optional.ofNullable(validator));
             Map<Class<? extends Annotation>, List<EntryPoint>> entryPoints = scanner.scan();
 
             return new RoutingConfig(componentProvider, Collections.unmodifiableMap(entryPoints), unmodifiableProducers,
-                    unmodifiableConsumers, unmodifiableConfigProperties);
+                    unmodifiableConsumers, unmodifiableConfigProperties, validator);
         }
     }
 }

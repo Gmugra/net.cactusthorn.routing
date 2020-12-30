@@ -19,7 +19,7 @@ public class HtmlEntryPoint implements EntryPoint {
     public HtmlEntryPoint() {
     }
 
-    @GET @Produces("text/html") @Template("/index.html") //
+    @GET @Produces("text/html") @Template("/form.html") //
     public String getitHtml() {
         return "TEST HTML PAGE";
     }

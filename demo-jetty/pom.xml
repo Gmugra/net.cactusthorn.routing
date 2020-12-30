@@ -7,7 +7,7 @@
     <parent>
         <groupId>net.cactusthorn.routing</groupId>
         <artifactId>root</artifactId>
-        <version>0.24</version>
+        <version>0.25</version>
     </parent>
 
     <artifactId>demo-jetty</artifactId>
@@ -36,6 +36,12 @@
         <dependency>
             <groupId>net.cactusthorn.routing</groupId>
             <artifactId>thymeleaf</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>net.cactusthorn.routing</groupId>
+            <artifactId>validation-javax</artifactId>
             <version>${project.version}</version>
         </dependency>
 

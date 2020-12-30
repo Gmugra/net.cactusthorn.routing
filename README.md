@@ -3,7 +3,7 @@
 
 Lightweight Java library for HTTP requests routing in context of Servlet API
 
-[![Build Status](https://travis-ci.com/Gmugra/net.cactusthorn.routing.svg?branch=main)](https://travis-ci.com/Gmugra/net.cactusthorn.routing) [![Coverage Status](https://coveralls.io/repos/github/Gmugra/net.cactusthorn.routing/badge.svg?branch=main)](https://coveralls.io/github/Gmugra/net.cactusthorn.routing?branch=main) ![GitHub release (latest by date)](https://img.shields.io/github/v/release/Gmugra/net.cactusthorn.routing)
+[![Build Status](https://travis-ci.com/Gmugra/net.cactusthorn.routing.svg?branch=main)](https://travis-ci.com/Gmugra/net.cactusthorn.routing) [![Coverage Status](https://coveralls.io/repos/github/Gmugra/net.cactusthorn.routing/badge.svg?branch=main)](https://coveralls.io/github/Gmugra/net.cactusthorn.routing?branch=main) ![GitHub release (latest by date)](https://img.shields.io/github/v/release/Gmugra/net.cactusthorn.routing) [![Build by Maven](http://maven.apache.org/images/logos/maven-feather.png)](http://maven.apache.org)
 
 ## Introduction
 
@@ -57,6 +57,7 @@ public class Application {
             .addConsumer("application/json", new SimpleGsonConsumer())
             .addProducer("text/html", new SimpleThymeleafProducer("/thymeleaf/"))
             .addConverter(java.time.LocalDate.class, converter);
+            .setParametersValidator(new SimpleParametersValidator())
             .build();
 
         MultipartConfigElement mpConfig = new MultipartConfigElement("/tmp", 1024 * 1024, 1024 * 1024 * 5, 1024 * 1024 * 5 * 5);
@@ -82,7 +83,7 @@ The library is doing only routing, but it's expected that the application provid
 1. multiple Producers which will generate responses based on Content-Type
 1. multiple Consumers to convert request body to Java objects based on Content-Type
 
-And that is **the basic idea**: you build your web application with only the components you prefer. There is nothing superfluous.
+**The basic idea**: build web application with only the components you prefer.
 The Routing Library JAR itself is less then 100KB (+ ~ 40KB _SLF4J_ JAR ; + ~ 100KB _javax.servlet-api_ JAR).
 
 The flow is simple:
@@ -106,13 +107,10 @@ It uses the embedded [Jetty](https://www.eclipse.org/jetty/) as servlet-containe
 and [Dagger 2](https://dagger.dev) for dependency injection and as the basis for the _ComponentProvider_.
 
 More or less there are examples of everything:
-Various "simple" requests, JSON, File uploading (multipart/form-data), HTML with Thymeleaf, Scopes.
+Various "simple" requests, JSON, File uploading (multipart/form-data), HTML with Thymeleaf, Scopes, parameters validation with javax.validation
 
+##  Features
 
-## Developing status
-It's full functional.
-
-The library is supporting:
 1. @Path for class and/or method (regular expressions support; routing priority like in JAX-RS)
 1. @GET @POST and so on
 1. Types converting for:
@@ -135,12 +133,12 @@ The library is supporting:
    1. application/json: _SimpleGsonConsumer_ (**json-gson** module)
 1. inject HttpServletRequest, HttpServletResponse, HttpSession, ServletContext in method parameters
 1. _Response_ class to manually construct response.
+1. ParametersValidator interface to integrate additional validations e.g. _javax.validation_
+   1. Implemetation example is **validation-javax** module
 
+##  LICENSE
 
-Comming a bit later
-1. Java Bean Validation Annotations (JSR 380) for parameters (as additional module)
-1. ?
-
+net.cactusthorn.routing is released under the BSD license. See LICENSE file included for the details.
 
 
 

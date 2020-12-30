@@ -1,22 +1,10 @@
 
-# Demo application with Jetty
+## Demo application with Jetty
 
-### Test request:
+#### Notes
 
-root: (GET) http://localhost:8080/
+Becasue of [Dagger 2](https://dagger.dev), in Eclipse need to install "m2e-apt" plugin: https://immutables.github.io/apt.html
 
-pathParam value: (GET) http://localhost:8080/rest/api/test123?test=10.5
-
-to get JSON: (GET) http://localhost:8080/rest/api/gson
-
-to post SON: (POST) http://localhost:8080/rest/api/gson with reguest body:
-```json
-{"name":"The Name ß","value":123}
-```
-
-to get HTML Thymeleaf-template: (GET) http://localhost:8080/text/html
-
-to submit HTML form: (POST) http://localhost:8080/text/form
 
 
 

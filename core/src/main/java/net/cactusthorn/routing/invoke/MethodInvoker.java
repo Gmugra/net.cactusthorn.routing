@@ -5,6 +5,7 @@ import java.lang.reflect.Parameter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
@@ -16,6 +17,8 @@ import net.cactusthorn.routing.RoutingException;
 import net.cactusthorn.routing.RoutingConfig.ConfigProperty;
 import net.cactusthorn.routing.PathTemplate.PathValues;
 import net.cactusthorn.routing.convert.*;
+import net.cactusthorn.routing.validate.ParametersValidator;
+import net.cactusthorn.routing.validate.ParametersValidationException;
 
 public final class MethodInvoker {
 
@@ -29,12 +32,15 @@ public final class MethodInvoker {
 
     private Map<ConfigProperty, Object> configProperties;
 
+    private Optional<ParametersValidator> validator;
+
     public MethodInvoker(Class<?> clazz, Method method, ComponentProvider componentProvider, ConvertersHolder convertersHolder,
-            String contentType, Map<ConfigProperty, Object> configProperties) {
+            String contentType, Map<ConfigProperty, Object> configProperties, Optional<ParametersValidator> validator) {
         this.clazz = clazz;
         this.method = method;
         this.componentProvider = componentProvider;
         this.configProperties = configProperties;
+        this.validator = validator;
         for (Parameter parameter : method.getParameters()) {
             if (parameter.isSynthetic()) {
                 continue;
@@ -44,7 +50,7 @@ public final class MethodInvoker {
     }
 
     public Object invoke(HttpServletRequest req, HttpServletResponse res, ServletContext con, PathValues pathValues)
-            throws ConverterException {
+            throws ConverterException, ParametersValidationException {
 
         Object object = componentProvider.provide(clazz, req);
         RequestData requestData;
@@ -54,12 +60,7 @@ public final class MethodInvoker {
             requestData = new RequestData(pathValues);
         }
 
-        Object[] values;
-        if (parameters.size() == 0) {
-            values = new Object[0];
-        } else {
-            values = new Object[parameters.size()];
-        }
+        Object[] values = parameters.size() == 0 ? new Object[0] : new Object[parameters.size()];
 
         for (int i = 0; i < parameters.size(); i++) {
             MethodParameter parameter = parameters.get(i);
@@ -68,6 +69,10 @@ public final class MethodInvoker {
             } catch (Exception e) {
                 throw new ConverterException(e, i + 1, parameter.getClass().getSimpleName());
             }
+        }
+
+        if (validator.isPresent()) {
+            validator.get().validate(object, method, values);
         }
 
         try {

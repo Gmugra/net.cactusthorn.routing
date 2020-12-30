@@ -7,6 +7,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -20,8 +21,11 @@ import net.cactusthorn.routing.RoutingConfig.ConfigProperty;
 import net.cactusthorn.routing.annotation.GET;
 import net.cactusthorn.routing.annotation.Path;
 import net.cactusthorn.routing.convert.ConvertersHolder;
+import net.cactusthorn.routing.validate.ParametersValidator;
 
 public class ScannerCollectionTest {
+
+    private static final Optional<ParametersValidator> VALIDATOR = Optional.ofNullable(null);
 
     @Path("/api") //
     public static class EntryPoint1 {
@@ -84,7 +88,7 @@ public class ScannerCollectionTest {
     @Test //
     public void entryPoint() {
         List<Class<?>> classes = Arrays.asList(EntryPoint1.class, EntryPoint2.class, EntryPoint3.class, EntryPoint4.class);
-        EntryPointScanner f = new EntryPointScanner(classes, new EntryPointProvider(), HOLDER, PROPERTIES);
+        EntryPointScanner f = new EntryPointScanner(classes, new EntryPointProvider(), HOLDER, PROPERTIES, VALIDATOR);
         Map<Class<? extends Annotation>, List<EntryPoint>> entryPoints = f.scan();
         List<EntryPoint> gets = entryPoints.get(GET.class);
         assertEquals(4, gets.size());

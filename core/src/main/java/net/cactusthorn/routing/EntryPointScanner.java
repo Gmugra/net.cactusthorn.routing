@@ -11,6 +11,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.regex.Pattern;
 
@@ -36,6 +37,8 @@ import net.cactusthorn.routing.PathTemplate.PathValues;
 import net.cactusthorn.routing.convert.ConverterException;
 import net.cactusthorn.routing.convert.ConvertersHolder;
 import net.cactusthorn.routing.invoke.MethodInvoker;
+import net.cactusthorn.routing.validate.ParametersValidator;
+import net.cactusthorn.routing.validate.ParametersValidationException;
 
 public class EntryPointScanner {
 
@@ -77,7 +80,7 @@ public class EntryPointScanner {
         }
 
         public Object invoke(HttpServletRequest req, HttpServletResponse res, ServletContext con, PathValues pathValues)
-                throws ConverterException {
+                throws ConverterException, ParametersValidationException {
             return methodInvoker.invoke(req, res, con, pathValues);
         }
 
@@ -109,13 +112,15 @@ public class EntryPointScanner {
     private ConvertersHolder convertersHolder;
     private ComponentProvider componentProvider;
     private Map<ConfigProperty, Object> configProperties;
+    private Optional<ParametersValidator> validator;
 
     public EntryPointScanner(Collection<Class<?>> classes, ComponentProvider componentProvider, ConvertersHolder convertersHolder,
-            Map<ConfigProperty, Object> configProperties) {
+            Map<ConfigProperty, Object> configProperties, Optional<ParametersValidator> validator) {
         this.classes.addAll(classes);
         this.componentProvider = componentProvider;
         this.convertersHolder = convertersHolder;
         this.configProperties = configProperties;
+        this.validator = validator;
     }
 
     public Map<Class<? extends Annotation>, List<EntryPoint>> scan() {
@@ -144,7 +149,7 @@ public class EntryPointScanner {
                         String template = findTemplate(method);
 
                         MethodInvoker methodInvoker = new MethodInvoker(clazz, method, componentProvider, convertersHolder, contentType,
-                                configProperties);
+                                configProperties, validator);
 
                         EntryPoint entryPoint = new EntryPoint(pathTemplate, produces, template, contentType, methodInvoker);
                         entryPoints.get(type).add(entryPoint);

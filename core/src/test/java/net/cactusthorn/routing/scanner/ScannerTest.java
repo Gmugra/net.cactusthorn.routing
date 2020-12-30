@@ -8,6 +8,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -22,8 +23,11 @@ import net.cactusthorn.routing.RoutingConfig.ConfigProperty;
 import net.cactusthorn.routing.PathTemplate.PathValues;
 import net.cactusthorn.routing.annotation.*;
 import net.cactusthorn.routing.convert.ConvertersHolder;
+import net.cactusthorn.routing.validate.ParametersValidator;
 
 public class ScannerTest {
+
+    private static final Optional<ParametersValidator> VALIDATOR = Optional.ofNullable(null);
 
     @Path("/api") //
     public static class EntryPoint1 {
@@ -61,7 +65,8 @@ public class ScannerTest {
 
     @Test //
     public void entryPoint1() {
-        EntryPointScanner f = new EntryPointScanner(Arrays.asList(EntryPoint1.class), new EntryPoint1Provider1(), HOLDER, PROPERTIES);
+        EntryPointScanner f = new EntryPointScanner(Arrays.asList(EntryPoint1.class), new EntryPoint1Provider1(), HOLDER, PROPERTIES,
+                VALIDATOR);
         Map<Class<? extends Annotation>, List<EntryPoint>> entryPoints = f.scan();
         List<EntryPoint> gets = entryPoints.get(GET.class);
 
@@ -97,7 +102,8 @@ public class ScannerTest {
 
     @Test //
     public void entryPoint2() {
-        EntryPointScanner f = new EntryPointScanner(Arrays.asList(EntryPoint2.class), new EntryPoint1Provider2(), HOLDER, PROPERTIES);
+        EntryPointScanner f = new EntryPointScanner(Arrays.asList(EntryPoint2.class), new EntryPoint1Provider2(), HOLDER, PROPERTIES,
+                VALIDATOR);
         Map<Class<? extends Annotation>, List<EntryPoint>> entryPoints = f.scan();
         List<EntryPoint> gets = entryPoints.get(GET.class);
 
@@ -122,7 +128,8 @@ public class ScannerTest {
 
     @Test //
     public void entryPoint3() {
-        EntryPointScanner f = new EntryPointScanner(Arrays.asList(EntryPoint3.class), new EntryPoint1Provider3(), HOLDER, PROPERTIES);
+        EntryPointScanner f = new EntryPointScanner(Arrays.asList(EntryPoint3.class), new EntryPoint1Provider3(), HOLDER, PROPERTIES,
+                VALIDATOR);
         Map<Class<? extends Annotation>, List<EntryPoint>> entryPoints = f.scan();
         EntryPoint entryPoint = entryPoints.get(GET.class).get(0);
 
@@ -133,7 +140,12 @@ public class ScannerTest {
     @Path("/api") //
     public static class EntryPoint4 {
 
-        @GET @Produces("*/*") public void m1() {
+        @GET @Produces("*/*") //
+        public void m1() {
+        }
+
+        @HEAD @Produces("text/html") @Template("wow.html") //
+        public void template() {
         }
     }
 
@@ -147,7 +159,8 @@ public class ScannerTest {
 
     @Test //
     public void entryPoint4() {
-        EntryPointScanner f = new EntryPointScanner(Arrays.asList(EntryPoint4.class), new EntryPoint1Provider4(), HOLDER, PROPERTIES);
+        EntryPointScanner f = new EntryPointScanner(Arrays.asList(EntryPoint4.class), new EntryPoint1Provider4(), HOLDER, PROPERTIES,
+                VALIDATOR);
         Map<Class<? extends Annotation>, List<EntryPoint>> entryPoints = f.scan();
         EntryPoint entryPoint = entryPoints.get(GET.class).get(0);
         PathTemplate.PathValues values = entryPoint.parse("/api/");
@@ -155,5 +168,15 @@ public class ScannerTest {
         assertEquals(PathValues.EMPTY, values);
         assertTrue(entryPoint.match("/api/"));
         assertEquals("*/*", entryPoint.produces());
+    }
+
+    @Test //
+    public void wow() {
+        EntryPointScanner f = new EntryPointScanner(Arrays.asList(EntryPoint4.class), new EntryPoint1Provider4(), HOLDER, PROPERTIES,
+                VALIDATOR);
+        Map<Class<? extends Annotation>, List<EntryPoint>> entryPoints = f.scan();
+        EntryPoint entryPoint = entryPoints.get(HEAD.class).get(0);
+        assertEquals("wow.html", entryPoint.template());
+
     }
 }

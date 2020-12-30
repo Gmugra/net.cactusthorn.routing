@@ -10,9 +10,9 @@
         <version>0.25</version>
     </parent>
 
-    <artifactId>thymeleaf</artifactId>
+    <artifactId>validation-javax</artifactId>
     <packaging>jar</packaging>
-    <name>Routing :: Thymeleaf </name>
+    <name>Routing :: Validation with javax.validation</name>
 
     <properties>
         <pmd.skip>false</pmd.skip>
@@ -27,8 +27,12 @@
         </dependency>
 
         <dependency>
-            <groupId>org.thymeleaf</groupId>
-            <artifactId>thymeleaf</artifactId>
+            <groupId>org.hibernate.validator</groupId>
+            <artifactId>hibernate-validator</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.glassfish</groupId>
+            <artifactId>javax.el</artifactId>
         </dependency>
 
     </dependencies>

@@ -4,7 +4,7 @@ import net.cactusthorn.routing.*;
 import net.cactusthorn.routing.gson.SimpleGsonConsumer;
 import net.cactusthorn.routing.gson.SimpleGsonProducer;
 import net.cactusthorn.routing.thymeleaf.SimpleThymeleafProducer;
-
+import net.cactusthorn.routing.validation.javax.SimpleParametersValidator;
 import net.cactusthorn.routing.demo.jetty.dagger.*;
 
 import java.time.LocalDate;
@@ -35,6 +35,7 @@ public class Application {
             .addConsumer("application/json", new SimpleGsonConsumer())
             .addProducer("text/html", new SimpleThymeleafProducer("/thymeleaf/"))
             .addConverter(LocalDate.class, new LocalDateConverter())
+            .setParametersValidator(new SimpleParametersValidator())
             .build();
         // @formatter:on
 

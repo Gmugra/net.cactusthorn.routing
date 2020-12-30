@@ -7,6 +7,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -20,8 +21,11 @@ import net.cactusthorn.routing.RoutingConfig.ConfigProperty;
 import net.cactusthorn.routing.annotation.GET;
 import net.cactusthorn.routing.annotation.Path;
 import net.cactusthorn.routing.convert.ConvertersHolder;
+import net.cactusthorn.routing.validate.ParametersValidator;
 
 public class ScannerSortingTest {
+
+    private static final Optional<ParametersValidator> VALIDATOR = Optional.ofNullable(null);
 
     @Path("/api") //
     public static class EntryPoint1 {
@@ -59,7 +63,8 @@ public class ScannerSortingTest {
 
     @Test //
     public void entryPoint1() {
-        EntryPointScanner f = new EntryPointScanner(Arrays.asList(EntryPoint1.class), new EntryPoint1Provider(), HOLDER, PROPERTIES);
+        EntryPointScanner f = new EntryPointScanner(Arrays.asList(EntryPoint1.class), new EntryPoint1Provider(), HOLDER, PROPERTIES,
+                VALIDATOR);
         Map<Class<? extends Annotation>, List<EntryPoint>> entryPoints = f.scan();
         List<EntryPoint> gets = entryPoints.get(GET.class);
 
