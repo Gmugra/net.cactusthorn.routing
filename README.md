@@ -109,7 +109,7 @@ and [Dagger 2](https://dagger.dev) for dependency injection and as the basis for
 More or less there are examples of everything:
 Various "simple" requests, JSON, File uploading (multipart/form-data), HTML with Thymeleaf, Scopes, parameters validation with javax.validation
 
-##  Features
+## Features
 
 1. @Path for class and/or method (regular expressions support; routing priority like in JAX-RS)
 1. @GET @POST and so on
@@ -136,7 +136,11 @@ Various "simple" requests, JSON, File uploading (multipart/form-data), HTML with
 1. ParametersValidator interface to integrate additional validations e.g. _javax.validation_
    1. Implemetation example is **validation-javax** module
 
-##  LICENSE
+## DOWNLOAD
+
+Public Releases can be downloaded from [GitHub Releases](https://github.com/Gmugra/net.cactusthorn.routing/releases) page or [Maven Central Repository](https://search.maven.org/search?q=g:net.cactusthorn.routing)
+
+## LICENSE
 
 net.cactusthorn.routing is released under the BSD license. See LICENSE file included for the details.
 

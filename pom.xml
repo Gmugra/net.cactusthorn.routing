@@ -6,7 +6,7 @@
 
     <groupId>net.cactusthorn.routing</groupId>
     <artifactId>root</artifactId>
-    <version>0.25</version>
+    <version>${revision}${changelist}</version>
     <packaging>pom</packaging>
 
     <name>Routing :: Root</name>
@@ -30,17 +30,13 @@
     <scm>
         <url>https://github.com/Gmugra/net.cactusthorn.routing</url>
         <connection>scm:git:https://github.com/Gmugra/net.cactusthorn.routing.git</connection>
+        <developerConnection>scm:git:https://github.com/Gmugra/net.cactusthorn.routing.git</developerConnection>
     </scm>
 
-    <distributionManagement>
-        <repository>
-            <id>github</id>
-            <name>GitHub Gmugra Apache Maven Packages</name>
-            <url>https://maven.pkg.github.com/Gmugra/net.cactusthorn.routing</url>
-        </repository>
-    </distributionManagement>
-
     <properties>
+
+        <revision>0.25</revision>
+        <changelist>-SNAPSHOT</changelist>
 
         <maven.build.timestamp.format>yyyy-MM-dd'T'HH:mm:ss'Z'</maven.build.timestamp.format>
 
@@ -85,6 +81,9 @@
             <dependency.checkstyle>8.38</dependency.checkstyle>
         <plugin.coveralls>4.3.0</plugin.coveralls>
         <plugin.gpg>1.6</plugin.gpg>
+        <plugin.nexus-staging>1.6.8</plugin.nexus-staging>
+        <plugin.release>3.0.0-M1</plugin.release>
+        <plugin.flatten>1.2.5</plugin.flatten>
 
     </properties>
 
@@ -249,6 +248,31 @@
                 </executions>
             </plugin>
 
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>flatten-maven-plugin</artifactId>
+                <configuration>
+                    <updatePomFile>true</updatePomFile>
+                    <flattenMode>resolveCiFriendliesOnly</flattenMode>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>flatten</id>
+                        <phase>process-resources</phase>
+                        <goals>
+                            <goal>flatten</goal>
+                        </goals>
+                    </execution>
+                    <execution>
+                        <id>flatten.clean</id>
+                        <phase>clean</phase>
+                        <goals>
+                            <goal>clean</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+
         </plugins>
 
         <pluginManagement>
@@ -312,8 +336,25 @@
                 </plugin>
 
                 <plugin>
+                    <artifactId>maven-release-plugin</artifactId>
+                    <version>${plugin.release}</version>
+                </plugin>
+
+                <plugin>
+                    <groupId>org.codehaus.mojo</groupId>
+                    <artifactId>flatten-maven-plugin</artifactId>
+                    <version>${plugin.flatten}</version>
+                </plugin>
+
+                <plugin>
                     <artifactId>maven-gpg-plugin</artifactId>
                     <version>${plugin.gpg}</version>
+                </plugin>
+
+                <plugin>
+                    <groupId>org.sonatype.plugins</groupId>
+                    <artifactId>nexus-staging-maven-plugin</artifactId>
+                    <version>${plugin.nexus-staging}</version>
                 </plugin>
 
                 <plugin>
@@ -440,6 +481,45 @@
     <profiles>
 
         <profile>
+            <id>only-eclipse</id>
+            <activation>
+                <property>
+                    <name>m2e.version</name>
+                </property>
+            </activation>
+            <build>
+                <pluginManagement>
+                    <plugins>
+                        <plugin>
+                            <groupId>org.eclipse.m2e</groupId>
+                            <artifactId>lifecycle-mapping</artifactId>
+                            <version>1.0.0</version>
+                            <configuration>
+                                <lifecycleMappingMetadata>
+                                    <pluginExecutions>
+                                        <pluginExecution>
+                                            <pluginExecutionFilter>
+                                                <groupId>org.codehaus.mojo</groupId>
+                                                <artifactId>flatten-maven-plugin</artifactId>
+                                                <versionRange>${plugin.flatten}</versionRange>
+                                                <goals>
+                                                    <goal>flatten</goal>
+                                                </goals>
+                                            </pluginExecutionFilter>
+                                            <action>
+                                                <ignore />
+                                            </action>
+                                        </pluginExecution>
+                                    </pluginExecutions>
+                                </lifecycleMappingMetadata>
+                            </configuration>
+                        </plugin>
+                    </plugins>
+                </pluginManagement>
+            </build>
+        </profile>
+
+        <profile>
             <id>coverage</id>
             <build>
                 <plugins>
@@ -488,9 +568,35 @@
         </profile>
 
         <profile>
-            <id>gpg</id>
+            <id>github</id>
+
+            <distributionManagement>
+                <repository>
+                    <id>github</id>
+                    <name>GitHub Gmugra Apache Maven Packages</name>
+                    <url>https://maven.pkg.github.com/Gmugra/net.cactusthorn.routing</url>
+                </repository>
+            </distributionManagement>
+
+        </profile>
+
+        <profile>
+            <id>ossrh</id>
+
+            <distributionManagement>
+                <snapshotRepository>
+                    <id>ossrh</id>
+                    <url>https://oss.sonatype.org/content/repositories/snapshots</url>
+                </snapshotRepository>
+                <repository>
+                    <id>ossrh</id>
+                    <url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
+                </repository>
+             </distributionManagement>
+
             <build>
                 <plugins>
+
                     <plugin>
                         <artifactId>maven-gpg-plugin</artifactId>
                         <executions>
@@ -503,8 +609,21 @@
                             </execution>
                         </executions>
                     </plugin>
+
+                    <plugin>
+                        <groupId>org.sonatype.plugins</groupId>
+                        <artifactId>nexus-staging-maven-plugin</artifactId>
+                        <extensions>true</extensions>
+                        <configuration>
+                            <serverId>ossrh</serverId>
+                            <nexusUrl>https://oss.sonatype.org/</nexusUrl>
+                            <autoReleaseAfterClose>true</autoReleaseAfterClose>
+                        </configuration>
+                    </plugin>
+
                 </plugins>
             </build>
+
         </profile>
 
     </profiles>

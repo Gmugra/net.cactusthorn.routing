@@ -7,7 +7,7 @@
     <parent>
         <groupId>net.cactusthorn.routing</groupId>
         <artifactId>root</artifactId>
-        <version>0.25</version>
+        <version>${revision}${changelist}</version>
     </parent>
 
     <artifactId>demo-jetty</artifactId>
@@ -15,8 +15,8 @@
     <name>Routing :: Demo Jetty</name>
 
     <properties>
-        <maven.javadoc.skip>true</maven.javadoc.skip>
         <pmd.skip>false</pmd.skip>
+        <maven.deploy.skip>true</maven.deploy.skip>
     </properties>
 
     <dependencies>
