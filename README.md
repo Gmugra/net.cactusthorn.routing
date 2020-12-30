@@ -3,7 +3,7 @@
 
 Lightweight Java library for HTTP requests routing in context of Servlet API
 
-[![Build Status](https://travis-ci.com/Gmugra/net.cactusthorn.routing.svg?branch=main)](https://travis-ci.com/Gmugra/net.cactusthorn.routing) [![Coverage Status](https://coveralls.io/repos/github/Gmugra/net.cactusthorn.routing/badge.svg?branch=main)](https://coveralls.io/github/Gmugra/net.cactusthorn.routing?branch=main) ![GitHub release (latest by date)](https://img.shields.io/github/v/release/Gmugra/net.cactusthorn.routing) ![Maven Central with version prefix filter](https://img.shields.io/maven-central/v/net.cactusthorn.routing/core/0.25) ![GitHub](https://img.shields.io/github/license/Gmugra/net.cactusthorn.routing) [![Build by Maven](http://maven.apache.org/images/logos/maven-feather.png)](http://maven.apache.org)
+[![Build Status](https://travis-ci.com/Gmugra/net.cactusthorn.routing.svg?branch=main)](https://travis-ci.com/Gmugra/net.cactusthorn.routing) [![Coverage Status](https://coveralls.io/repos/github/Gmugra/net.cactusthorn.routing/badge.svg?branch=main)](https://coveralls.io/github/Gmugra/net.cactusthorn.routing?branch=main) [![GitHub release (latest by date)](https://img.shields.io/github/v/release/Gmugra/net.cactusthorn.routing)](https://github.com/Gmugra/net.cactusthorn.routing/releases/tag/v0.25) [![Maven Central with version prefix filter](https://img.shields.io/maven-central/v/net.cactusthorn.routing/core/0.25)](https://search.maven.org/search?q=g:net.cactusthorn.routing) [![GitHub](https://img.shields.io/github/license/Gmugra/net.cactusthorn.routing)](https://github.com/Gmugra/net.cactusthorn.routing/blob/main/LICENSE) [![Build by Maven](http://maven.apache.org/images/logos/maven-feather.png)](http://maven.apache.org)
 
 ## Introduction
 
