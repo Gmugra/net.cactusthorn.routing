@@ -9,6 +9,8 @@ import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletResponse;
 
 import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Mockito;
 
 import net.cactusthorn.routing.Response.Redirect;
 
@@ -100,8 +102,19 @@ public class ResponseTest {
         URI uri = new URI("/xxx");
         Response response = Response.builder().seeOther(uri).build();
         Redirect redirect = response.redirect().get();
-        assertEquals(HttpServletResponse.SC_SEE_OTHER, redirect.code());
-        assertEquals(uri, redirect.uri());
+
+        HttpServletResponse resp = Mockito.mock(HttpServletResponse.class);
+
+        redirect.apply(resp);
+
+        ArgumentCaptor<Integer> code = ArgumentCaptor.forClass(Integer.class);
+        ArgumentCaptor<String> header = ArgumentCaptor.forClass(String.class);
+
+        Mockito.verify(resp).setStatus(code.capture());
+        Mockito.verify(resp).setHeader(Mockito.eq(Redirect.LOCATION), header.capture());
+
+        assertEquals(HttpServletResponse.SC_SEE_OTHER, code.getValue());
+        assertEquals("/xxx", header.getValue());
     }
 
     @Test //
@@ -109,8 +122,19 @@ public class ResponseTest {
         URI uri = new URI("/yyy");
         Response response = Response.builder().movedTemporarily(uri).build();
         Redirect redirect = response.redirect().get();
-        assertEquals(HttpServletResponse.SC_MOVED_TEMPORARILY, redirect.code());
-        assertEquals(uri, redirect.uri());
+
+        HttpServletResponse resp = Mockito.mock(HttpServletResponse.class);
+
+        redirect.apply(resp);
+
+        ArgumentCaptor<Integer> code = ArgumentCaptor.forClass(Integer.class);
+        ArgumentCaptor<String> header = ArgumentCaptor.forClass(String.class);
+
+        Mockito.verify(resp).setStatus(code.capture());
+        Mockito.verify(resp).setHeader(Mockito.eq(Redirect.LOCATION), header.capture());
+
+        assertEquals(HttpServletResponse.SC_MOVED_TEMPORARILY, code.getValue());
+        assertEquals("/yyy", header.getValue());
     }
 
     @Test //
@@ -118,16 +142,38 @@ public class ResponseTest {
         URI uri = new URI("/zzz");
         Response response = Response.builder().movedPermanently(uri).build();
         Redirect redirect = response.redirect().get();
-        assertEquals(HttpServletResponse.SC_MOVED_PERMANENTLY, redirect.code());
-        assertEquals(uri, redirect.uri());
+
+        HttpServletResponse resp = Mockito.mock(HttpServletResponse.class);
+
+        redirect.apply(resp);
+
+        ArgumentCaptor<Integer> code = ArgumentCaptor.forClass(Integer.class);
+        ArgumentCaptor<String> header = ArgumentCaptor.forClass(String.class);
+
+        Mockito.verify(resp).setStatus(code.capture());
+        Mockito.verify(resp).setHeader(Mockito.eq(Redirect.LOCATION), header.capture());
+
+        assertEquals(HttpServletResponse.SC_MOVED_PERMANENTLY, code.getValue());
+        assertEquals("/zzz", header.getValue());
     }
 
     @Test //
     public void redirect() throws URISyntaxException {
         URI uri = new URI("/rrr");
-        Response response = Response.builder().redirect(300, uri).build();
+        Response response = Response.builder().redirect(HttpServletResponse.SC_MULTIPLE_CHOICES, uri).build();
         Redirect redirect = response.redirect().get();
-        assertEquals(300, redirect.code());
-        assertEquals(uri, redirect.uri());
+
+        HttpServletResponse resp = Mockito.mock(HttpServletResponse.class);
+
+        redirect.apply(resp);
+
+        ArgumentCaptor<Integer> code = ArgumentCaptor.forClass(Integer.class);
+        ArgumentCaptor<String> header = ArgumentCaptor.forClass(String.class);
+
+        Mockito.verify(resp).setStatus(code.capture());
+        Mockito.verify(resp).setHeader(Mockito.eq(Redirect.LOCATION), header.capture());
+
+        assertEquals(HttpServletResponse.SC_MULTIPLE_CHOICES, code.getValue());
+        assertEquals("/rrr", header.getValue());
     }
 }

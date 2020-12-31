@@ -14,6 +14,9 @@ import javax.servlet.http.HttpServletResponse;
 public final class Response {
 
     static class Redirect {
+
+        public static final String LOCATION = "Location";
+
         private int code;
         private URI uri;
 
@@ -22,12 +25,9 @@ public final class Response {
             this.uri = uri;
         }
 
-        int code() {
-            return code;
-        }
-
-        URI uri() {
-            return uri;
+        void apply(HttpServletResponse resp) {
+            resp.setHeader(LOCATION, uri.toString());
+            resp.setStatus(code);
         }
     }
 
@@ -41,7 +41,6 @@ public final class Response {
     private Map<String, List<String>> headers;
     private Map<String, List<Integer>> intHeaders = new HashMap<>();
     private Map<String, List<Long>> dateHeaders = new HashMap<>();
-
     private Redirect redirect;
 
     // @formatter:off

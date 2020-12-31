@@ -12,8 +12,9 @@ import java.time.LocalDate;
 import javax.servlet.MultipartConfigElement;
 
 import org.eclipse.jetty.server.*;
+import org.eclipse.jetty.server.handler.HandlerList;
 import org.eclipse.jetty.servlet.*;
-
+import org.eclipse.jetty.util.resource.Resource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -22,6 +23,33 @@ public class Application {
     private static final Logger LOG = LoggerFactory.getLogger(Application.class);
 
     public static void main(String... args) {
+
+        HandlerList handlers = new HandlerList();
+        handlers.addHandler(createStaticResourcesServlet());
+        handlers.addHandler(createRoutingServlet());
+
+        Server jetty = new Server(8080);
+        for (Connector connector : jetty.getConnectors()) {
+            for (ConnectionFactory factory : connector.getConnectionFactories()) {
+                if (factory instanceof HttpConnectionFactory) {
+                    ((HttpConnectionFactory) factory).getHttpConfiguration().setSendServerVersion(false);
+                }
+            }
+        }
+        jetty.setStopAtShutdown(true);
+        jetty.setHandler(handlers);
+
+        try {
+            jetty.start();
+            jetty.join();
+        } catch (Exception e) {
+            LOG.error("", e);
+        } finally {
+            jetty.destroy();
+        }
+    }
+
+    private static ServletContextHandler createRoutingServlet() {
 
         Main main = DaggerMain.create();
         ComponentProvider ComponentProvider = new ComponentProviderWithDagger(main);
@@ -51,24 +79,20 @@ public class Application {
         servletContextHandler.setContextPath("/");
         servletContextHandler.addServlet(servletHolder, "/*");
 
-        Server jetty = new Server(8080);
-        for (Connector connector : jetty.getConnectors()) {
-            for (ConnectionFactory factory : connector.getConnectionFactories()) {
-                if (factory instanceof HttpConnectionFactory) {
-                    ((HttpConnectionFactory) factory).getHttpConfiguration().setSendServerVersion(false);
-                }
-            }
-        }
-        jetty.setStopAtShutdown(true);
-        jetty.setHandler(servletContextHandler);
+        return servletContextHandler;
+    }
 
-        try {
-            jetty.start();
-            jetty.join();
-        } catch (Exception e) {
-            LOG.error("", e);
-        } finally {
-            jetty.destroy();
-        }
+    private static ServletContextHandler createStaticResourcesServlet() {
+
+        ServletHolder servletHolder = new ServletHolder("Default Servlet", new DefaultServlet());
+        servletHolder.setInitOrder(0);
+
+        ServletContextHandler servletContextHandler = new ServletContextHandler(ServletContextHandler.NO_SESSIONS);
+        servletContextHandler.setContextPath("/static");
+        servletContextHandler.addServlet(servletHolder, "*.jpg");
+        servletContextHandler.addServlet(servletHolder, "*.png");
+        servletContextHandler.setBaseResource(Resource.newClassPathResource("/static/"));
+
+        return servletContextHandler;
     }
 }
