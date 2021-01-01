@@ -108,6 +108,10 @@ public class RoutingServlet extends HttpServlet {
             }
             PathValues values = entryPoint.parse(path);
             if (values != null) {
+                if (!entryPoint.matchUserRole(req)) {
+                    resp.sendError(HttpServletResponse.SC_FORBIDDEN, "Forbidden");
+                    return;
+                }
                 try {
                     Object result = entryPoint.invoke(req, resp, servletContext, values);
                     produce(req, resp, entryPoint, result);

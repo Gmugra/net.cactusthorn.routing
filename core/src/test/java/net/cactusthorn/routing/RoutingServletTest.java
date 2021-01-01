@@ -120,6 +120,11 @@ public class RoutingServletTest {
         public Response redirect() throws URISyntaxException {
             return Response.builder().seeOther(new URI("/xyz")).build();
         }
+
+        @GET @UserRoles({ "somerole" }) @Path("api/role") //
+        public Response role() throws URISyntaxException {
+            return Response.builder().seeOther(new URI("/xyz")).build();
+        }
     }
 
     public static class EntryPoint1Provider implements ComponentProvider {
@@ -402,5 +407,23 @@ public class RoutingServletTest {
         Mockito.verify(resp).sendError(code.capture(), Mockito.any());
 
         assertEquals(400, code.getValue());
+    }
+
+    @Test //
+    public void userRoles() throws ServletException, IOException {
+        RoutingConfig c = RoutingConfig.builder(new EntryPoint1Provider()).addEntryPoint(EntryPoint1.class)
+                .setParametersValidator(TEST_VALIDATOR).build();
+        RoutingServlet s = new RoutingServlet(c);
+
+        Mockito.when(req.getPathInfo()).thenReturn("/api/role");
+        Mockito.when(req.isUserInRole(Mockito.any())).thenReturn(false);
+
+        s.doGet(req, resp);
+
+        ArgumentCaptor<Integer> code = ArgumentCaptor.forClass(Integer.class);
+
+        Mockito.verify(resp).sendError(code.capture(), Mockito.any());
+
+        assertEquals(403, code.getValue());
     }
 }

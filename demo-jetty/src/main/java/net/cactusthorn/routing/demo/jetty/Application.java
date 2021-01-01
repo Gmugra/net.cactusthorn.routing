@@ -7,9 +7,21 @@ import net.cactusthorn.routing.thymeleaf.SimpleThymeleafProducer;
 import net.cactusthorn.routing.validation.javax.SimpleParametersValidator;
 import net.cactusthorn.routing.demo.jetty.dagger.*;
 
+import java.io.IOException;
+import java.security.Principal;
 import java.time.LocalDate;
+import java.util.EnumSet;
 
+import javax.servlet.DispatcherType;
+import javax.servlet.Filter;
+import javax.servlet.FilterChain;
+import javax.servlet.FilterConfig;
 import javax.servlet.MultipartConfigElement;
+import javax.servlet.ServletException;
+import javax.servlet.ServletRequest;
+import javax.servlet.ServletResponse;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletRequestWrapper;
 
 import org.eclipse.jetty.server.*;
 import org.eclipse.jetty.server.handler.HandlerList;
@@ -78,6 +90,7 @@ public class Application {
         ServletContextHandler servletContextHandler = new ServletContextHandler(ServletContextHandler.SESSIONS);
         servletContextHandler.setContextPath("/");
         servletContextHandler.addServlet(servletHolder, "/*");
+        servletContextHandler.addFilter(TestUserFilter.class, "/*", EnumSet.of(DispatcherType.INCLUDE, DispatcherType.REQUEST));
 
         return servletContextHandler;
     }
@@ -95,4 +108,42 @@ public class Application {
 
         return servletContextHandler;
     }
+
+    public static class TestUserFilter implements Filter {
+
+        @Override //
+        public void init(FilterConfig filterConfig) throws ServletException {
+        }
+
+        @Override //
+        public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
+            HttpServletRequest req = (HttpServletRequest) request;
+            chain.doFilter(new TestUserRequestWrapper(req), response);
+        }
+
+        @Override //
+        public void destroy() {
+        }
+
+        public static class TestUserRequestWrapper extends HttpServletRequestWrapper {
+
+            public TestUserRequestWrapper(HttpServletRequest request) {
+                super(request);
+            }
+
+            @Override //
+            public boolean isUserInRole(String role) {
+                return "TestRole".equals(role);
+            }
+
+            @Override //
+            public Principal getUserPrincipal() {
+                return () -> {
+                    return "TestUser";
+                };
+            }
+
+        }
+    }
+
 }

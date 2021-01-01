@@ -2,6 +2,7 @@ package net.cactusthorn.routing.invoke;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
+import java.security.Principal;
 
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
@@ -77,6 +78,9 @@ public abstract class MethodParameter {
             } else if (parameterClassType == ServletContext.class) {
 
                 return new ServletContextParameter(parameter);
+            } else if (parameterClassType == Principal.class) {
+
+                return new PrincipalParameter(parameter);
             } else if (parameter.getAnnotation(Context.class) != null) {
 
                 return new BodyParameter(method, parameter, convertersHolder, contentType);

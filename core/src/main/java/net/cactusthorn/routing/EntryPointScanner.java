@@ -2,17 +2,7 @@ package net.cactusthorn.routing;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.regex.Pattern;
 
 import javax.servlet.ServletContext;
@@ -31,7 +21,7 @@ import net.cactusthorn.routing.annotation.Path;
 import net.cactusthorn.routing.annotation.Produces;
 import net.cactusthorn.routing.annotation.Consumes;
 import net.cactusthorn.routing.annotation.Template;
-
+import net.cactusthorn.routing.annotation.UserRoles;
 import net.cactusthorn.routing.RoutingConfig.ConfigProperty;
 import net.cactusthorn.routing.PathTemplate.PathValues;
 import net.cactusthorn.routing.convert.ConverterException;
@@ -53,14 +43,17 @@ public class EntryPointScanner {
         private String contentType;
         private Pattern contentTypePattern;
         private String template;
+        private Set<String> userRoles;
 
-        private EntryPoint(PathTemplate pathTemplate, String produces, String template, String contentType, MethodInvoker methodInvoker) {
+        private EntryPoint(PathTemplate pathTemplate, String produces, String template, String contentType, MethodInvoker methodInvoker,
+                Set<String> userRoles) {
             this.pathTemplate = pathTemplate;
             this.produces = produces;
             this.template = template;
             this.contentType = contentType;
-            contentTypePattern = Pattern.compile(contentType.replace("*", "(.*)"));
+            this.contentTypePattern = Pattern.compile(contentType.replace("*", "(.*)"));
             this.methodInvoker = methodInvoker;
+            this.userRoles = userRoles;
         }
 
         public boolean match(String path) {
@@ -90,6 +83,13 @@ public class EntryPointScanner {
 
         public String consumes() {
             return contentType;
+        }
+
+        public boolean matchUserRole(HttpServletRequest req) {
+            if (userRoles.isEmpty()) {
+                return true;
+            }
+            return userRoles.stream().filter(r -> req.isUserInRole(r)).findAny().isPresent();
         }
 
         public static final String FORM_DATA = "multipart/form-data";
@@ -151,7 +151,9 @@ public class EntryPointScanner {
                         MethodInvoker methodInvoker = new MethodInvoker(clazz, method, componentProvider, convertersHolder, contentType,
                                 configProperties, validator);
 
-                        EntryPoint entryPoint = new EntryPoint(pathTemplate, produces, template, contentType, methodInvoker);
+                        Set<String> userRoles = findUserRoles(method);
+
+                        EntryPoint entryPoint = new EntryPoint(pathTemplate, produces, template, contentType, methodInvoker, userRoles);
                         entryPoints.get(type).add(entryPoint);
                     }
                 }
@@ -190,6 +192,14 @@ public class EntryPointScanner {
             return consumes.value();
         }
         return CONSUMES_DEFAULT;
+    }
+
+    private Set<String> findUserRoles(Method method) {
+        UserRoles userRoles = method.getAnnotation(UserRoles.class);
+        if (userRoles != null) {
+            return new HashSet<>(Arrays.asList(userRoles.value()));
+        }
+        return Collections.emptySet();
     }
 
     private String findConsumes(Method method, String clazzConsumes) {

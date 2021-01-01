@@ -2,6 +2,7 @@ package net.cactusthorn.routing.demo.jetty.entrypoint;
 
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.security.Principal;
 import java.time.LocalDate;
 
 import javax.inject.Inject;
@@ -16,6 +17,7 @@ import net.cactusthorn.routing.annotation.PathParam;
 import net.cactusthorn.routing.annotation.Produces;
 import net.cactusthorn.routing.annotation.QueryParam;
 import net.cactusthorn.routing.annotation.Template;
+import net.cactusthorn.routing.annotation.UserRoles;
 import net.cactusthorn.routing.demo.jetty.dagger.EntryPoint;
 
 public class SimpleEntryPoint implements EntryPoint {
@@ -53,7 +55,16 @@ public class SimpleEntryPoint implements EntryPoint {
     }
 
     @GET @Path("/localdate/{date : \\d{8}}") //
-    public String localdate(@PathParam("date") LocalDate date) throws URISyntaxException {
+    public String localdate(@PathParam("date") LocalDate date) {
         return date.toString();
+    }
+
+    @GET @UserRoles({ "TestRole" }) @Path("/principal") //
+    public String principal(Principal principal) {
+        return principal.getName();
+    }
+
+    @GET @UserRoles({ "WrongRole" }) @Path("/wrongrole") //
+    public void wrongRole() {
     }
 }
