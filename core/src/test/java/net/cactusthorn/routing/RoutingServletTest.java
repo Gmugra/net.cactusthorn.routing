@@ -426,4 +426,18 @@ public class RoutingServletTest {
 
         assertEquals(403, code.getValue());
     }
+
+    public static final Consumer EXCEPTION_CONSUMER = (clazz, mediaType, data) -> {
+        throw new RuntimeException("TEST IT");
+    };
+
+    @Test //
+    public void init() throws ServletException {
+        RoutingConfig c = RoutingConfig.builder(new EntryPoint1Provider()).addEntryPoint(EntryPoint1.class)
+                .setParametersValidator(TEST_VALIDATOR).addConsumer("aa/bb", EXCEPTION_CONSUMER).build();
+        RoutingServlet servlet = new RoutingServlet(c);
+        RoutingServlet spyServlet = Mockito.spy(servlet);
+        Mockito.doReturn(null).when(spyServlet).getServletContext();
+        spyServlet.init();
+    }
 }

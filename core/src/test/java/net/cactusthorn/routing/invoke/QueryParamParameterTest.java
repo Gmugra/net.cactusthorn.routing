@@ -6,20 +6,14 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
 import java.util.*;
 
-import javax.servlet.http.HttpServletRequest;
-
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
 import net.cactusthorn.routing.RoutingInitializationException;
 import net.cactusthorn.routing.RequestData;
 import net.cactusthorn.routing.annotation.QueryParam;
-import net.cactusthorn.routing.convert.ConvertersHolder;
 
-public class QueryParamParameterTest {
-
-    static final ConvertersHolder HOLDER = new ConvertersHolder();
+public class QueryParamParameterTest extends InvokeTestAncestor {
 
     public static class EntryPoint1 {
 
@@ -52,23 +46,16 @@ public class QueryParamParameterTest {
         }
     }
 
-    HttpServletRequest request;
-
-    @BeforeEach //
-    void setUp() {
-        request = Mockito.mock(HttpServletRequest.class);
-    }
-
     @Test //
     public void collectionNoGeneric() {
-        Method m = findMethod("collectionNoGeneric");
+        Method m = findMethod(EntryPoint1.class, "collectionNoGeneric");
         Parameter p = m.getParameters()[0];
         assertThrows(RoutingInitializationException.class, () -> MethodParameter.Factory.create(m, p, HOLDER, "*/*"));
     }
 
     @Test //
     public void linkedList() throws Exception {
-        Method m = findMethod("linkedList");
+        Method m = findMethod(EntryPoint1.class,"linkedList");
         Parameter p = m.getParameters()[0];
         MethodParameter mp = MethodParameter.Factory.create(m, p, HOLDER, "*/*");
 
@@ -84,7 +71,7 @@ public class QueryParamParameterTest {
 
     @Test //
     public void sortedSet() throws Exception {
-        Method m = findMethod("sortedSet");
+        Method m = findMethod(EntryPoint1.class, "sortedSet");
         Parameter p = m.getParameters()[0];
         MethodParameter mp = MethodParameter.Factory.create(m, p, HOLDER, "*/*");
 
@@ -100,7 +87,7 @@ public class QueryParamParameterTest {
 
     @Test //
     public void set() throws Exception {
-        Method m = findMethod("set");
+        Method m = findMethod(EntryPoint1.class, "set");
         Parameter p = m.getParameters()[0];
         MethodParameter mp = MethodParameter.Factory.create(m, p, HOLDER, "*/*");
 
@@ -115,7 +102,7 @@ public class QueryParamParameterTest {
 
     @Test //
     public void list() throws Exception {
-        Method m = findMethod("list");
+        Method m = findMethod(EntryPoint1.class, "list");
         Parameter p = m.getParameters()[0];
         MethodParameter mp = MethodParameter.Factory.create(m, p, HOLDER, "*/*");
 
@@ -131,7 +118,7 @@ public class QueryParamParameterTest {
 
     @Test //
     public void collection() throws Exception {
-        Method m = findMethod("collection");
+        Method m = findMethod(EntryPoint1.class, "collection");
         Parameter p = m.getParameters()[0];
         MethodParameter mp = MethodParameter.Factory.create(m, p, HOLDER, "*/*");
 
@@ -146,8 +133,8 @@ public class QueryParamParameterTest {
     }
 
     @Test //
-    public void nullCcollection() throws Exception {
-        Method m = findMethod("collection");
+    public void nullCollection() throws Exception {
+        Method m = findMethod(EntryPoint1.class, "collection");
         Parameter p = m.getParameters()[0];
         MethodParameter mp = MethodParameter.Factory.create(m, p, HOLDER, "*/*");
 
@@ -162,7 +149,7 @@ public class QueryParamParameterTest {
 
     @Test //
     public void array() throws Exception {
-        Method m = findMethod("array");
+        Method m = findMethod(EntryPoint1.class, "array");
         Parameter p = m.getParameters()[0];
         MethodParameter mp = MethodParameter.Factory.create(m, p, HOLDER, "*/*");
 
@@ -175,14 +162,14 @@ public class QueryParamParameterTest {
 
     @Test //
     public void multiArray() {
-        Method m = findMethod("multiArray");
+        Method m = findMethod(EntryPoint1.class, "multiArray");
         Parameter p = m.getParameters()[0];
         assertThrows(RoutingInitializationException.class, () -> MethodParameter.Factory.create(m, p, HOLDER, "*/*"));
     }
 
     @Test //
     public void wrong() {
-        Method m = findMethod("wrong");
+        Method m = findMethod(EntryPoint1.class, "wrong");
         Parameter p = m.getParameters()[0];
         MethodParameter mp = MethodParameter.Factory.create(m, p, HOLDER, "*/*");
 
@@ -190,14 +177,5 @@ public class QueryParamParameterTest {
         RequestData data = new RequestData(null);
 
         assertThrows(NumberFormatException.class, () -> mp.findValue(request, null, null, data));
-    }
-
-    private Method findMethod(String methodName) {
-        for (Method method : EntryPoint1.class.getMethods()) {
-            if (methodName.equals(method.getName())) {
-                return method;
-            }
-        }
-        return null;
     }
 }

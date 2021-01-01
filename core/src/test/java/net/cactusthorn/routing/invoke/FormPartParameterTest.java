@@ -12,21 +12,16 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.Part;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
 import net.cactusthorn.routing.RoutingInitializationException;
 import net.cactusthorn.routing.annotation.FormPart;
 import net.cactusthorn.routing.convert.ConverterException;
-import net.cactusthorn.routing.convert.ConvertersHolder;
 
-public class FormPartParameterTest {
-
-    static final ConvertersHolder HOLDER = new ConvertersHolder();
+public class FormPartParameterTest extends InvokeTestAncestor {
 
     public static class EntryPoint1 {
 
@@ -84,16 +79,9 @@ public class FormPartParameterTest {
         }
     }
 
-    HttpServletRequest request;
-
-    @BeforeEach //
-    void setUp() {
-        request = Mockito.mock(HttpServletRequest.class);
-    }
-
     @Test //
     public void simple() throws Exception {
-        Method m = findMethod("simple");
+        Method m = findMethod(EntryPoint1.class, "simple");
         Parameter p = m.getParameters()[0];
         MethodParameter mp = MethodParameter.Factory.create(m, p, HOLDER, "*/*");
 
@@ -107,7 +95,7 @@ public class FormPartParameterTest {
 
     @Test //
     public void notfound() throws Exception {
-        Method m = findMethod("simple");
+        Method m = findMethod(EntryPoint1.class, "simple");
         Parameter p = m.getParameters()[0];
         MethodParameter mp = MethodParameter.Factory.create(m, p, HOLDER, "*/*");
 
@@ -118,7 +106,7 @@ public class FormPartParameterTest {
 
     @Test //
     public void notfound2() throws Exception {
-        Method m = findMethod("simple");
+        Method m = findMethod(EntryPoint1.class, "simple");
         Parameter p = m.getParameters()[0];
         MethodParameter mp = MethodParameter.Factory.create(m, p, HOLDER, "*/*");
 
@@ -132,17 +120,8 @@ public class FormPartParameterTest {
 
     @Test //
     public void wrongType() throws ConverterException {
-        Method m = findMethod("wrongType");
+        Method m = findMethod(EntryPoint1.class, "wrongType");
         Parameter p = m.getParameters()[0];
         assertThrows(RoutingInitializationException.class, () -> MethodParameter.Factory.create(m, p, HOLDER, "*/*"));
-    }
-
-    private Method findMethod(String methodName) {
-        for (Method method : EntryPoint1.class.getMethods()) {
-            if (methodName.equals(method.getName())) {
-                return method;
-            }
-        }
-        return null;
     }
 }

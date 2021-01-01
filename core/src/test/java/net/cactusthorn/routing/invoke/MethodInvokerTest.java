@@ -4,7 +4,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 import java.io.BufferedReader;
-import java.io.IOException;
 import java.io.StringReader;
 import java.lang.reflect.*;
 import java.util.HashMap;
@@ -29,7 +28,7 @@ import net.cactusthorn.routing.annotation.*;
 import net.cactusthorn.routing.convert.ConvertersHolder;
 import net.cactusthorn.routing.validate.ParametersValidator;
 
-public class MethodInvokerTest {
+public class MethodInvokerTest extends InvokeTestAncestor {
 
     public static final Consumer TEST_CONSUMER = (clazz, mediaType, data) -> {
         return new java.util.Date();
@@ -87,7 +86,7 @@ public class MethodInvokerTest {
     static ConvertersHolder holder;
 
     @BeforeAll //
-    static void setUp() {
+    static void beforeAll() {
         holder = new ConvertersHolder();
         holder.register("test/date", TEST_CONSUMER);
         provider = new EntryPoint1Provider();
@@ -95,17 +94,15 @@ public class MethodInvokerTest {
         configProperties.put(ConfigProperty.READ_BODY_BUFFER_SIZE, 512);
     }
 
-    HttpServletRequest request;
-
     HttpServletResponse response;
 
     HttpSession session;
 
     ServletContext context;
 
-    @BeforeEach //
-    void mock() throws IOException {
-        request = Mockito.mock(HttpServletRequest.class);
+    @BeforeEach @Override //
+    protected void setUp() throws Exception {
+        super.setUp();
         session = Mockito.mock(HttpSession.class);
         context = Mockito.mock(ServletContext.class);
         response = Mockito.mock(HttpServletResponse.class);
@@ -120,7 +117,7 @@ public class MethodInvokerTest {
     @Test //
     public void invokeM1() throws Exception {
 
-        Method method = findMethod("m1");
+        Method method = findMethod(EntryPoint1.class, "m1");
         MethodInvoker caller = new MethodInvoker(EntryPoint1.class, method, provider, holder, "*/*", configProperties, VALIDATOR);
 
         PathValues values = new PathValues();
@@ -134,7 +131,7 @@ public class MethodInvokerTest {
     @Test //
     public void invokeM0() throws Exception {
 
-        Method method = findMethod("m0");
+        Method method = findMethod(EntryPoint1.class, "m0");
         MethodInvoker caller = new MethodInvoker(EntryPoint1.class, method, provider, holder, "*/*", configProperties, VALIDATOR);
 
         PathValues values = PathValues.EMPTY;
@@ -147,7 +144,7 @@ public class MethodInvokerTest {
     @Test //
     public void invokeM2() throws Exception {
 
-        Method method = findMethod("m2");
+        Method method = findMethod(EntryPoint1.class, "m2");
         MethodInvoker caller = new MethodInvoker(EntryPoint1.class, method, provider, holder, "*/*", configProperties, VALIDATOR);
 
         PathValues values = PathValues.EMPTY;
@@ -160,7 +157,7 @@ public class MethodInvokerTest {
     @Test //
     public void invokeM3() throws Exception {
 
-        Method method = findMethod("m3");
+        Method method = findMethod(EntryPoint1.class, "m3");
         MethodInvoker caller = new MethodInvoker(EntryPoint1.class, method, provider, holder, "*/*", configProperties, VALIDATOR);
 
         PathValues values = new PathValues();
@@ -174,7 +171,7 @@ public class MethodInvokerTest {
     @Test //
     public void invokeM4() throws Exception {
 
-        Method method = findMethod("m4");
+        Method method = findMethod(EntryPoint1.class, "m4");
         MethodInvoker caller = new MethodInvoker(EntryPoint1.class, method, provider, holder, "*/*", configProperties, VALIDATOR);
 
         String result = (String) caller.invoke(request, null, null, null);
@@ -185,7 +182,7 @@ public class MethodInvokerTest {
     @Test //
     public void invokeM5() throws Exception {
 
-        Method method = findMethod("m5");
+        Method method = findMethod(EntryPoint1.class, "m5");
         MethodInvoker caller = new MethodInvoker(EntryPoint1.class, method, provider, holder, "*/*", configProperties, VALIDATOR);
 
         String result = (String) caller.invoke(request, null, context, null);
@@ -196,7 +193,7 @@ public class MethodInvokerTest {
     @Test //
     public void invokeM6() throws Exception {
 
-        Method method = findMethod("m6");
+        Method method = findMethod(EntryPoint1.class, "m6");
         MethodInvoker caller = new MethodInvoker(EntryPoint1.class, method, provider, holder, "*/*", configProperties, VALIDATOR);
 
         String result = (String) caller.invoke(request, response, null, null);
@@ -210,20 +207,11 @@ public class MethodInvokerTest {
         BufferedReader reader = new BufferedReader(new StringReader("TO HAVE BODY"));
         Mockito.when(request.getReader()).thenReturn(reader);
 
-        Method method = findMethod("m7");
+        Method method = findMethod(EntryPoint1.class, "m7");
         MethodInvoker caller = new MethodInvoker(EntryPoint1.class, method, provider, holder, "test/date", configProperties, VALIDATOR);
 
         java.util.Date result = (java.util.Date) caller.invoke(request, response, null, null);
 
         assertNotNull(result);
-    }
-
-    private Method findMethod(String methodName) {
-        for (Method method : EntryPoint1.class.getMethods()) {
-            if (methodName.equals(method.getName())) {
-                return method;
-            }
-        }
-        return null;
     }
 }

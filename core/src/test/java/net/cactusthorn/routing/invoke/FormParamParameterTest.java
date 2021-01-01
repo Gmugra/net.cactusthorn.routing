@@ -6,9 +6,6 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
 
-import javax.servlet.http.HttpServletRequest;
-
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
@@ -16,11 +13,8 @@ import net.cactusthorn.routing.RoutingInitializationException;
 import net.cactusthorn.routing.annotation.DefaultValue;
 import net.cactusthorn.routing.annotation.FormParam;
 import net.cactusthorn.routing.convert.ConverterException;
-import net.cactusthorn.routing.convert.ConvertersHolder;
 
-public class FormParamParameterTest {
-
-    static final ConvertersHolder HOLDER = new ConvertersHolder();
+public class FormParamParameterTest extends InvokeTestAncestor {
 
     public static class EntryPoint1 {
 
@@ -34,16 +28,9 @@ public class FormParamParameterTest {
         }
     }
 
-    HttpServletRequest request;
-
-    @BeforeEach //
-    void setUp() {
-        request = Mockito.mock(HttpServletRequest.class);
-    }
-
     @Test //
     public void simple() throws Exception {
-        Method m = findMethod("simple");
+        Method m = findMethod(EntryPoint1.class, "simple");
         Parameter p = m.getParameters()[0];
         MethodParameter mp = MethodParameter.Factory.create(m, p, HOLDER, "application/x-www-form-urlencoded");
 
@@ -54,7 +41,7 @@ public class FormParamParameterTest {
 
     @Test //
     public void defaultArray() throws Exception {
-        Method m = findMethod("defaultArray");
+        Method m = findMethod(EntryPoint1.class, "defaultArray");
         Parameter p = m.getParameters()[0];
         MethodParameter mp = MethodParameter.Factory.create(m, p, HOLDER, "application/x-www-form-urlencoded");
 
@@ -66,7 +53,7 @@ public class FormParamParameterTest {
 
     @Test //
     public void defaultValue() throws Exception {
-        Method m = findMethod("defaultValue");
+        Method m = findMethod(EntryPoint1.class, "defaultValue");
         Parameter p = m.getParameters()[0];
         MethodParameter mp = MethodParameter.Factory.create(m, p, HOLDER, "application/x-www-form-urlencoded");
 
@@ -77,17 +64,8 @@ public class FormParamParameterTest {
 
     @Test //
     public void wrongContentType() throws ConverterException {
-        Method m = findMethod("simple");
+        Method m = findMethod(EntryPoint1.class, "simple");
         Parameter p = m.getParameters()[0];
         assertThrows(RoutingInitializationException.class, () -> MethodParameter.Factory.create(m, p, HOLDER, "*/*"));
-    }
-
-    private Method findMethod(String methodName) {
-        for (Method method : EntryPoint1.class.getMethods()) {
-            if (methodName.equals(method.getName())) {
-                return method;
-            }
-        }
-        return null;
     }
 }
