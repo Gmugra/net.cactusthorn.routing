@@ -131,12 +131,6 @@
         <dependencies>
 
             <dependency>
-                <groupId>org.slf4j</groupId>
-                <artifactId>slf4j-api</artifactId>
-                <version>${dependency.slf4j}</version>
-            </dependency>
-
-            <dependency>
                 <groupId>javax.servlet</groupId>
                 <artifactId>javax.servlet-api</artifactId>
                 <version>${dependency.servlet}</version>
@@ -182,6 +176,16 @@
                 <version>${dependency.dagger}</version>
             </dependency>
 
+            <dependency>
+                <groupId>org.slf4j</groupId>
+                <artifactId>slf4j-api</artifactId>
+                <version>${dependency.slf4j}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.slf4j</groupId>
+                <artifactId>jul-to-slf4j</artifactId>
+                <version>${dependency.slf4j}</version>
+            </dependency>
             <dependency>
                 <groupId>ch.qos.logback</groupId>
                 <artifactId>logback-classic</artifactId>

@@ -11,6 +11,7 @@ import java.io.IOException;
 import java.security.Principal;
 import java.time.LocalDate;
 import java.util.EnumSet;
+import java.util.logging.Level;
 
 import javax.servlet.DispatcherType;
 import javax.servlet.Filter;
@@ -29,12 +30,18 @@ import org.eclipse.jetty.servlet.*;
 import org.eclipse.jetty.util.resource.Resource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.slf4j.bridge.SLF4JBridgeHandler;
 
 public class Application {
 
     private static final Logger LOG = LoggerFactory.getLogger(Application.class);
 
     public static void main(String... args) {
+
+        // java.util.loggingg -> SLF4j
+        SLF4JBridgeHandler.removeHandlersForRootLogger();
+        SLF4JBridgeHandler.install();
+        java.util.logging.Logger.getLogger("").setLevel(Level.FINEST);
 
         HandlerList handlers = new HandlerList();
         handlers.addHandler(createStaticResourcesServlet());

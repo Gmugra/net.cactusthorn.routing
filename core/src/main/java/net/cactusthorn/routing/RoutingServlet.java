@@ -5,12 +5,11 @@ import java.lang.annotation.Annotation;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import javax.servlet.*;
 import javax.servlet.http.*;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import net.cactusthorn.routing.EntryPointScanner.EntryPoint;
 import net.cactusthorn.routing.RoutingConfig.ConfigProperty;
@@ -25,7 +24,7 @@ public class RoutingServlet extends HttpServlet {
 
     private static final long serialVersionUID = 0L;
 
-    private static final Logger LOG = LoggerFactory.getLogger(RoutingServlet.class);
+    private static final Logger LOG = Logger.getLogger(RoutingServlet.class.getName());
 
     private transient Map<Class<? extends Annotation>, List<EntryPoint>> allEntryPoints;
     private transient ServletContext servletContext;
@@ -142,8 +141,8 @@ public class RoutingServlet extends HttpServlet {
         } else if (!"/".equals(path) && path.charAt(path.length() - 1) != '/') {
             path += '/';
         }
-        LOG.debug("{}({} {}) PathInfo -> original: \"{}\", corrected: \"{}\"", req.getMethod(), contentType, req.getCharacterEncoding(),
-                original, path);
+        LOG.log(Level.FINE, "{0}({1} {2}) PathInfo -> original: \"{3}\", corrected: \"{4}\"",
+                new Object[] {req.getMethod(), contentType, req.getCharacterEncoding(), original, path});
         return path;
     }
 
@@ -156,7 +155,7 @@ public class RoutingServlet extends HttpServlet {
         String contentType = entryPoint.produces();
         resp.setContentType(contentType);
         producers.get(contentType).produce(result, entryPoint.template(), contentType, req, resp);
-        LOG.debug("Producer processing done for Content-Type: {}", contentType);
+        LOG.log(Level.FINE, "Producer processing done for Content-Type: {0}", new Object[] {contentType});
     }
 
     private void produce(HttpServletRequest req, HttpServletResponse resp, EntryPoint entryPoint, Response response) throws IOException {
@@ -187,10 +186,10 @@ public class RoutingServlet extends HttpServlet {
             if (response.body() != null) {
                 resp.getWriter().write(String.valueOf(response.body()));
             }
-            LOG.debug("Producer processing skipped!");
+            LOG.fine("Producer processing skipped!");
             return;
         }
         producers.get(contentType).produce(response.body(), template, contentType, req, resp);
-        LOG.debug("Producer processing done for Content-Type: {}", contentType);
+        LOG.log(Level.FINE, "Producer processing done for Content-Type: {0}", new Object[] {contentType});
     }
 }

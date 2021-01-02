@@ -8,8 +8,6 @@ import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.thymeleaf.ITemplateEngine;
 import org.thymeleaf.TemplateEngine;
 import org.thymeleaf.templatemode.TemplateMode;
@@ -20,8 +18,6 @@ import net.cactusthorn.routing.ComponentProvider;
 import net.cactusthorn.routing.producer.Producer;
 
 public class SimpleThymeleafProducer implements Producer {
-
-    private static final Logger LOG = LoggerFactory.getLogger(SimpleThymeleafProducer.class);
 
     private ITemplateEngine templateEngine;
 
@@ -69,7 +65,6 @@ public class SimpleThymeleafProducer implements Producer {
         }
 
         templateEngine.process(template, ctx, resp.getWriter());
-        LOG.debug("processed template: {}", template);
     }
 
 }

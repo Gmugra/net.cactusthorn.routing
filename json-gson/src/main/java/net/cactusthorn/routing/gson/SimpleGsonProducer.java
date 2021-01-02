@@ -5,9 +5,6 @@ import java.io.IOException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.stream.JsonWriter;
@@ -15,8 +12,6 @@ import com.google.gson.stream.JsonWriter;
 import net.cactusthorn.routing.producer.Producer;
 
 public class SimpleGsonProducer implements Producer {
-
-    private static final Logger LOG = LoggerFactory.getLogger(SimpleGsonProducer.class);
 
     private Gson gson;
 
@@ -32,7 +27,6 @@ public class SimpleGsonProducer implements Producer {
     public void produce(Object object, String template, String mediaType, HttpServletRequest req, HttpServletResponse resp)
             throws IOException {
         if (object == null) {
-            LOG.warn("Entry point return Object is NULL");
             if (resp.getStatus() == HttpServletResponse.SC_OK) {
                 resp.setStatus(HttpServletResponse.SC_NO_CONTENT);
             }
