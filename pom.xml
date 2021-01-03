@@ -10,7 +10,7 @@
     <packaging>pom</packaging>
 
     <name>Routing :: Root</name>
-    <description>Lightweight Java library for HTTP requests routing</description>
+    <description>Parent POM</description>
     <url>https://github.com/Gmugra/net.cactusthorn.routing</url>
 
     <licenses>

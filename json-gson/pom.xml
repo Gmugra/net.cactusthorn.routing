@@ -12,7 +12,29 @@
 
     <artifactId>json-gson</artifactId>
     <packaging>jar</packaging>
+
     <name>Routing :: JSON with Gson</name>
+    <description>JSON Consumer and Producer using Gson</description>
+
+    <licenses>
+        <license>
+            <name>BSD 3-Clause License</name>
+            <url>https://github.com/Gmugra/net.cactusthorn.routing/blob/main/LICENSE</url>
+            <distribution>repo</distribution>
+        </license>
+    </licenses>
+    <developers>
+        <developer>
+            <name>Alexei Khatskevich</name>
+            <email>alexei.khatskevich@gmail.com</email>
+        </developer>
+    </developers>
+
+    <scm>
+        <url>https://github.com/Gmugra/net.cactusthorn.routing</url>
+        <connection>scm:git:https://github.com/Gmugra/net.cactusthorn.routing.git</connection>
+        <developerConnection>scm:git:https://github.com/Gmugra/net.cactusthorn.routing.git</developerConnection>
+    </scm>
 
     <properties>
         <pmd.skip>false</pmd.skip>

@@ -84,7 +84,7 @@ The library is doing only routing, but it's expected that the application provid
 1. multiple Consumers to convert request body to Java objects based on Content-Type
 
 **The basic idea**: build web application with only the components you prefer.
-The Routing Library JAR itself is less then 100KB (+ ~ 40KB _SLF4J_ JAR ; + ~ 100KB _javax.servlet-api_ JAR).
+The Routing Library JAR itself is less then 100KB (+ ~ 100KB _javax.servlet-api_ JAR).
 
 The flow is simple:
 1. The Servlet get the HTTP request, and find the method which should process it.
@@ -107,7 +107,7 @@ It uses the embedded [Jetty](https://www.eclipse.org/jetty/) as servlet-containe
 and [Dagger 2](https://dagger.dev) for dependency injection and as the basis for the _ComponentProvider_.
 
 More or less there are examples of everything:
-Various "simple" requests, JSON, File uploading (multipart/form-data), HTML with Thymeleaf, Scopes, parameters validation with javax.validation
+Various "simple" requests, JSON, File uploading (multipart/form-data), HTML with Thymeleaf, Scopes, parameters validation with javax.validation, @UserRoles
 
 ## Features
 
@@ -131,14 +131,27 @@ Various "simple" requests, JSON, File uploading (multipart/form-data), HTML with
 1. @Consumes for class and/or method. To specify Content-Type as additional routing filter. Wildcard is supported (e.g. text/* )
 1. Consumer interface. Implementation examples:
    1. application/json: _SimpleGsonConsumer_ (**json-gson** module)
-1. inject HttpServletRequest, HttpServletResponse, HttpSession, ServletContext in method parameters
+1. Inject _HttpServletRequest_, _HttpServletResponse_, _HttpSession_, _ServletContext_, _java.security.Principal_ in method parameters
 1. _Response_ class to manually construct response.
 1. ParametersValidator interface to integrate additional validations e.g. _javax.validation_
    1. Implemetation example is **validation-javax** module
+1. @UserRoles annotation
+   1. to check entry point against request.isUserInRole(...)
+   1. Implemetation example exists in **demo-jetty** module
 
 ## DOWNLOAD
 
-Public Releases can be downloaded from [GitHub Releases](https://github.com/Gmugra/net.cactusthorn.routing/releases) page or [Maven Central Repository](https://search.maven.org/search?q=g:net.cactusthorn.routing)
+[Maven Central Repository](https://search.maven.org/search?q=g:net.cactusthorn.routing):
+```xml
+<dependency>
+    <groupId>net.cactusthorn.routing</groupId>
+    <artifactId>core</artifactId>
+    <version>0.26</version>
+</dependency>
+```
+
+Public Releases can be also downloaded from [GitHub Releases](https://github.com/Gmugra/net.cactusthorn.routing/releases) or [GitHub Packages](https://github.com/Gmugra?tab=packages&repo_name=net.cactusthorn.routing)
+
 
 ## LICENSE
 
