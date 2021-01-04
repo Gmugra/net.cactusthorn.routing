@@ -139,6 +139,12 @@ Various "simple" requests, JSON, File uploading (multipart/form-data), HTML with
    1. to check entry point against request.isUserInRole(...)
    1. Implemetation example exists in **demo-jetty** module
 
+TODO
+1. @Converter to override "default" converter for some parameter
+1. @MatrixParam
+1. PathSegment
+1. AsyncResponse
+
 ## DOWNLOAD
 
 [Maven Central Repository](https://search.maven.org/search?q=g:net.cactusthorn.routing):
