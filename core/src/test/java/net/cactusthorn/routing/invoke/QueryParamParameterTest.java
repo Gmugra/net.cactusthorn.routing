@@ -5,19 +5,23 @@ import static org.junit.jupiter.api.Assertions.*;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
 import java.util.*;
+import java.util.stream.Stream;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.Mockito;
 
 import net.cactusthorn.routing.RoutingInitializationException;
-import net.cactusthorn.routing.RequestData;
 import net.cactusthorn.routing.annotation.QueryParam;
 
 public class QueryParamParameterTest extends InvokeTestAncestor {
 
     public static class EntryPoint1 {
 
-        public void array(@QueryParam("val") int[] values) {
+        public void array(@QueryParam("val") Integer[] values) {
         }
 
         public void multiArray(@QueryParam("val") int[][] values) {
@@ -32,9 +36,6 @@ public class QueryParamParameterTest extends InvokeTestAncestor {
         public void list(@QueryParam("val") List<Integer> values) {
         }
 
-        public void set(@QueryParam("val") Set<Integer> values) {
-        }
-
         public void sortedSet(@QueryParam("val") SortedSet<Integer> values) {
         }
 
@@ -46,90 +47,39 @@ public class QueryParamParameterTest extends InvokeTestAncestor {
         }
     }
 
-    @Test //
-    public void collectionNoGeneric() {
-        Method m = findMethod(EntryPoint1.class, "collectionNoGeneric");
+    @ParameterizedTest @MethodSource("collectionArguments") //
+    public void collections(String methodName, String[] requestValues, Integer[] expected) throws Exception {
+        Method m = findMethod(EntryPoint1.class, methodName);
+        Parameter p = m.getParameters()[0];
+        MethodParameter mp = MethodParameter.Factory.create(m, p, HOLDER, "*/*");
+
+        Mockito.when(request.getParameterValues("val")).thenReturn(requestValues);
+
+        Object result = mp.findValue(request, null, null, null);
+
+        if (result.getClass().isArray()) {
+            assertArrayEquals(expected, (Integer[]) result);
+        } else {
+            assertArrayEquals(expected, ((Collection<?>) result).toArray());
+        }
+    }
+
+    private static Stream<Arguments> collectionArguments() {
+        // @formatter:off
+        return Stream.of(
+            Arguments.of("linkedList", new String[] {"10", "20", "30"}, new Integer[] {10, 20, 30}),
+            Arguments.of("sortedSet", new String[] {"10", "20", "20"}, new Integer[] {10, 20}),
+            Arguments.of("list", new String[] {"10", "20", "30"}, new Integer[] {10, 20, 30}),
+            Arguments.of("collection", new String[] {"10", "20", "30"}, new Integer[] {10, 20, 30}),
+            Arguments.of("array", new String[] {"100", "200"}, new Integer[] {100, 200}));
+        // @formatter:on
+    }
+
+    @ParameterizedTest @ValueSource(strings = { "collectionNoGeneric", "multiArray" }) //
+    public void testThrows(String method) {
+        Method m = findMethod(EntryPoint1.class, method);
         Parameter p = m.getParameters()[0];
         assertThrows(RoutingInitializationException.class, () -> MethodParameter.Factory.create(m, p, HOLDER, "*/*"));
-    }
-
-    @Test //
-    public void linkedList() throws Exception {
-        Method m = findMethod(EntryPoint1.class,"linkedList");
-        Parameter p = m.getParameters()[0];
-        MethodParameter mp = MethodParameter.Factory.create(m, p, HOLDER, "*/*");
-
-        String[] values = new String[] { "10", "20", "30" };
-        Mockito.when(request.getParameterValues("val")).thenReturn(values);
-
-        @SuppressWarnings("unchecked") //
-        LinkedList<Integer> collection = (LinkedList<Integer>) mp.findValue(request, null, null, null);
-
-        Integer[] expected = new Integer[] { 10, 20, 30 };
-        assertArrayEquals(expected, collection.toArray());
-    }
-
-    @Test //
-    public void sortedSet() throws Exception {
-        Method m = findMethod(EntryPoint1.class, "sortedSet");
-        Parameter p = m.getParameters()[0];
-        MethodParameter mp = MethodParameter.Factory.create(m, p, HOLDER, "*/*");
-
-        String[] values = new String[] { "10", "20", "20" };
-        Mockito.when(request.getParameterValues("val")).thenReturn(values);
-
-        @SuppressWarnings("unchecked") //
-        SortedSet<Integer> collection = (SortedSet<Integer>) mp.findValue(request, null, null, null);
-
-        Integer[] expected = new Integer[] { 10, 20 };
-        assertArrayEquals(expected, collection.toArray());
-    }
-
-    @Test //
-    public void set() throws Exception {
-        Method m = findMethod(EntryPoint1.class, "set");
-        Parameter p = m.getParameters()[0];
-        MethodParameter mp = MethodParameter.Factory.create(m, p, HOLDER, "*/*");
-
-        String[] values = new String[] { "10", "20", "20" };
-        Mockito.when(request.getParameterValues("val")).thenReturn(values);
-
-        @SuppressWarnings("unchecked") //
-        Set<Integer> collection = (Set<Integer>) mp.findValue(request, null, null, null);
-
-        assertEquals(2, collection.size());
-    }
-
-    @Test //
-    public void list() throws Exception {
-        Method m = findMethod(EntryPoint1.class, "list");
-        Parameter p = m.getParameters()[0];
-        MethodParameter mp = MethodParameter.Factory.create(m, p, HOLDER, "*/*");
-
-        String[] values = new String[] { "10", "20", "30" };
-        Mockito.when(request.getParameterValues("val")).thenReturn(values);
-
-        @SuppressWarnings("unchecked") //
-        List<Integer> collection = (List<Integer>) mp.findValue(request, null, null, null);
-
-        Integer[] expected = new Integer[] { 10, 20, 30 };
-        assertArrayEquals(expected, collection.toArray());
-    }
-
-    @Test //
-    public void collection() throws Exception {
-        Method m = findMethod(EntryPoint1.class, "collection");
-        Parameter p = m.getParameters()[0];
-        MethodParameter mp = MethodParameter.Factory.create(m, p, HOLDER, "*/*");
-
-        String[] values = new String[] { "10", "20", "30" };
-        Mockito.when(request.getParameterValues("val")).thenReturn(values);
-
-        @SuppressWarnings("unchecked") //
-        Collection<Integer> collection = (Collection<Integer>) mp.findValue(request, null, null, null);
-
-        Integer[] expected = new Integer[] { 10, 20, 30 };
-        assertArrayEquals(expected, collection.toArray());
     }
 
     @Test //
@@ -138,33 +88,12 @@ public class QueryParamParameterTest extends InvokeTestAncestor {
         Parameter p = m.getParameters()[0];
         MethodParameter mp = MethodParameter.Factory.create(m, p, HOLDER, "*/*");
 
-        String[] values = null;
-        Mockito.when(request.getParameterValues("val")).thenReturn(values);
+        Mockito.when(request.getParameterValues("val")).thenReturn(null);
 
         @SuppressWarnings("unchecked") //
         Collection<Integer> collection = (Collection<Integer>) mp.findValue(request, null, null, null);
 
         assertNull(collection);
-    }
-
-    @Test //
-    public void array() throws Exception {
-        Method m = findMethod(EntryPoint1.class, "array");
-        Parameter p = m.getParameters()[0];
-        MethodParameter mp = MethodParameter.Factory.create(m, p, HOLDER, "*/*");
-
-        Mockito.when(request.getParameterValues("val")).thenReturn(new String[] { "100", "200" });
-        RequestData data = new RequestData(null);
-
-        int[] result = (int[]) mp.findValue(request, null, null, data);
-        assertArrayEquals(new int[] { 100, 200 }, result);
-    }
-
-    @Test //
-    public void multiArray() {
-        Method m = findMethod(EntryPoint1.class, "multiArray");
-        Parameter p = m.getParameters()[0];
-        assertThrows(RoutingInitializationException.class, () -> MethodParameter.Factory.create(m, p, HOLDER, "*/*"));
     }
 
     @Test //
@@ -174,8 +103,7 @@ public class QueryParamParameterTest extends InvokeTestAncestor {
         MethodParameter mp = MethodParameter.Factory.create(m, p, HOLDER, "*/*");
 
         Mockito.when(request.getParameter("val")).thenReturn("abc");
-        RequestData data = new RequestData(null);
 
-        assertThrows(NumberFormatException.class, () -> mp.findValue(request, null, null, data));
+        assertThrows(NumberFormatException.class, () -> mp.findValue(request, null, null, null));
     }
 }

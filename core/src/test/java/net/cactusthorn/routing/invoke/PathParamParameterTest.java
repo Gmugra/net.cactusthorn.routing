@@ -6,8 +6,12 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
 import java.util.List;
+import java.util.stream.Stream;
 
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
+import org.junit.jupiter.params.provider.ValueSource;
 
 import net.cactusthorn.routing.RoutingInitializationException;
 import net.cactusthorn.routing.PathTemplate.PathValues;
@@ -38,78 +42,32 @@ public class PathParamParameterTest extends InvokeTestAncestor {
         }
     }
 
-    @Test //
-    public void array() {
-        Method m = findMethod(EntryPoint1.class, "array");
+    @ParameterizedTest @ValueSource(strings = { "array", "collection", "math" }) //
+    public void testThrows(String method) {
+        Method m = findMethod(EntryPoint1.class, method);
         Parameter p = m.getParameters()[0];
         assertThrows(RoutingInitializationException.class, () -> MethodParameter.Factory.create(m, p, HOLDER, "*/*"));
     }
 
-    @Test //
-    public void collection() {
-        Method m = findMethod(EntryPoint1.class, "collection");
-        Parameter p = m.getParameters()[0];
-        assertThrows(RoutingInitializationException.class, () -> MethodParameter.Factory.create(m, p, HOLDER, "*/*"));
-    }
-
-    @Test //
-    public void math() {
-        Method m = findMethod(EntryPoint1.class, "math");
-        Parameter p = m.getParameters()[0];
-        assertThrows(RoutingInitializationException.class, () -> MethodParameter.Factory.create(m, p, HOLDER, "*/*"));
-    }
-
-    @Test //
-    public void defaultValue() throws Exception {
-        Method m = findMethod(EntryPoint1.class, "defaultValue");
+    @ParameterizedTest @MethodSource("provideArguments") //
+    public void findValue(String methodName, PathValues pathValues, Object expected) throws Exception {
+        Method m = findMethod(EntryPoint1.class, methodName);
         Parameter p = m.getParameters()[0];
         MethodParameter mp = MethodParameter.Factory.create(m, p, HOLDER, "*/*");
 
-        PathValues values = new PathValues();
-        values.put("val", "");
-        RequestData requestData = new RequestData(values);
+        RequestData requestData = new RequestData(pathValues);
 
-        int result = (int) mp.findValue(null, null, null, requestData);
+        Object result = mp.findValue(null, null, null, requestData);
 
-        assertEquals(10, result);
+        assertEquals(expected, result);
     }
 
-    @Test //
-    public void simple() throws Exception {
-        Method m = findMethod("simple");
-        Parameter p = m.getParameters()[0];
-        MethodParameter mp = MethodParameter.Factory.create(m, p, HOLDER, "*/*");
-
-        PathValues values = new PathValues();
-        values.put("val", "");
-        RequestData requestData = new RequestData(values);
-
-        int result = (int) mp.findValue(null, null, null, requestData);
-
-        assertEquals(0, result);
-    }
-
-    @Test //
-    public void simpleWithValue() throws Exception {
-        Method m = findMethod("simple");
-        Parameter p = m.getParameters()[0];
-        MethodParameter mp = MethodParameter.Factory.create(m, p, HOLDER, "*/*");
-
-        PathValues values = new PathValues();
-        values.put("val", "20");
-        RequestData requestData = new RequestData(values);
-
-        int result = (int) mp.findValue(null, null, null, requestData);
-
-        assertEquals(20, result);
-    }
-
-    private Method findMethod(String methodName) {
-        for (Method method : EntryPoint1.class.getMethods()) {
-            if (methodName.equals(method.getName())) {
-                return method;
-            }
-        }
-        return null;
+    private static Stream<Arguments> provideArguments() {
+        // @formatter:off
+        return Stream.of(
+            Arguments.of("simple", new PathValues("val", "20"), 20),
+            Arguments.of("simple", new PathValues("val", ""), 0),
+            Arguments.of("defaultValue", new PathValues("val", ""), 10));
+        // @formatter:on
     }
 }

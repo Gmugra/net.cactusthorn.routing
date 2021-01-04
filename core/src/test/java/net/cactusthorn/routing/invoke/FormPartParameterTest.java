@@ -8,13 +8,17 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
-import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
+import java.util.stream.Stream;
 
 import javax.servlet.http.Part;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.Mockito;
 
 import net.cactusthorn.routing.RoutingInitializationException;
@@ -80,48 +84,33 @@ public class FormPartParameterTest extends InvokeTestAncestor {
     }
 
     @Test //
-    public void simple() throws Exception {
-        Method m = findMethod(EntryPoint1.class, "simple");
-        Parameter p = m.getParameters()[0];
-        MethodParameter mp = MethodParameter.Factory.create(m, p, HOLDER, "*/*");
-
-        List<Part> parts = new ArrayList<>();
-        parts.add(new TestPart("val"));
-
-        Mockito.when(request.getParts()).thenReturn(parts);
-        Part part = (Part) mp.findValue(request, null, null, null);
-        assertEquals("val", part.getName());
-    }
-
-    @Test //
-    public void notfound() throws Exception {
-        Method m = findMethod(EntryPoint1.class, "simple");
-        Parameter p = m.getParameters()[0];
-        MethodParameter mp = MethodParameter.Factory.create(m, p, HOLDER, "*/*");
-
-        Mockito.when(request.getParts()).thenReturn(null);
-        Part part = (Part) mp.findValue(request, null, null, null);
-        assertNull(part);
-    }
-
-    @Test //
-    public void notfound2() throws Exception {
-        Method m = findMethod(EntryPoint1.class, "simple");
-        Parameter p = m.getParameters()[0];
-        MethodParameter mp = MethodParameter.Factory.create(m, p, HOLDER, "*/*");
-
-        List<Part> parts = new ArrayList<>();
-        parts.add(new TestPart("other"));
-
-        Mockito.when(request.getParts()).thenReturn(parts);
-        Part part = (Part) mp.findValue(request, null, null, null);
-        assertNull(part);
-    }
-
-    @Test //
     public void wrongType() throws ConverterException {
         Method m = findMethod(EntryPoint1.class, "wrongType");
         Parameter p = m.getParameters()[0];
         assertThrows(RoutingInitializationException.class, () -> MethodParameter.Factory.create(m, p, HOLDER, "*/*"));
+    }
+
+    @ParameterizedTest @MethodSource("provideArguments") //
+    public void getParts(String methodName, List<Part> requestParts, boolean expectedNull) throws Exception {
+        Method m = findMethod(EntryPoint1.class, "simple");
+        Parameter p = m.getParameters()[0];
+        MethodParameter mp = MethodParameter.Factory.create(m, p, HOLDER, "*/*");
+
+        Mockito.when(request.getParts()).thenReturn(requestParts);
+        Part part = (Part) mp.findValue(request, null, null, null);
+        if (expectedNull) {
+            assertNull(part);
+        } else {
+            assertEquals(requestParts.get(0).getName(), part.getName());
+        }
+    }
+
+    private static Stream<Arguments> provideArguments() {
+        // @formatter:off
+        return Stream.of(
+            Arguments.of("simple", Arrays.asList(new TestPart[] {new TestPart("other")}), true),
+            Arguments.of("simple", null, true),
+            Arguments.of("simple", Arrays.asList(new TestPart[] {new TestPart("val")}), false));
+        // @formatter:on
     }
 }

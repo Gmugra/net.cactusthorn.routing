@@ -4,11 +4,13 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 import java.io.BufferedReader;
+import java.io.IOException;
 import java.io.StringReader;
 import java.lang.reflect.*;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Stream;
 
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
@@ -18,6 +20,9 @@ import javax.servlet.http.HttpSession;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.Mockito;
 
 import net.cactusthorn.routing.ComponentProvider;
@@ -25,7 +30,9 @@ import net.cactusthorn.routing.Consumer;
 import net.cactusthorn.routing.RoutingConfig.ConfigProperty;
 import net.cactusthorn.routing.PathTemplate.PathValues;
 import net.cactusthorn.routing.annotation.*;
+import net.cactusthorn.routing.convert.ConverterException;
 import net.cactusthorn.routing.convert.ConvertersHolder;
+import net.cactusthorn.routing.validate.ParametersValidationException;
 import net.cactusthorn.routing.validate.ParametersValidator;
 
 public class MethodInvokerTest extends InvokeTestAncestor {
@@ -114,95 +121,20 @@ public class MethodInvokerTest extends InvokeTestAncestor {
         Mockito.when(response.getCharacterEncoding()).thenReturn("KOI8-R");
     }
 
-    @Test //
-    public void invokeM1() throws Exception {
+    @ParameterizedTest @MethodSource("provideArguments") //
+    public void invokeMethod(String methodName, PathValues pathValues, Object expectedResult)
+            throws ConverterException, ParametersValidationException {
 
-        Method method = findMethod(EntryPoint1.class, "m1");
+        Method method = findMethod(EntryPoint1.class, methodName);
         MethodInvoker caller = new MethodInvoker(EntryPoint1.class, method, provider, holder, "*/*", configProperties, VALIDATOR);
 
-        PathValues values = new PathValues();
-        values.put("in", "123");
+        Object result = caller.invoke(request, response, context, pathValues);
 
-        Integer result = (Integer) caller.invoke(request, null, null, values);
-
-        assertEquals(123, result);
+        assertEquals(expectedResult, result);
     }
 
     @Test //
-    public void invokeM0() throws Exception {
-
-        Method method = findMethod(EntryPoint1.class, "m0");
-        MethodInvoker caller = new MethodInvoker(EntryPoint1.class, method, provider, holder, "*/*", configProperties, VALIDATOR);
-
-        PathValues values = PathValues.EMPTY;
-
-        String result = (String) caller.invoke(request, null, null, values);
-
-        assertEquals("OK", result);
-    }
-
-    @Test //
-    public void invokeM2() throws Exception {
-
-        Method method = findMethod(EntryPoint1.class, "m2");
-        MethodInvoker caller = new MethodInvoker(EntryPoint1.class, method, provider, holder, "*/*", configProperties, VALIDATOR);
-
-        PathValues values = PathValues.EMPTY;
-
-        String result = (String) caller.invoke(request, null, null, values);
-
-        assertEquals("YES", result);
-    }
-
-    @Test //
-    public void invokeM3() throws Exception {
-
-        Method method = findMethod(EntryPoint1.class, "m3");
-        MethodInvoker caller = new MethodInvoker(EntryPoint1.class, method, provider, holder, "*/*", configProperties, VALIDATOR);
-
-        PathValues values = new PathValues();
-        values.put("in", "123");
-
-        String result = (String) caller.invoke(request, null, null, values);
-
-        assertEquals("EVE123null", result);
-    }
-
-    @Test //
-    public void invokeM4() throws Exception {
-
-        Method method = findMethod(EntryPoint1.class, "m4");
-        MethodInvoker caller = new MethodInvoker(EntryPoint1.class, method, provider, holder, "*/*", configProperties, VALIDATOR);
-
-        String result = (String) caller.invoke(request, null, null, null);
-
-        assertEquals("120.5", result);
-    }
-
-    @Test //
-    public void invokeM5() throws Exception {
-
-        Method method = findMethod(EntryPoint1.class, "m5");
-        MethodInvoker caller = new MethodInvoker(EntryPoint1.class, method, provider, holder, "*/*", configProperties, VALIDATOR);
-
-        String result = (String) caller.invoke(request, null, context, null);
-
-        assertEquals("CONTEXT", result);
-    }
-
-    @Test //
-    public void invokeM6() throws Exception {
-
-        Method method = findMethod(EntryPoint1.class, "m6");
-        MethodInvoker caller = new MethodInvoker(EntryPoint1.class, method, provider, holder, "*/*", configProperties, VALIDATOR);
-
-        String result = (String) caller.invoke(request, response, null, null);
-
-        assertEquals("KOI8-R", result);
-    }
-
-    @Test //
-    public void invokeM7() throws Exception {
+    public void invokeM7() throws IOException, ConverterException, ParametersValidationException {
 
         BufferedReader reader = new BufferedReader(new StringReader("TO HAVE BODY"));
         Mockito.when(request.getReader()).thenReturn(reader);
@@ -213,5 +145,18 @@ public class MethodInvokerTest extends InvokeTestAncestor {
         java.util.Date result = (java.util.Date) caller.invoke(request, response, null, null);
 
         assertNotNull(result);
+    }
+
+    private static Stream<Arguments> provideArguments() {
+        // @formatter:off
+        return Stream.of(
+            Arguments.of("m0", PathValues.EMPTY, "OK"),
+            Arguments.of("m1", new PathValues("in", "123"), 123),
+            Arguments.of("m2", PathValues.EMPTY, "YES"),
+            Arguments.of("m3", new PathValues("in", "123"), "EVE123null"),
+            Arguments.of("m4", null, "120.5"),
+            Arguments.of("m5", null, "CONTEXT"),
+            Arguments.of("m6", null, "KOI8-R"));
+        // @formatter:on
     }
 }

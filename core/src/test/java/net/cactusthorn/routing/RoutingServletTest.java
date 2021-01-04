@@ -15,6 +15,9 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 
@@ -221,46 +224,13 @@ public class RoutingServletTest {
         assertEquals("TRACE", stringWriter.toString());
     }
 
-    @Test //
-    public void produce() throws ServletException, IOException {
-        Mockito.when(req.getPathInfo()).thenReturn("/api/produce");
+    @ParameterizedTest //
+    @CsvSource(nullValues = { "$$" }, delimiter = ';', value = { "/api/get;GET", "/api/get/;GET", "$$;ROOT", "'';ROOT", "/;ROOT",
+            "/api/produce;TEST_PRODUCER", "/api/response;FROM RESPONSE", "api/null;''" }) //
+    public void get(String pathInfo, String expectedResponse) throws ServletException, IOException {
+        Mockito.when(req.getPathInfo()).thenReturn(pathInfo);
         servlet.doGet(req, resp);
-        assertEquals("TEST_PRODUCER", stringWriter.toString());
-    }
-
-    @Test //
-    public void simple() throws ServletException, IOException {
-        Mockito.when(req.getPathInfo()).thenReturn("/api/get");
-        servlet.doGet(req, resp);
-        assertEquals("GET", stringWriter.toString());
-    }
-
-    @Test //
-    public void closedUri() throws ServletException, IOException {
-        Mockito.when(req.getPathInfo()).thenReturn("/api/get/");
-        servlet.doGet(req, resp);
-        assertEquals("GET", stringWriter.toString());
-    }
-
-    @Test //
-    public void rootNull() throws ServletException, IOException {
-        Mockito.when(req.getPathInfo()).thenReturn(null);
-        servlet.doGet(req, resp);
-        assertEquals("ROOT", stringWriter.toString());
-    }
-
-    @Test //
-    public void root() throws ServletException, IOException {
-        Mockito.when(req.getPathInfo()).thenReturn("/");
-        servlet.doGet(req, resp);
-        assertEquals("ROOT", stringWriter.toString());
-    }
-
-    @Test //
-    public void rootEmpty() throws ServletException, IOException {
-        Mockito.when(req.getPathInfo()).thenReturn("");
-        servlet.doGet(req, resp);
-        assertEquals("ROOT", stringWriter.toString());
+        assertEquals(expectedResponse, stringWriter.toString());
     }
 
     @Test //
@@ -274,15 +244,6 @@ public class RoutingServletTest {
         Mockito.verify(resp).sendError(code.capture(), Mockito.any());
 
         assertEquals(404, code.getValue());
-    }
-
-    @Test //
-    public void nullResponse() throws ServletException, IOException {
-        Mockito.when(req.getPathInfo()).thenReturn("api/null");
-
-        servlet.doGet(req, resp);
-
-        assertEquals("", stringWriter.toString());
     }
 
     @Test //
@@ -301,30 +262,9 @@ public class RoutingServletTest {
         assertEquals(404, code.getValue());
     }
 
-    @Test //
-    public void response() throws ServletException, IOException {
-        Mockito.when(req.getPathInfo()).thenReturn("/api/response");
-        servlet.doGet(req, resp);
-        assertEquals("FROM RESPONSE", stringWriter.toString());
-    }
-
-    @Test //
-    public void nocontent() throws ServletException, IOException {
-        Mockito.when(req.getPathInfo()).thenReturn("/api/nocontent");
-        Mockito.when(resp.getStatus()).thenReturn(HttpServletResponse.SC_OK);
-
-        servlet.doGet(req, resp);
-
-        ArgumentCaptor<Integer> code = ArgumentCaptor.forClass(Integer.class);
-
-        Mockito.verify(resp).setStatus(code.capture());
-
-        assertEquals(204, code.getValue());
-    }
-
-    @Test //
-    public void responseNocontent() throws ServletException, IOException {
-        Mockito.when(req.getPathInfo()).thenReturn("/api/response/nocontent");
+    @ParameterizedTest @ValueSource(strings = { "/api/nocontent", "/api/response/nocontent" }) //
+    public void nocontent(String pathInfo ) throws ServletException, IOException {
+        Mockito.when(req.getPathInfo()).thenReturn(pathInfo);
         Mockito.when(resp.getStatus()).thenReturn(HttpServletResponse.SC_OK);
 
         servlet.doGet(req, resp);

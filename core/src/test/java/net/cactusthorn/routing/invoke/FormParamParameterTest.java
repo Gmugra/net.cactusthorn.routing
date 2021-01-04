@@ -5,8 +5,12 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
+import java.util.stream.Stream;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.Mockito;
 
 import net.cactusthorn.routing.RoutingInitializationException;
@@ -29,43 +33,33 @@ public class FormParamParameterTest extends InvokeTestAncestor {
     }
 
     @Test //
-    public void simple() throws Exception {
-        Method m = findMethod(EntryPoint1.class, "simple");
-        Parameter p = m.getParameters()[0];
-        MethodParameter mp = MethodParameter.Factory.create(m, p, HOLDER, "application/x-www-form-urlencoded");
-
-        Mockito.when(request.getParameter("val")).thenReturn("xyz");
-        String value = (String) mp.findValue(request, null, null, null);
-        assertEquals("xyz", value);
-    }
-
-    @Test //
-    public void defaultArray() throws Exception {
-        Method m = findMethod(EntryPoint1.class, "defaultArray");
-        Parameter p = m.getParameters()[0];
-        MethodParameter mp = MethodParameter.Factory.create(m, p, HOLDER, "application/x-www-form-urlencoded");
-
-        Mockito.when(request.getParameter("val")).thenReturn(null);
-        String[] values = (String[]) mp.findValue(request, null, null, null);
-        assertEquals("A", values[0]);
-        assertEquals(1, values.length);
-    }
-
-    @Test //
-    public void defaultValue() throws Exception {
-        Method m = findMethod(EntryPoint1.class, "defaultValue");
-        Parameter p = m.getParameters()[0];
-        MethodParameter mp = MethodParameter.Factory.create(m, p, HOLDER, "application/x-www-form-urlencoded");
-
-        Mockito.when(request.getParameter("val")).thenReturn(null);
-        String value = (String) mp.findValue(request, null, null, null);
-        assertEquals("D", value);
-    }
-
-    @Test //
     public void wrongContentType() throws ConverterException {
         Method m = findMethod(EntryPoint1.class, "simple");
         Parameter p = m.getParameters()[0];
         assertThrows(RoutingInitializationException.class, () -> MethodParameter.Factory.create(m, p, HOLDER, "*/*"));
+    }
+
+    @ParameterizedTest @MethodSource("provideArguments") //
+    public void findFormValue(String methodName, String requestValue, Object expectedValue) throws Exception {
+        Method m = findMethod(EntryPoint1.class, methodName);
+        Parameter p = m.getParameters()[0];
+        MethodParameter mp = MethodParameter.Factory.create(m, p, HOLDER, "application/x-www-form-urlencoded");
+
+        Mockito.when(request.getParameter("val")).thenReturn(requestValue);
+        Object value = mp.findValue(request, null, null, null);
+        if (value.getClass().isArray()) {
+            assertEquals(expectedValue, ((Object[]) value)[0]);
+        } else {
+            assertEquals(expectedValue, value);
+        }
+    }
+
+    private static Stream<Arguments> provideArguments() {
+        // @formatter:off
+        return Stream.of(
+            Arguments.of("simple", "xyz", "xyz"),
+            Arguments.of("defaultArray", null, "A"),
+            Arguments.of("defaultValue", null, "D"));
+        // @formatter:on
     }
 }

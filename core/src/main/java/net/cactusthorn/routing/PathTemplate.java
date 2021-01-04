@@ -25,6 +25,10 @@ public final class PathTemplate {
         public PathValues() {
         }
 
+        public PathValues(String name, String value) {
+            values.put(name, value);
+        }
+
         public void put(String name, String value) {
             values.put(name, value);
         }
