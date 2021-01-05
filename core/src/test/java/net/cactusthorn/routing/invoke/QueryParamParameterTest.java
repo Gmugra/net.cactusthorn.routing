@@ -24,6 +24,9 @@ public class QueryParamParameterTest extends InvokeTestAncestor {
         public void array(@QueryParam("val") Integer[] values) {
         }
 
+        public void arrayByName(@QueryParam Integer[] val) {
+        }
+
         public void multiArray(@QueryParam("val") int[][] values) {
         }
 
@@ -71,7 +74,8 @@ public class QueryParamParameterTest extends InvokeTestAncestor {
             Arguments.of("sortedSet", new String[] {"10", "20", "20"}, new Integer[] {10, 20}),
             Arguments.of("list", new String[] {"10", "20", "30"}, new Integer[] {10, 20, 30}),
             Arguments.of("collection", new String[] {"10", "20", "30"}, new Integer[] {10, 20, 30}),
-            Arguments.of("array", new String[] {"100", "200"}, new Integer[] {100, 200}));
+            Arguments.of("array", new String[] {"100", "200"}, new Integer[] {100, 200}),
+            Arguments.of("arrayByName", new String[] {"100", "200"}, new Integer[] {100, 200}));
         // @formatter:on
     }
 

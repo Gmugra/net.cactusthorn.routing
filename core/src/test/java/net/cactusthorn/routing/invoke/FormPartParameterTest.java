@@ -32,6 +32,9 @@ public class FormPartParameterTest extends InvokeTestAncestor {
         public void simple(@FormPart("val") Part value) {
         }
 
+        public void byName(@FormPart Part val) {
+        }
+
         public void wrongType(@FormPart("val") String value) {
         }
     }
@@ -92,7 +95,7 @@ public class FormPartParameterTest extends InvokeTestAncestor {
 
     @ParameterizedTest @MethodSource("provideArguments") //
     public void getParts(String methodName, List<Part> requestParts, boolean expectedNull) throws Exception {
-        Method m = findMethod(EntryPoint1.class, "simple");
+        Method m = findMethod(EntryPoint1.class, methodName);
         Parameter p = m.getParameters()[0];
         MethodParameter mp = MethodParameter.Factory.create(m, p, HOLDER, "*/*");
 
@@ -110,7 +113,8 @@ public class FormPartParameterTest extends InvokeTestAncestor {
         return Stream.of(
             Arguments.of("simple", Arrays.asList(new TestPart[] {new TestPart("other")}), true),
             Arguments.of("simple", null, true),
-            Arguments.of("simple", Arrays.asList(new TestPart[] {new TestPart("val")}), false));
+            Arguments.of("simple", Arrays.asList(new TestPart[] {new TestPart("val")}), false),
+            Arguments.of("byName", Arrays.asList(new TestPart[] {new TestPart("val")}), false));
         // @formatter:on
     }
 }

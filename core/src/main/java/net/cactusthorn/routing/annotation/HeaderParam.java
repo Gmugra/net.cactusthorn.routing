@@ -8,5 +8,5 @@ import java.lang.annotation.Target;
 
 @Target(ElementType.PARAMETER) @Retention(RetentionPolicy.RUNTIME) @Documented //
 public @interface HeaderParam {
-    String value();
+    String value() default "";
 }

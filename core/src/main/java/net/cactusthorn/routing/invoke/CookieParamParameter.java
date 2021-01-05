@@ -16,14 +16,20 @@ public class CookieParamParameter extends MethodParameter {
 
     protected static final String WRONG_TYPE = "@CookieParam can be used only for javax.servlet.http.Cookie type; Method: %s";
 
-    private String name;
-
     public CookieParamParameter(Method method, Parameter parameter) {
         super(parameter);
-        name = parameter.getAnnotation(CookieParam.class).value();
         if (classType() != Cookie.class) {
             throw new RoutingInitializationException(WRONG_TYPE, method);
         }
+    }
+
+    @Override //
+    protected String findName(Parameter parameter) {
+        String name = parameter.getAnnotation(CookieParam.class).value();
+        if ("".equals(name)) {
+            return super.findName(parameter);
+        }
+        return name;
     }
 
     @Override //
@@ -33,7 +39,7 @@ public class CookieParamParameter extends MethodParameter {
             return null;
         }
         for (Cookie cookie : cookies) {
-            if (name.equals(cookie.getName())) {
+            if (name().equals(cookie.getName())) {
                 return cookie;
             }
         }

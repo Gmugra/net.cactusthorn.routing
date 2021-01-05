@@ -319,6 +319,7 @@
                     <configuration>
                         <source>${jdk.version}</source>
                         <target>${jdk.version}</target>
+                        <parameters>true</parameters>
                     </configuration>
                 </plugin>
 

@@ -26,6 +26,9 @@ public class CookieParamParameterTest extends InvokeTestAncestor {
 
         public void wrongType(@CookieParam("val") String value) {
         }
+
+        public void byName(@CookieParam Cookie value) {
+        }
     }
 
     @Test //
@@ -37,7 +40,7 @@ public class CookieParamParameterTest extends InvokeTestAncestor {
 
     @ParameterizedTest @MethodSource("provideArguments") //
     public void findCookieValue(String methodName, Cookie[] expectedCookie, boolean expectedNull) throws Exception {
-        Method m = findMethod(EntryPoint1.class, "simple");
+        Method m = findMethod(EntryPoint1.class, methodName);
         Parameter p = m.getParameters()[0];
         MethodParameter mp = MethodParameter.Factory.create(m, p, HOLDER, "*/*");
 
@@ -56,7 +59,8 @@ public class CookieParamParameterTest extends InvokeTestAncestor {
         return Stream.of(
             Arguments.of("simple", null, true),
             Arguments.of("simple", new Cookie[] {new Cookie("xxx", "xxx")}, true),
-            Arguments.of("simple", new Cookie[] {new Cookie("val", "xyz")}, false));
+            Arguments.of("simple", new Cookie[] {new Cookie("val", "xyz")}, false),
+            Arguments.of("byName", new Cookie[] {new Cookie("value", "xyz")}, false));
         // @formatter:on
     }
 }

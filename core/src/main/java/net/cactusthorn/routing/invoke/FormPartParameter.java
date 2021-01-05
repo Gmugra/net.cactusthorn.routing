@@ -17,14 +17,20 @@ public class FormPartParameter extends MethodParameter {
 
     protected static final String WRONG_TYPE = "@FormPart can be used only for javax.servlet.http.Part type; Method: %s";
 
-    private String name;
-
     public FormPartParameter(Method method, Parameter parameter) {
         super(parameter);
-        name = parameter.getAnnotation(FormPart.class).value();
         if (classType() != Part.class) {
             throw new RoutingInitializationException(WRONG_TYPE, method);
         }
+    }
+
+    @Override //
+    protected String findName(Parameter parameter) {
+        String name = parameter.getAnnotation(FormPart.class).value();
+        if ("".equals(name)) {
+            return super.findName(parameter);
+        }
+        return name;
     }
 
     @Override //
@@ -34,7 +40,7 @@ public class FormPartParameter extends MethodParameter {
             return null;
         }
         for (Part part : req.getParts()) {
-            if (name.equals(part.getName())) {
+            if (name().equals(part.getName())) {
                 return part;
             }
         }

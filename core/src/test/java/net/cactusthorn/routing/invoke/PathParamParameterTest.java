@@ -40,6 +40,9 @@ public class PathParamParameterTest extends InvokeTestAncestor {
 
         public void simple(@PathParam("val") int value) {
         }
+
+        public void byName(@PathParam int value) {
+        }
     }
 
     @ParameterizedTest @ValueSource(strings = { "array", "collection", "math" }) //
@@ -66,8 +69,10 @@ public class PathParamParameterTest extends InvokeTestAncestor {
         // @formatter:off
         return Stream.of(
             Arguments.of("simple", new PathValues("val", "20"), 20),
+            Arguments.of("byName", new PathValues("value", "20"), 20),
             Arguments.of("simple", new PathValues("val", ""), 0),
-            Arguments.of("defaultValue", new PathValues("val", ""), 10));
+            Arguments.of("defaultValue", new PathValues("val", ""), 10),
+            Arguments.of("defaultValue", new PathValues("val", "15"), 15));
         // @formatter:on
     }
 }

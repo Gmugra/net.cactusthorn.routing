@@ -8,5 +8,5 @@ import java.lang.annotation.Target;
 
 @Target(ElementType.PARAMETER) @Retention(RetentionPolicy.RUNTIME) @Documented //
 public @interface FormParam {
-    String value();
+    String value() default "";
 }

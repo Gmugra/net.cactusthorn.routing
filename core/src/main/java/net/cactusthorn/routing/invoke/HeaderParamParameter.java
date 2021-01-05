@@ -11,19 +11,24 @@ import net.cactusthorn.routing.RequestData;
 import net.cactusthorn.routing.annotation.HeaderParam;
 import net.cactusthorn.routing.convert.ConvertersHolder;
 
-public class HeaderParamParameter extends PathParamParameter {
+public class HeaderParamParameter extends MethodSingleValueParameter {
 
     public HeaderParamParameter(Method method, Parameter parameter, ConvertersHolder convertersHolder) {
         super(method, parameter, convertersHolder);
     }
 
+    @Override //
     protected String annotationName() {
         return HeaderParam.class.getSimpleName();
     }
 
-    protected String initName(Parameter parameter) {
-        HeaderParam headerParam = parameter.getAnnotation(HeaderParam.class);
-        return headerParam.value();
+    @Override //
+    protected String findName(Parameter parameter) {
+        String name = parameter.getAnnotation(HeaderParam.class).value();
+        if ("".equals(name)) {
+            return super.findName(parameter);
+        }
+        return name;
     }
 
     @Override //

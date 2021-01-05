@@ -35,8 +35,8 @@ public class SimpleEntryPoint implements EntryPoint {
     }
 
     @GET @Path("/rest/api/test{ var : \\d+ }") //
-    public String doit(@PathParam("var") int in, @DefaultValue("10.5") @QueryParam("test") Double q) {
-        return in + " \u00DF " + q + " :: " + this.getClass().getSimpleName() + "@" + this.hashCode();
+    public String doit(@PathParam("var") int in, @DefaultValue("10.5") @QueryParam Double test) {
+        return in + " \u00DF " + test + " :: " + this.getClass().getSimpleName() + "@" + this.hashCode();
     }
 
     @GET @Path("/rest/api/validation") //

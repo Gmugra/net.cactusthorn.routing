@@ -24,9 +24,11 @@ public abstract class MethodParameter {
 
     private Class<?> classType;
     private String defaultValue;
+    private String name;
 
     MethodParameter(Parameter parameter) {
         classType = parameter.getType();
+        name = findName(parameter);
         DefaultValue defaultValueAnnotation = parameter.getAnnotation(DefaultValue.class);
         if (defaultValueAnnotation != null) {
             defaultValue = defaultValueAnnotation.value();
@@ -41,6 +43,14 @@ public abstract class MethodParameter {
         return classType;
     }
 
+    protected String name() {
+        return name;
+    }
+
+    protected String findName(Parameter parameter) {
+        return parameter.getName();
+    }
+
     abstract Object findValue(HttpServletRequest req, HttpServletResponse res, ServletContext con, RequestData requestData)
             throws Exception;
 
@@ -49,40 +59,39 @@ public abstract class MethodParameter {
         static MethodParameter create(Method method, Parameter parameter, ConvertersHolder convertersHolder, String contentType) {
             Class<?> parameterClassType = parameter.getType();
             if (parameter.getAnnotation(PathParam.class) != null) {
-
                 return new PathParamParameter(method, parameter, convertersHolder);
-            } else if (parameter.getAnnotation(QueryParam.class) != null) {
-
+            }
+            if (parameter.getAnnotation(QueryParam.class) != null) {
                 return new QueryParamParameter(method, parameter, convertersHolder);
-            } else if (parameter.getAnnotation(FormParam.class) != null) {
-
+            }
+            if (parameter.getAnnotation(FormParam.class) != null) {
                 return new FormParamParameter(method, parameter, convertersHolder, contentType);
-            } else if (parameter.getAnnotation(FormPart.class) != null) {
-
+            }
+            if (parameter.getAnnotation(FormPart.class) != null) {
                 return new FormPartParameter(method, parameter);
-            } else if (parameter.getAnnotation(HeaderParam.class) != null) {
-
+            }
+            if (parameter.getAnnotation(HeaderParam.class) != null) {
                 return new HeaderParamParameter(method, parameter, convertersHolder);
-            } else if (parameter.getAnnotation(CookieParam.class) != null) {
-
+            }
+            if (parameter.getAnnotation(CookieParam.class) != null) {
                 return new CookieParamParameter(method, parameter);
-            } else if (parameterClassType == HttpServletRequest.class) {
-
+            }
+            if (parameterClassType == HttpServletRequest.class) {
                 return new HttpServletRequestParameter(parameter);
-            } else if (parameterClassType == HttpServletResponse.class) {
-
+            }
+            if (parameterClassType == HttpServletResponse.class) {
                 return new HttpServletResponseParameter(parameter);
-            } else if (parameterClassType == HttpSession.class) {
-
+            }
+            if (parameterClassType == HttpSession.class) {
                 return new HttpSessionParameter(parameter);
-            } else if (parameterClassType == ServletContext.class) {
-
+            }
+            if (parameterClassType == ServletContext.class) {
                 return new ServletContextParameter(parameter);
-            } else if (parameterClassType == Principal.class) {
-
+            }
+            if (parameterClassType == Principal.class) {
                 return new PrincipalParameter(parameter);
-            } else if (parameter.getAnnotation(Context.class) != null) {
-
+            }
+            if (parameter.getAnnotation(Context.class) != null) {
                 return new BodyParameter(method, parameter, convertersHolder, contentType);
             }
             return new UnknownParameter(parameter);

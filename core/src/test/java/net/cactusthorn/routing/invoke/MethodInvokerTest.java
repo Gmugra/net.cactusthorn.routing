@@ -41,7 +41,7 @@ public class MethodInvokerTest extends InvokeTestAncestor {
         return new java.util.Date();
     };
 
-    private static final Optional<ParametersValidator> VALIDATOR = Optional.ofNullable(null);
+    private static final Optional<ParametersValidator> VALIDATOR = Optional.of((object, method, parameters) -> {});
 
     public static class EntryPoint1 {
 

@@ -24,10 +24,16 @@ public class HeaderParamParameterTest extends InvokeTestAncestor {
         public void simple(@HeaderParam("val") String value) {
         }
 
+        public void byName(@HeaderParam String val) {
+        }
+
         public void simpleArray(@HeaderParam("val") String[] values) {
         }
 
         public void defaultValue(@HeaderParam("val") @DefaultValue("D") String value) {
+        }
+
+        public void nullValue(@HeaderParam("val") String value) {
         }
     }
 
@@ -50,6 +56,13 @@ public class HeaderParamParameterTest extends InvokeTestAncestor {
     }
 
     private static Stream<Arguments> provideArguments() {
-        return Stream.of(Arguments.of("simple", "xyz", "xyz"), Arguments.of("defaultValue", null, "D"));
+        // @formatter:off
+        return Stream.of(
+            Arguments.of("simple", "xyz", "xyz"),
+            Arguments.of("byName", "xyz", "xyz"),
+            Arguments.of("defaultValue", null, "D"),
+            Arguments.of("defaultValue", "xyz", "xyz"),
+            Arguments.of("nullValue", null, null));
+        // @formatter:on
     }
 }

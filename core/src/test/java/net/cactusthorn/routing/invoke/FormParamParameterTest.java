@@ -30,6 +30,9 @@ public class FormParamParameterTest extends InvokeTestAncestor {
 
         public void defaultArray(@FormParam("val") @DefaultValue("A") String[] value) {
         }
+
+        public void byName(@FormParam String val) {
+        }
     }
 
     @Test //
@@ -46,6 +49,9 @@ public class FormParamParameterTest extends InvokeTestAncestor {
         MethodParameter mp = MethodParameter.Factory.create(m, p, HOLDER, "application/x-www-form-urlencoded");
 
         Mockito.when(request.getParameter("val")).thenReturn(requestValue);
+        if (requestValue != null) {
+            Mockito.when(request.getParameterValues("val")).thenReturn(new String[] {requestValue});
+        }
         Object value = mp.findValue(request, null, null, null);
         if (value.getClass().isArray()) {
             assertEquals(expectedValue, ((Object[]) value)[0]);
@@ -58,8 +64,11 @@ public class FormParamParameterTest extends InvokeTestAncestor {
         // @formatter:off
         return Stream.of(
             Arguments.of("simple", "xyz", "xyz"),
+            Arguments.of("byName", "xyz", "xyz"),
             Arguments.of("defaultArray", null, "A"),
-            Arguments.of("defaultValue", null, "D"));
+            Arguments.of("defaultValue", null, "D"),
+            Arguments.of("defaultValue", "xyz", "xyz"),
+            Arguments.of("defaultArray", "xyz", "xyz"));
         // @formatter:on
     }
 }

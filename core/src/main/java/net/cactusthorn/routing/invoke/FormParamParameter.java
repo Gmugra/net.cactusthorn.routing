@@ -11,7 +11,7 @@ import net.cactusthorn.routing.RoutingInitializationException;
 import net.cactusthorn.routing.annotation.FormParam;
 import net.cactusthorn.routing.convert.ConvertersHolder;
 
-public class FormParamParameter extends QueryParamParameter {
+public class FormParamParameter extends MethodMultiValueParameter {
 
     // @formatter:off
     public static final Set<String> CONTENT_TYPE = Collections
@@ -28,8 +28,11 @@ public class FormParamParameter extends QueryParamParameter {
     }
 
     @Override //
-    protected String initName(Parameter parameter) {
-        FormParam formParam = parameter.getAnnotation(FormParam.class);
-        return formParam.value();
+    protected String findName(Parameter parameter) {
+        String name = parameter.getAnnotation(FormParam.class).value();
+        if ("".equals(name)) {
+            return super.findName(parameter);
+        }
+        return name;
     }
 }
