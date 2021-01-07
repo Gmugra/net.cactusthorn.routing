@@ -13,6 +13,8 @@ public class InvokeTestAncestor {
 
     protected final static ConvertersHolder HOLDER = new ConvertersHolder();
 
+    protected static final String[] DEFAULT_CONTENT_TYPES = new String[] {"*/*"};
+
     protected HttpServletRequest request;
 
     @BeforeEach //

@@ -39,7 +39,7 @@ public class FormParamParameterTest extends InvokeTestAncestor {
     public void wrongContentType() throws ConverterException {
         Method m = findMethod(EntryPoint1.class, "simple");
         Parameter p = m.getParameters()[0];
-        assertThrows(RoutingInitializationException.class, () -> MethodParameter.Factory.create(m, p, HOLDER, new String[] {"*/*"}));
+        assertThrows(RoutingInitializationException.class, () -> MethodParameter.Factory.create(m, p, HOLDER, DEFAULT_CONTENT_TYPES));
     }
 
     @ParameterizedTest @MethodSource("provideArguments") //

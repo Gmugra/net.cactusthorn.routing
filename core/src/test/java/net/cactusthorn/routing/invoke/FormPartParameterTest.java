@@ -90,14 +90,14 @@ public class FormPartParameterTest extends InvokeTestAncestor {
     public void wrongType() throws ConverterException {
         Method m = findMethod(EntryPoint1.class, "wrongType");
         Parameter p = m.getParameters()[0];
-        assertThrows(RoutingInitializationException.class, () -> MethodParameter.Factory.create(m, p, HOLDER, new String[] {"*/*"}));
+        assertThrows(RoutingInitializationException.class, () -> MethodParameter.Factory.create(m, p, HOLDER, DEFAULT_CONTENT_TYPES));
     }
 
     @ParameterizedTest @MethodSource("provideArguments") //
     public void getParts(String methodName, List<Part> requestParts, boolean expectedNull) throws Exception {
         Method m = findMethod(EntryPoint1.class, methodName);
         Parameter p = m.getParameters()[0];
-        MethodParameter mp = MethodParameter.Factory.create(m, p, HOLDER, new String[] {"*/*"});
+        MethodParameter mp = MethodParameter.Factory.create(m, p, HOLDER, DEFAULT_CONTENT_TYPES);
 
         Mockito.when(request.getParts()).thenReturn(requestParts);
         Part part = (Part) mp.findValue(request, null, null, null);

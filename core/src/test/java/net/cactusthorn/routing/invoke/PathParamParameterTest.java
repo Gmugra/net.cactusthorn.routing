@@ -49,14 +49,14 @@ public class PathParamParameterTest extends InvokeTestAncestor {
     public void testThrows(String method) {
         Method m = findMethod(EntryPoint1.class, method);
         Parameter p = m.getParameters()[0];
-        assertThrows(RoutingInitializationException.class, () -> MethodParameter.Factory.create(m, p, HOLDER, new String[] {"*/*"}));
+        assertThrows(RoutingInitializationException.class, () -> MethodParameter.Factory.create(m, p, HOLDER, DEFAULT_CONTENT_TYPES));
     }
 
     @ParameterizedTest @MethodSource("provideArguments") //
     public void findValue(String methodName, PathValues pathValues, Object expected) throws Exception {
         Method m = findMethod(EntryPoint1.class, methodName);
         Parameter p = m.getParameters()[0];
-        MethodParameter mp = MethodParameter.Factory.create(m, p, HOLDER, new String[] {"*/*"});
+        MethodParameter mp = MethodParameter.Factory.create(m, p, HOLDER, DEFAULT_CONTENT_TYPES);
 
         RequestData requestData = new RequestData(pathValues);
 

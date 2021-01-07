@@ -185,9 +185,27 @@ public class EntryPointScanner {
     private String[] findConsumes(Class<?> clazz) {
         Consumes consumes = clazz.getAnnotation(Consumes.class);
         if (consumes != null) {
-            return consumes.value();
+            return parseConsumes(consumes.value());
         }
         return CONSUMES_DEFAULTS;
+    }
+
+    private String[] findConsumes(Method method, String[] clazzConsumes) {
+        Consumes consumes = method.getAnnotation(Consumes.class);
+        if (consumes != null) {
+            return parseConsumes(consumes.value());
+        }
+        return clazzConsumes;
+    }
+
+    private String[] parseConsumes(String[] consumes) {
+        List<String> list = new ArrayList<>();
+        for (String value : consumes) {
+            for (String subValue : value.split(",")) {
+                list.add(subValue.trim());
+            }
+        }
+        return list.toArray(new String[list.size()]);
     }
 
     private Set<String> findUserRoles(Method method) {
@@ -196,14 +214,6 @@ public class EntryPointScanner {
             return new HashSet<>(Arrays.asList(userRoles.value()));
         }
         return Collections.emptySet();
-    }
-
-    private String[] findConsumes(Method method, String[] clazzConsumes) {
-        Consumes consumes = method.getAnnotation(Consumes.class);
-        if (consumes != null) {
-            return consumes.value();
-        }
-        return clazzConsumes;
     }
 
     public static final String PRODUCES_DEFAULT = "text/plain";

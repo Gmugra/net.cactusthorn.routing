@@ -110,7 +110,7 @@ public class MethodInvokerTest extends InvokeTestAncestor {
                 .setParametersValidator(VALIDATOR).build();
 
         Method method = findMethod(EntryPoint1.class, methodName);
-        MethodInvoker caller = new MethodInvoker(config, EntryPoint1.class, method, new String[] {"*/*"});
+        MethodInvoker caller = new MethodInvoker(config, EntryPoint1.class, method, DEFAULT_CONTENT_TYPES);
 
         Object result = caller.invoke(request, response, context, pathValues);
 

@@ -46,7 +46,7 @@ public class ConsumesTest {
     @Path("/") @Consumes({"text/*","sss/www"}) //
     public static class EntryPoint2 {
 
-        @GET @Consumes("application/json") //
+        @GET @Consumes("application/json,turbo/mega") //
         public void all() {
         }
 
@@ -86,6 +86,7 @@ public class ConsumesTest {
             Arguments.of(new EntryPoint1Provider2(), EntryPoint2.class, PUT.class, "text/html"),
             Arguments.of(new EntryPoint1Provider2(), EntryPoint2.class, PUT.class, "sss/www"),
             Arguments.of(new EntryPoint1Provider2(), EntryPoint2.class, GET.class, "application/json"),
+            Arguments.of(new EntryPoint1Provider2(), EntryPoint2.class, GET.class, "turbo/mega"),
             Arguments.of(new EntryPoint1Provider2(), EntryPoint2.class, POST.class,
                     "multipart/form-data; boundary=----WebKitFormBoundaryqoNsVh2QtLJ19YqS"));
         // @formatter:on
