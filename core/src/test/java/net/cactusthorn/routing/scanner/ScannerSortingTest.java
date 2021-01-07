@@ -3,29 +3,22 @@ package net.cactusthorn.routing.scanner;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.lang.annotation.Annotation;
-import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 import javax.servlet.http.HttpServletRequest;
 
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
 import net.cactusthorn.routing.ComponentProvider;
 import net.cactusthorn.routing.EntryPointScanner;
+import net.cactusthorn.routing.RoutingConfig;
 import net.cactusthorn.routing.EntryPointScanner.EntryPoint;
-import net.cactusthorn.routing.RoutingConfig.ConfigProperty;
 import net.cactusthorn.routing.annotation.GET;
 import net.cactusthorn.routing.annotation.Path;
-import net.cactusthorn.routing.convert.ConvertersHolder;
-import net.cactusthorn.routing.validate.ParametersValidator;
+import net.cactusthorn.routing.scanner.ScannerTest.EntryPoint1Provider1;
 
 public class ScannerSortingTest {
-
-    private static final Optional<ParametersValidator> VALIDATOR = Optional.ofNullable(null);
 
     @Path("/api") //
     public static class EntryPoint1 {
@@ -53,18 +46,10 @@ public class ScannerSortingTest {
         }
     }
 
-    static final ConvertersHolder HOLDER = new ConvertersHolder();
-    static Map<ConfigProperty, Object> PROPERTIES = new HashMap<>();
-
-    @BeforeAll //
-    static void setUp() {
-        PROPERTIES.put(ConfigProperty.READ_BODY_BUFFER_SIZE, 512);
-    }
-
     @Test //
     public void entryPoint1() {
-        EntryPointScanner f = new EntryPointScanner(Arrays.asList(EntryPoint1.class), new EntryPoint1Provider(), HOLDER, PROPERTIES,
-                VALIDATOR);
+        RoutingConfig config = RoutingConfig.builder(new EntryPoint1Provider1()).addEntryPoint(EntryPoint1.class).build();
+        EntryPointScanner f = new EntryPointScanner(config);
         Map<Class<? extends Annotation>, List<EntryPoint>> entryPoints = f.scan();
         List<EntryPoint> gets = entryPoints.get(GET.class);
 

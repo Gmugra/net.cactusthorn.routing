@@ -4,14 +4,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-import net.cactusthorn.routing.EntryPointScanner.EntryPoint;
 import net.cactusthorn.routing.convert.Converter;
 import net.cactusthorn.routing.convert.ConvertersHolder;
 import net.cactusthorn.routing.producer.Producer;
 import net.cactusthorn.routing.producer.TextPlainProducer;
 import net.cactusthorn.routing.validate.ParametersValidator;
 
-import java.lang.annotation.Annotation;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -38,7 +36,9 @@ public final class RoutingConfig {
         }
     }
 
-    private Map<Class<? extends Annotation>, List<EntryPoint>> entryPoints;
+    private List<Class<?>> entryPointClasses;
+
+    private ConvertersHolder convertersHolder;
 
     private Map<String, Producer> producers;
 
@@ -50,22 +50,26 @@ public final class RoutingConfig {
 
     private ParametersValidator validator;
 
+    private String applicationPath;
+
     // @formatter:off
     private RoutingConfig(
                 ComponentProvider componentProvider,
-                Map<Class<? extends Annotation>,
-                List<EntryPoint>> entryPoints,
+                ConvertersHolder convertersHolder,
+                List<Class<?>> entryPointClasses,
                 Map<String, Producer> producers,
                 Map<String, Consumer> consumers,
                 Map<ConfigProperty, Object> configProperties,
-                ParametersValidator validator) {
-
+                ParametersValidator validator,
+                String applicationPath) {
         this.componentProvider = componentProvider;
-        this.entryPoints = entryPoints;
+        this.convertersHolder = convertersHolder;
+        this.entryPointClasses = entryPointClasses;
         this.producers = producers;
         this.consumers = consumers;
         this.configProperties = configProperties;
         this.validator = validator;
+        this.applicationPath = applicationPath;
     }
     // @formatter:off
 
@@ -73,8 +77,12 @@ public final class RoutingConfig {
         return new Builder(componentProvider);
     }
 
-    public Map<Class<? extends Annotation>, List<EntryPoint>> entryPoints() {
-        return entryPoints;
+    public ConvertersHolder convertersHolder() {
+        return convertersHolder;
+    }
+
+    public List<Class<?>> entryPointClasses() {
+        return entryPointClasses;
     }
 
     public Map<String, Producer> producers() {
@@ -97,6 +105,10 @@ public final class RoutingConfig {
         return Optional.ofNullable(validator);
     }
 
+    public String applicationPath() {
+        return applicationPath;
+    }
+
     public static final class Builder {
 
         private ComponentProvider componentProvider;
@@ -112,6 +124,8 @@ public final class RoutingConfig {
         private final Map<ConfigProperty, Object> configProperties = new HashMap<>();
 
         private ParametersValidator validator;
+
+        private String applicationPath = "/";
 
         private Builder(ComponentProvider componentProvider) {
             if (componentProvider == null) {
@@ -172,18 +186,28 @@ public final class RoutingConfig {
             return this;
         }
 
+        public Builder setApplicationPath(String path) {
+            if (path == null) {
+                throw new IllegalArgumentException("application-path can not be null");
+            }
+            applicationPath = path;
+            if (applicationPath.charAt(0) != '/') {
+                applicationPath = '/' + applicationPath;
+            }
+            if (!"/".equals(applicationPath) && applicationPath.charAt(applicationPath.length() - 1) != '/') {
+                applicationPath += '/';
+            }
+            return this;
+        }
+
         public RoutingConfig build() {
 
             Map<String, Producer> unmodifiableProducers = Collections.unmodifiableMap(producers);
             Map<String, Consumer> unmodifiableConsumers = Collections.unmodifiableMap(consumers);
             Map<ConfigProperty, Object> unmodifiableConfigProperties = Collections.unmodifiableMap(configProperties);
 
-            EntryPointScanner scanner = new EntryPointScanner(entryPointClasses, componentProvider, convertersHolder,
-                    unmodifiableConfigProperties, Optional.ofNullable(validator));
-            Map<Class<? extends Annotation>, List<EntryPoint>> entryPoints = scanner.scan();
-
-            return new RoutingConfig(componentProvider, Collections.unmodifiableMap(entryPoints), unmodifiableProducers,
-                    unmodifiableConsumers, unmodifiableConfigProperties, validator);
+            return new RoutingConfig(componentProvider, convertersHolder, Collections.unmodifiableList(entryPointClasses),
+                    unmodifiableProducers, unmodifiableConsumers, unmodifiableConfigProperties, validator, applicationPath);
         }
     }
 }

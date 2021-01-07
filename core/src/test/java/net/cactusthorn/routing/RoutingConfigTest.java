@@ -2,7 +2,6 @@ package net.cactusthorn.routing;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-import java.util.Arrays;
 import java.util.Optional;
 
 import javax.servlet.http.HttpServletRequest;
@@ -11,8 +10,8 @@ import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
 import net.cactusthorn.routing.EntryPointScanner.EntryPoint;
-import net.cactusthorn.routing.RoutingConfig.ConfigProperty;
 import net.cactusthorn.routing.PathTemplate.PathValues;
+import net.cactusthorn.routing.RoutingConfig.ConfigProperty;
 import net.cactusthorn.routing.annotation.GET;
 import net.cactusthorn.routing.annotation.Path;
 import net.cactusthorn.routing.annotation.PathParam;
@@ -39,27 +38,6 @@ public class RoutingConfigTest {
     private static final ParametersValidator TEST_VALIDATOR = (object, method, parameters) -> {
     };
 
-    public static class EntryPointWrong {
-
-        @GET @Path("/dddd{/") //
-        public void m4() {
-        }
-    }
-
-    public static class EntryPointWrongProvider implements ComponentProvider {
-
-        @Override //
-        public Object provide(Class<?> clazz, HttpServletRequest request) {
-            return new EntryPointWrong();
-        }
-    }
-
-    @Test //
-    public void exception() {
-        assertThrows(RoutingInitializationException.class,
-                () -> RoutingConfig.builder(new EntryPointWrongProvider()).addEntryPoint(EntryPointWrong.class).build());
-    }
-
     public static class EntryPointDate {
 
         @GET @Path("/dddd{var}/") //
@@ -78,10 +56,12 @@ public class RoutingConfigTest {
 
     @Test //
     public void converter() throws ConverterException, ParametersValidationException {
-        RoutingConfig config = RoutingConfig.builder(new EntryPointDateProvider()).addEntryPoint(Arrays.asList(EntryPointDate.class))
+
+        RoutingConfig config = RoutingConfig.builder(new EntryPointDateProvider()).addEntryPoint(EntryPointDate.class)
                 .addConverter(java.util.Date.class, TEST_CONVERTER).build();
 
-        EntryPoint entryPoint = config.entryPoints().get(GET.class).get(0);
+        EntryPointScanner scanner = new EntryPointScanner(config);
+        EntryPoint entryPoint = scanner.scan().get(GET.class).get(0);
 
         HttpServletRequest request = Mockito.mock(HttpServletRequest.class);
         java.util.Date date = (java.util.Date) entryPoint.invoke(request, null, null, PathValues.EMPTY);
@@ -138,5 +118,35 @@ public class RoutingConfigTest {
         RoutingConfig config = RoutingConfig.builder(new EntryPointDateProvider()).setParametersValidator(TEST_VALIDATOR).build();
         Optional<ParametersValidator> validator = config.validator();
         assertTrue(validator.isPresent());
+    }
+
+    @Test //
+    public void applicationPath() {
+        RoutingConfig config = RoutingConfig.builder(new EntryPointDateProvider()).setApplicationPath("/yyyy").build();
+        assertEquals("/yyyy/", config.applicationPath());
+    }
+
+    @Test //
+    public void applicationPathNull() {
+        assertThrows(IllegalArgumentException.class,
+                () -> RoutingConfig.builder(new EntryPointDateProvider()).setApplicationPath(null).build());
+    }
+
+    @Test //
+    public void applicationPathDefault() {
+        RoutingConfig config = RoutingConfig.builder(new EntryPointDateProvider()).setApplicationPath("/").build();
+        assertEquals("/", config.applicationPath());
+    }
+
+    @Test //
+    public void applicationPathAdd() {
+        RoutingConfig config = RoutingConfig.builder(new EntryPointDateProvider()).setApplicationPath("yy/cc").build();
+        assertEquals("/yy/cc/", config.applicationPath());
+    }
+
+    @Test //
+    public void applicationPathEnd() {
+        RoutingConfig config = RoutingConfig.builder(new EntryPointDateProvider()).setApplicationPath("yy/cc/").build();
+        assertEquals("/yy/cc/", config.applicationPath());
     }
 }

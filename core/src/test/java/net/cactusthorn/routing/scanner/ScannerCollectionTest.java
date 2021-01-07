@@ -4,28 +4,21 @@ import static org.junit.jupiter.api.Assertions.*;
 
 import java.lang.annotation.Annotation;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 import javax.servlet.http.HttpServletRequest;
 
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
 import net.cactusthorn.routing.ComponentProvider;
 import net.cactusthorn.routing.EntryPointScanner;
+import net.cactusthorn.routing.RoutingConfig;
 import net.cactusthorn.routing.EntryPointScanner.EntryPoint;
-import net.cactusthorn.routing.RoutingConfig.ConfigProperty;
 import net.cactusthorn.routing.annotation.GET;
 import net.cactusthorn.routing.annotation.Path;
-import net.cactusthorn.routing.convert.ConvertersHolder;
-import net.cactusthorn.routing.validate.ParametersValidator;
 
 public class ScannerCollectionTest {
-
-    private static final Optional<ParametersValidator> VALIDATOR = Optional.ofNullable(null);
 
     @Path("/api") //
     public static class EntryPoint1 {
@@ -57,14 +50,6 @@ public class ScannerCollectionTest {
         }
     }
 
-    static final ConvertersHolder HOLDER = new ConvertersHolder();
-    static Map<ConfigProperty, Object> PROPERTIES = new HashMap<>();
-
-    @BeforeAll //
-    static void setUp() {
-        PROPERTIES.put(ConfigProperty.READ_BODY_BUFFER_SIZE, 512);
-    }
-
     public static class EntryPointProvider implements ComponentProvider {
 
         @Override //
@@ -88,7 +73,8 @@ public class ScannerCollectionTest {
     @Test //
     public void entryPoint() {
         List<Class<?>> classes = Arrays.asList(EntryPoint1.class, EntryPoint2.class, EntryPoint3.class, EntryPoint4.class);
-        EntryPointScanner f = new EntryPointScanner(classes, new EntryPointProvider(), HOLDER, PROPERTIES, VALIDATOR);
+        RoutingConfig config = RoutingConfig.builder(new EntryPointProvider()).addEntryPoint(classes).build();
+        EntryPointScanner f = new EntryPointScanner(config);
         Map<Class<? extends Annotation>, List<EntryPoint>> entryPoints = f.scan();
         List<EntryPoint> gets = entryPoints.get(GET.class);
         assertEquals(4, gets.size());

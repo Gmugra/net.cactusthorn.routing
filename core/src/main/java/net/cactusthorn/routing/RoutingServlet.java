@@ -4,7 +4,6 @@ import java.io.*;
 import java.lang.annotation.Annotation;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -18,7 +17,6 @@ import net.cactusthorn.routing.annotation.*;
 import net.cactusthorn.routing.convert.ConverterException;
 import net.cactusthorn.routing.producer.Producer;
 import net.cactusthorn.routing.validate.ParametersValidationException;
-import net.cactusthorn.routing.validate.ParametersValidator;
 
 public class RoutingServlet extends HttpServlet {
 
@@ -28,32 +26,30 @@ public class RoutingServlet extends HttpServlet {
 
     private transient Map<Class<? extends Annotation>, List<EntryPoint>> allEntryPoints;
     private transient ServletContext servletContext;
+    private transient RoutingConfig routingConfig;
     private transient Map<String, Producer> producers;
-    private transient Map<String, Consumer> consumers;
-    private transient ComponentProvider componentProvider;
     private transient String responseCharacterEncoding;
     private transient String defaultRequestCharacterEncoding;
-    private transient Optional<ParametersValidator> parametersValidator;
 
     public RoutingServlet(RoutingConfig config) {
         super();
-        componentProvider = config.provider();
-        allEntryPoints = config.entryPoints();
+        routingConfig = config;
         producers = config.producers();
-        consumers = config.consumers();
-        responseCharacterEncoding = (String) config.properties().get(ConfigProperty.RESPONSE_CHARACTER_ENCODING);
-        defaultRequestCharacterEncoding = (String) config.properties().get(ConfigProperty.DEFAULT_REQUEST_CHARACTER_ENCODING);
-        parametersValidator = config.validator();
+        responseCharacterEncoding = (String) routingConfig.properties().get(ConfigProperty.RESPONSE_CHARACTER_ENCODING);
+        defaultRequestCharacterEncoding = (String) routingConfig.properties().get(ConfigProperty.DEFAULT_REQUEST_CHARACTER_ENCODING);
+
+        EntryPointScanner scanner = new EntryPointScanner(routingConfig);
+        allEntryPoints = scanner.scan();
     }
 
     @Override //
     public void init() throws ServletException {
         super.init();
         servletContext = getServletContext();
-        componentProvider.init(servletContext);
-        producers.values().forEach(p -> p.init(servletContext, componentProvider));
-        consumers.values().forEach(p -> p.init(servletContext, componentProvider));
-        parametersValidator.ifPresent(v -> v.init(servletContext, componentProvider));
+        routingConfig.provider().init(servletContext);
+        producers.values().forEach(p -> p.init(servletContext, routingConfig.provider()));
+        routingConfig.consumers().values().forEach(p -> p.init(servletContext, routingConfig.provider()));
+        routingConfig.validator().ifPresent(v -> v.init(servletContext, routingConfig.provider()));
     }
 
     @Override //

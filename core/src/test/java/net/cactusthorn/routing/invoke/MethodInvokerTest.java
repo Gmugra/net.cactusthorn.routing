@@ -7,9 +7,6 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.StringReader;
 import java.lang.reflect.*;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
 import java.util.stream.Stream;
 
 import javax.servlet.ServletContext;
@@ -17,7 +14,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -27,11 +23,10 @@ import org.mockito.Mockito;
 
 import net.cactusthorn.routing.ComponentProvider;
 import net.cactusthorn.routing.Consumer;
-import net.cactusthorn.routing.RoutingConfig.ConfigProperty;
+import net.cactusthorn.routing.RoutingConfig;
 import net.cactusthorn.routing.PathTemplate.PathValues;
 import net.cactusthorn.routing.annotation.*;
 import net.cactusthorn.routing.convert.ConverterException;
-import net.cactusthorn.routing.convert.ConvertersHolder;
 import net.cactusthorn.routing.validate.ParametersValidationException;
 import net.cactusthorn.routing.validate.ParametersValidator;
 
@@ -41,7 +36,8 @@ public class MethodInvokerTest extends InvokeTestAncestor {
         return new java.util.Date();
     };
 
-    private static final Optional<ParametersValidator> VALIDATOR = Optional.of((object, method, parameters) -> {});
+    private static final ParametersValidator VALIDATOR = (object, method, parameters) -> {
+    };
 
     public static class EntryPoint1 {
 
@@ -86,21 +82,6 @@ public class MethodInvokerTest extends InvokeTestAncestor {
         }
     }
 
-    static Map<ConfigProperty, Object> configProperties;
-
-    static ComponentProvider provider;
-
-    static ConvertersHolder holder;
-
-    @BeforeAll //
-    static void beforeAll() {
-        holder = new ConvertersHolder();
-        holder.register("test/date", TEST_CONSUMER);
-        provider = new EntryPoint1Provider();
-        configProperties = new HashMap<>();
-        configProperties.put(ConfigProperty.READ_BODY_BUFFER_SIZE, 512);
-    }
-
     HttpServletResponse response;
 
     HttpSession session;
@@ -125,8 +106,11 @@ public class MethodInvokerTest extends InvokeTestAncestor {
     public void invokeMethod(String methodName, PathValues pathValues, Object expectedResult)
             throws ConverterException, ParametersValidationException {
 
+        RoutingConfig config = RoutingConfig.builder(new EntryPoint1Provider()).addEntryPoint(EntryPoint1.class)
+                .setParametersValidator(VALIDATOR).build();
+
         Method method = findMethod(EntryPoint1.class, methodName);
-        MethodInvoker caller = new MethodInvoker(EntryPoint1.class, method, provider, holder, "*/*", configProperties, VALIDATOR);
+        MethodInvoker caller = new MethodInvoker(config, EntryPoint1.class, method, "*/*");
 
         Object result = caller.invoke(request, response, context, pathValues);
 
@@ -140,7 +124,11 @@ public class MethodInvokerTest extends InvokeTestAncestor {
         Mockito.when(request.getReader()).thenReturn(reader);
 
         Method method = findMethod(EntryPoint1.class, "m7");
-        MethodInvoker caller = new MethodInvoker(EntryPoint1.class, method, provider, holder, "test/date", configProperties, VALIDATOR);
+        
+        RoutingConfig config = RoutingConfig.builder(new EntryPoint1Provider()).addEntryPoint(EntryPoint1.class)
+                .setParametersValidator(VALIDATOR).addConsumer("test/date", TEST_CONSUMER).build();
+        
+        MethodInvoker caller = new MethodInvoker(config, EntryPoint1.class, method, "test/date");
 
         java.util.Date result = (java.util.Date) caller.invoke(request, response, null, null);
 

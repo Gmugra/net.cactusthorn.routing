@@ -22,12 +22,9 @@ import net.cactusthorn.routing.annotation.Produces;
 import net.cactusthorn.routing.annotation.Consumes;
 import net.cactusthorn.routing.annotation.Template;
 import net.cactusthorn.routing.annotation.UserRoles;
-import net.cactusthorn.routing.RoutingConfig.ConfigProperty;
 import net.cactusthorn.routing.PathTemplate.PathValues;
 import net.cactusthorn.routing.convert.ConverterException;
-import net.cactusthorn.routing.convert.ConvertersHolder;
 import net.cactusthorn.routing.invoke.MethodInvoker;
-import net.cactusthorn.routing.validate.ParametersValidator;
 import net.cactusthorn.routing.validate.ParametersValidationException;
 
 public class EntryPointScanner {
@@ -108,28 +105,19 @@ public class EntryPointScanner {
     private static final Set<Class<? extends Annotation>> HTTP_ANNOTATTIONS = new HashSet<>(
             Arrays.asList(DELETE.class, GET.class, HEAD.class, OPTIONS.class, PATCH.class, POST.class, PUT.class, TRACE.class));
 
-    private final List<Class<?>> classes = new ArrayList<>();
-    private ConvertersHolder convertersHolder;
-    private ComponentProvider componentProvider;
-    private Map<ConfigProperty, Object> configProperties;
-    private Optional<ParametersValidator> validator;
+    private RoutingConfig routingConfig;
 
-    public EntryPointScanner(Collection<Class<?>> classes, ComponentProvider componentProvider, ConvertersHolder convertersHolder,
-            Map<ConfigProperty, Object> configProperties, Optional<ParametersValidator> validator) {
-        this.classes.addAll(classes);
-        this.componentProvider = componentProvider;
-        this.convertersHolder = convertersHolder;
-        this.configProperties = configProperties;
-        this.validator = validator;
+    public EntryPointScanner(RoutingConfig routingConfig) {
+        this.routingConfig = routingConfig;
     }
 
     public Map<Class<? extends Annotation>, List<EntryPoint>> scan() {
 
         Map<Class<? extends Annotation>, List<EntryPoint>> entryPoints = createMap();
 
-        for (Class<?> clazz : classes) {
+        for (Class<?> clazz : routingConfig.entryPointClasses()) {
 
-            String classPath = preparePath(clazz.getAnnotation(Path.class));
+            String classPath = prepareClassPath(clazz.getAnnotation(Path.class));
             String clazzConsumes = findConsumes(clazz);
 
             for (Method method : clazz.getMethods()) {
@@ -148,8 +136,7 @@ public class EntryPointScanner {
 
                         String template = findTemplate(method);
 
-                        MethodInvoker methodInvoker = new MethodInvoker(clazz, method, componentProvider, convertersHolder, contentType,
-                                configProperties, validator);
+                        MethodInvoker methodInvoker = new MethodInvoker(routingConfig, clazz, method, contentType);
 
                         Set<String> userRoles = findUserRoles(method);
 
@@ -169,7 +156,7 @@ public class EntryPointScanner {
 
     private PathTemplate createPathTemplate(Method method, String classPath) {
         try {
-            String path = classPath.substring(0, classPath.length() - 1) + preparePath(method.getAnnotation(Path.class));
+            String path = classPath.substring(0, classPath.length() - 1) + prepareMethodPath(method.getAnnotation(Path.class));
             return new PathTemplate(path);
         } catch (IllegalArgumentException e) {
             throw new RoutingInitializationException("Path template is incorrect %s", e, method);
@@ -228,11 +215,28 @@ public class EntryPointScanner {
         return entryPoints;
     }
 
-    private String preparePath(Path classPathAnnotation) {
+    private String prepareClassPath(Path classPathAnnotation) {
+        String applicationPath = routingConfig.applicationPath();
         if (classPathAnnotation == null) {
-            return "/";
+            return applicationPath;
         }
         String path = classPathAnnotation.value();
+        if (path.charAt(0) != '/') {
+            path = applicationPath + path;
+        } else {
+            path = applicationPath.substring(0, applicationPath.length() - 1) + path;
+        }
+        if (!"/".equals(path) && path.charAt(path.length() - 1) != '/') {
+            path += '/';
+        }
+        return path;
+    }
+
+    private String prepareMethodPath(Path methodPathAnnotation) {
+        if (methodPathAnnotation == null) {
+            return "/";
+        }
+        String path = methodPathAnnotation.value();
         if (path.charAt(0) != '/') {
             path = '/' + path;
         }

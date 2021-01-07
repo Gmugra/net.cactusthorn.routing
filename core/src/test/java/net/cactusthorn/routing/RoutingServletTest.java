@@ -1,6 +1,6 @@
 package net.cactusthorn.routing;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.*;
 
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -263,7 +263,7 @@ public class RoutingServletTest {
     }
 
     @ParameterizedTest @ValueSource(strings = { "/api/nocontent", "/api/response/nocontent" }) //
-    public void nocontent(String pathInfo ) throws ServletException, IOException {
+    public void nocontent(String pathInfo) throws ServletException, IOException {
         Mockito.when(req.getPathInfo()).thenReturn(pathInfo);
         Mockito.when(resp.getStatus()).thenReturn(HttpServletResponse.SC_OK);
 
@@ -379,5 +379,26 @@ public class RoutingServletTest {
         RoutingServlet spyServlet = Mockito.spy(servlet);
         Mockito.doReturn(null).when(spyServlet).getServletContext();
         spyServlet.init();
+    }
+
+    public static class EntryPointWrong {
+
+        @GET @Path("/dddd{/") //
+        public void m4() {
+        }
+    }
+
+    public static class EntryPointWrongProvider implements ComponentProvider {
+
+        @Override //
+        public Object provide(Class<?> clazz, HttpServletRequest request) {
+            return new EntryPointWrong();
+        }
+    }
+
+    @Test //
+    public void initializationException() {
+        RoutingConfig config = RoutingConfig.builder(new EntryPointWrongProvider()).addEntryPoint(EntryPointWrong.class).build();
+        assertThrows(RoutingInitializationException.class, () -> new RoutingServlet(config));
     }
 }
