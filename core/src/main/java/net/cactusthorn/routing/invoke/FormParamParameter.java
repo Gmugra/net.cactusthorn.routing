@@ -20,10 +20,12 @@ public class FormParamParameter extends MethodMultiValueParameter {
 
     protected static final String WRONG_CONTENT_TYPE = "@FormParam can be used only with @Consumes content types: %s; Method: %s";
 
-    public FormParamParameter(Method method, Parameter parameter, ConvertersHolder convertersHolder, String contentType) {
+    public FormParamParameter(Method method, Parameter parameter, ConvertersHolder convertersHolder, String[] contentTypes) {
         super(method, parameter, convertersHolder);
-        if (!CONTENT_TYPE.contains(contentType)) {
-            throw new RoutingInitializationException(WRONG_CONTENT_TYPE, CONTENT_TYPE, method);
+        for (String contentType : contentTypes) {
+            if (!CONTENT_TYPE.contains(contentType)) {
+                throw new RoutingInitializationException(WRONG_CONTENT_TYPE, CONTENT_TYPE, method);
+            }
         }
     }
 

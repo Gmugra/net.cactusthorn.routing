@@ -69,7 +69,7 @@ public class MethodInvokerTest extends InvokeTestAncestor {
             return response.getCharacterEncoding();
         }
 
-        public java.util.Date m7(@Context java.util.Date date) {
+        @Consumes("test/date") public java.util.Date m7(@Context java.util.Date date) {
             return date;
         }
     }
@@ -110,7 +110,7 @@ public class MethodInvokerTest extends InvokeTestAncestor {
                 .setParametersValidator(VALIDATOR).build();
 
         Method method = findMethod(EntryPoint1.class, methodName);
-        MethodInvoker caller = new MethodInvoker(config, EntryPoint1.class, method, "*/*");
+        MethodInvoker caller = new MethodInvoker(config, EntryPoint1.class, method, new String[] {"*/*"});
 
         Object result = caller.invoke(request, response, context, pathValues);
 
@@ -122,13 +122,14 @@ public class MethodInvokerTest extends InvokeTestAncestor {
 
         BufferedReader reader = new BufferedReader(new StringReader("TO HAVE BODY"));
         Mockito.when(request.getReader()).thenReturn(reader);
+        Mockito.when(request.getContentType()).thenReturn("test/date");
 
         Method method = findMethod(EntryPoint1.class, "m7");
         
         RoutingConfig config = RoutingConfig.builder(new EntryPoint1Provider()).addEntryPoint(EntryPoint1.class)
                 .setParametersValidator(VALIDATOR).addConsumer("test/date", TEST_CONSUMER).build();
         
-        MethodInvoker caller = new MethodInvoker(config, EntryPoint1.class, method, "test/date");
+        MethodInvoker caller = new MethodInvoker(config, EntryPoint1.class, method, new String[] {"test/date"});
 
         java.util.Date result = (java.util.Date) caller.invoke(request, response, null, null);
 

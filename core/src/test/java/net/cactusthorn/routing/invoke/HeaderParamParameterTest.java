@@ -41,14 +41,14 @@ public class HeaderParamParameterTest extends InvokeTestAncestor {
     public void simpleArray() {
         Method m = findMethod(EntryPoint1.class, "simpleArray");
         Parameter p = m.getParameters()[0];
-        assertThrows(RoutingInitializationException.class, () -> MethodParameter.Factory.create(m, p, HOLDER, "*/*"));
+        assertThrows(RoutingInitializationException.class, () -> MethodParameter.Factory.create(m, p, HOLDER, new String[] {"*/*"}));
     }
 
     @ParameterizedTest @MethodSource("provideArguments") //
     public void headerValue(String methodName, String requestValue, String expectedValue) throws Exception {
         Method m = findMethod(EntryPoint1.class, methodName);
         Parameter p = m.getParameters()[0];
-        MethodParameter mp = MethodParameter.Factory.create(m, p, HOLDER, "*/*");
+        MethodParameter mp = MethodParameter.Factory.create(m, p, HOLDER, new String[] {"*/*"});
 
         Mockito.when(request.getHeader("val")).thenReturn(requestValue);
         String header = (String) mp.findValue(request, null, null, null);

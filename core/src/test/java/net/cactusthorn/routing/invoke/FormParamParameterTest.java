@@ -39,14 +39,14 @@ public class FormParamParameterTest extends InvokeTestAncestor {
     public void wrongContentType() throws ConverterException {
         Method m = findMethod(EntryPoint1.class, "simple");
         Parameter p = m.getParameters()[0];
-        assertThrows(RoutingInitializationException.class, () -> MethodParameter.Factory.create(m, p, HOLDER, "*/*"));
+        assertThrows(RoutingInitializationException.class, () -> MethodParameter.Factory.create(m, p, HOLDER, new String[] {"*/*"}));
     }
 
     @ParameterizedTest @MethodSource("provideArguments") //
     public void findFormValue(String methodName, String requestValue, Object expectedValue) throws Exception {
         Method m = findMethod(EntryPoint1.class, methodName);
         Parameter p = m.getParameters()[0];
-        MethodParameter mp = MethodParameter.Factory.create(m, p, HOLDER, "application/x-www-form-urlencoded");
+        MethodParameter mp = MethodParameter.Factory.create(m, p, HOLDER, new String[] {"application/x-www-form-urlencoded"});
 
         Mockito.when(request.getParameter("val")).thenReturn(requestValue);
         if (requestValue != null) {

@@ -27,7 +27,7 @@ public final class MethodInvoker {
 
     private final List<MethodParameter> parameters = new ArrayList<>();
 
-    public MethodInvoker(RoutingConfig routingConfig, Class<?> clazz, Method method, String contentType) {
+    public MethodInvoker(RoutingConfig routingConfig, Class<?> clazz, Method method, String[] contentType) {
         this.routingConfig = routingConfig;
         this.clazz = clazz;
         this.method = method;

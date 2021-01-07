@@ -37,18 +37,21 @@ public class EntryPointScanner {
         private PathTemplate pathTemplate;
         private MethodInvoker methodInvoker;
         private String produces;
-        private String contentType;
-        private Pattern contentTypePattern;
+        private String[] contentTypes;
+        private Pattern[] contentTypePatterns;
         private String template;
         private Set<String> userRoles;
 
-        private EntryPoint(PathTemplate pathTemplate, String produces, String template, String contentType, MethodInvoker methodInvoker,
+        private EntryPoint(PathTemplate pathTemplate, String produces, String template, String[] contentTypes, MethodInvoker methodInvoker,
                 Set<String> userRoles) {
             this.pathTemplate = pathTemplate;
             this.produces = produces;
             this.template = template;
-            this.contentType = contentType;
-            this.contentTypePattern = Pattern.compile(contentType.replace("*", "(.*)"));
+            this.contentTypes = contentTypes;
+            this.contentTypePatterns = new Pattern[contentTypes.length];
+            for (int i = 0; i < contentTypes.length; i++) {
+                this.contentTypePatterns[i] = Pattern.compile(contentTypes[i].replace("*", "(.*)"));
+            }
             this.methodInvoker = methodInvoker;
             this.userRoles = userRoles;
         }
@@ -78,8 +81,8 @@ public class EntryPointScanner {
             return produces;
         }
 
-        public String consumes() {
-            return contentType;
+        public String[] consumes() {
+            return contentTypes;
         }
 
         public boolean matchUserRole(HttpServletRequest req) {
@@ -92,13 +95,18 @@ public class EntryPointScanner {
         public static final String FORM_DATA = "multipart/form-data";
 
         public boolean matchContentType(String contenttype) {
-            if (this.contentType.equals(contenttype)) {
-                return true;
+            for (int i = 0; i < contentTypes.length; i++) {
+                if (contentTypes[i].equals(contenttype)) {
+                    return true;
+                }
+                if (FORM_DATA.equals(contentTypes[i]) && contenttype != null && contenttype.startsWith("multipart/form-data")) {
+                    return true;
+                }
+                if (contentTypePatterns[i].matcher(contenttype).find()) {
+                    return true;
+                }
             }
-            if (FORM_DATA.equals(this.contentType) && contenttype != null && contenttype.startsWith("multipart/form-data")) {
-                return true;
-            }
-            return contentTypePattern.matcher(contenttype).find();
+            return false;
         }
     }
 
@@ -118,7 +126,7 @@ public class EntryPointScanner {
         for (Class<?> clazz : routingConfig.entryPointClasses()) {
 
             String classPath = prepareClassPath(clazz.getAnnotation(Path.class));
-            String clazzConsumes = findConsumes(clazz);
+            String[] clazzConsumes = findConsumes(clazz);
 
             for (Method method : clazz.getMethods()) {
 
@@ -132,15 +140,15 @@ public class EntryPointScanner {
 
                         String produces = findProduces(method);
 
-                        String contentType = findConsumes(method, clazzConsumes);
+                        String[] contentTypes = findConsumes(method, clazzConsumes);
 
                         String template = findTemplate(method);
 
-                        MethodInvoker methodInvoker = new MethodInvoker(routingConfig, clazz, method, contentType);
+                        MethodInvoker methodInvoker = new MethodInvoker(routingConfig, clazz, method, contentTypes);
 
                         Set<String> userRoles = findUserRoles(method);
 
-                        EntryPoint entryPoint = new EntryPoint(pathTemplate, produces, template, contentType, methodInvoker, userRoles);
+                        EntryPoint entryPoint = new EntryPoint(pathTemplate, produces, template, contentTypes, methodInvoker, userRoles);
                         entryPoints.get(type).add(entryPoint);
                     }
                 }
@@ -172,13 +180,14 @@ public class EntryPointScanner {
     }
 
     public static final String CONSUMES_DEFAULT = "*/*";
+    public static final String[] CONSUMES_DEFAULTS = new String[] {CONSUMES_DEFAULT};
 
-    private String findConsumes(Class<?> clazz) {
+    private String[] findConsumes(Class<?> clazz) {
         Consumes consumes = clazz.getAnnotation(Consumes.class);
         if (consumes != null) {
             return consumes.value();
         }
-        return CONSUMES_DEFAULT;
+        return CONSUMES_DEFAULTS;
     }
 
     private Set<String> findUserRoles(Method method) {
@@ -189,7 +198,7 @@ public class EntryPointScanner {
         return Collections.emptySet();
     }
 
-    private String findConsumes(Method method, String clazzConsumes) {
+    private String[] findConsumes(Method method, String[] clazzConsumes) {
         Consumes consumes = method.getAnnotation(Consumes.class);
         if (consumes != null) {
             return consumes.value();

@@ -56,7 +56,7 @@ public abstract class MethodParameter {
 
     static final class Factory {
 
-        static MethodParameter create(Method method, Parameter parameter, ConvertersHolder convertersHolder, String contentType) {
+        static MethodParameter create(Method method, Parameter parameter, ConvertersHolder convertersHolder, String[] contentTypes) {
             Class<?> parameterClassType = parameter.getType();
             if (parameter.getAnnotation(PathParam.class) != null) {
                 return new PathParamParameter(method, parameter, convertersHolder);
@@ -65,7 +65,7 @@ public abstract class MethodParameter {
                 return new QueryParamParameter(method, parameter, convertersHolder);
             }
             if (parameter.getAnnotation(FormParam.class) != null) {
-                return new FormParamParameter(method, parameter, convertersHolder, contentType);
+                return new FormParamParameter(method, parameter, convertersHolder, contentTypes);
             }
             if (parameter.getAnnotation(FormPart.class) != null) {
                 return new FormPartParameter(method, parameter);
@@ -92,7 +92,7 @@ public abstract class MethodParameter {
                 return new PrincipalParameter(parameter);
             }
             if (parameter.getAnnotation(Context.class) != null) {
-                return new BodyParameter(method, parameter, convertersHolder, contentType);
+                return new BodyParameter(method, parameter, convertersHolder, contentTypes);
             }
             return new UnknownParameter(parameter);
         }

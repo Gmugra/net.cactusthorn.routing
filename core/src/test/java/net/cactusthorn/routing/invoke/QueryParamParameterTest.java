@@ -54,7 +54,7 @@ public class QueryParamParameterTest extends InvokeTestAncestor {
     public void collections(String methodName, String[] requestValues, Integer[] expected) throws Exception {
         Method m = findMethod(EntryPoint1.class, methodName);
         Parameter p = m.getParameters()[0];
-        MethodParameter mp = MethodParameter.Factory.create(m, p, HOLDER, "*/*");
+        MethodParameter mp = MethodParameter.Factory.create(m, p, HOLDER, new String[] {"*/*"});
 
         Mockito.when(request.getParameterValues("val")).thenReturn(requestValues);
 
@@ -83,14 +83,14 @@ public class QueryParamParameterTest extends InvokeTestAncestor {
     public void testThrows(String method) {
         Method m = findMethod(EntryPoint1.class, method);
         Parameter p = m.getParameters()[0];
-        assertThrows(RoutingInitializationException.class, () -> MethodParameter.Factory.create(m, p, HOLDER, "*/*"));
+        assertThrows(RoutingInitializationException.class, () -> MethodParameter.Factory.create(m, p, HOLDER, new String[] {"*/*"}));
     }
 
     @Test //
     public void nullCollection() throws Exception {
         Method m = findMethod(EntryPoint1.class, "collection");
         Parameter p = m.getParameters()[0];
-        MethodParameter mp = MethodParameter.Factory.create(m, p, HOLDER, "*/*");
+        MethodParameter mp = MethodParameter.Factory.create(m, p, HOLDER, new String[] {"*/*"});
 
         Mockito.when(request.getParameterValues("val")).thenReturn(null);
 
@@ -104,7 +104,7 @@ public class QueryParamParameterTest extends InvokeTestAncestor {
     public void wrong() {
         Method m = findMethod(EntryPoint1.class, "wrong");
         Parameter p = m.getParameters()[0];
-        MethodParameter mp = MethodParameter.Factory.create(m, p, HOLDER, "*/*");
+        MethodParameter mp = MethodParameter.Factory.create(m, p, HOLDER, new String[] {"*/*"});
 
         Mockito.when(request.getParameter("val")).thenReturn("abc");
 

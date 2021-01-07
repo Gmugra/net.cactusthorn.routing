@@ -35,14 +35,14 @@ public class CookieParamParameterTest extends InvokeTestAncestor {
     public void wrongType() throws Exception {
         Method m = findMethod(EntryPoint1.class, "wrongType");
         Parameter p = m.getParameters()[0];
-        assertThrows(RoutingInitializationException.class, () -> MethodParameter.Factory.create(m, p, HOLDER, "*/*"));
+        assertThrows(RoutingInitializationException.class, () -> MethodParameter.Factory.create(m, p, HOLDER, new String[] {"*/*"}));
     }
 
     @ParameterizedTest @MethodSource("provideArguments") //
     public void findCookieValue(String methodName, Cookie[] expectedCookie, boolean expectedNull) throws Exception {
         Method m = findMethod(EntryPoint1.class, methodName);
         Parameter p = m.getParameters()[0];
-        MethodParameter mp = MethodParameter.Factory.create(m, p, HOLDER, "*/*");
+        MethodParameter mp = MethodParameter.Factory.create(m, p, HOLDER, new String[] {"*/*"});
 
         Mockito.when(request.getCookies()).thenReturn(expectedCookie);
         Cookie cookie = (Cookie) mp.findValue(request, null, null, null);

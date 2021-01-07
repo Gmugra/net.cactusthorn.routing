@@ -25,7 +25,7 @@ public class PrincipalParameterTest extends InvokeTestAncestor {
     public void simple() throws Exception {
         Method m = findMethod(EntryPoint1.class, "simple");
         Parameter p = m.getParameters()[0];
-        MethodParameter mp = MethodParameter.Factory.create(m, p, HOLDER, "*/*");
+        MethodParameter mp = MethodParameter.Factory.create(m, p, HOLDER, new String[] {"*/*"});
 
         Mockito.when(request.getUserPrincipal()).thenReturn(PRINCIPAL);
         Principal value = (Principal) mp.findValue(request, null, null, null);
