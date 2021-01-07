@@ -97,15 +97,17 @@ public class RoutingServlet extends HttpServlet {
             resp.sendError(HttpServletResponse.SC_NOT_FOUND, "Not Found");
             return;
         }
+        boolean matchContentTypeFail = false;
         for (EntryPoint entryPoint : entryPoints) {
-            if (!entryPoint.matchContentType(contentType)) {
-                continue;
-            }
             PathValues values = entryPoint.parse(path);
             if (values != null) {
                 if (!entryPoint.matchUserRole(req)) {
                     resp.sendError(HttpServletResponse.SC_FORBIDDEN, "Forbidden");
                     return;
+                }
+                if (!entryPoint.matchContentType(contentType)) {
+                    matchContentTypeFail = true;
+                    continue;
                 }
                 try {
                     Object result = entryPoint.invoke(req, resp, servletContext, values);
@@ -118,7 +120,11 @@ public class RoutingServlet extends HttpServlet {
                 return;
             }
         }
-        resp.sendError(HttpServletResponse.SC_NOT_FOUND, "Not Found");
+        if (matchContentTypeFail) {
+            resp.sendError(HttpServletResponse.SC_UNSUPPORTED_MEDIA_TYPE, "Unsupported Media Type");
+        } else {
+            resp.sendError(HttpServletResponse.SC_NOT_FOUND, "Not Found");
+        }
     }
 
     private String contentType(HttpServletRequest req) {

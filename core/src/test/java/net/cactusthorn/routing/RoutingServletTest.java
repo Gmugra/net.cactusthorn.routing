@@ -200,7 +200,7 @@ public class RoutingServletTest {
 
         Mockito.verify(resp).sendError(code.capture(), Mockito.any());
 
-        assertEquals(404, code.getValue());
+        assertEquals(415, code.getValue());
     }
 
     @Test //
