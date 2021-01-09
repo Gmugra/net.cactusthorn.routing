@@ -3,23 +3,14 @@ package net.cactusthorn.routing;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.util.*;
-import java.util.regex.Pattern;
 
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.HttpMethod;
+import javax.ws.rs.Path;
 
-import net.cactusthorn.routing.annotation.GET;
-import net.cactusthorn.routing.annotation.POST;
-import net.cactusthorn.routing.annotation.PUT;
-import net.cactusthorn.routing.annotation.DELETE;
-import net.cactusthorn.routing.annotation.HEAD;
-import net.cactusthorn.routing.annotation.PATCH;
-import net.cactusthorn.routing.annotation.OPTIONS;
-import net.cactusthorn.routing.annotation.TRACE;
-import net.cactusthorn.routing.annotation.Path;
-import net.cactusthorn.routing.annotation.Produces;
-import net.cactusthorn.routing.annotation.Consumes;
 import net.cactusthorn.routing.annotation.Template;
 import net.cactusthorn.routing.annotation.UserRoles;
 import net.cactusthorn.routing.PathTemplate.PathValues;
@@ -29,6 +20,10 @@ import net.cactusthorn.routing.validate.ParametersValidationException;
 
 public class EntryPointScanner {
 
+    private static final ConsumesParser CONSUMES_PARSER = new ConsumesParser();
+    private static final PathTemplateParser PATHTEMPLATE_PARSER = new PathTemplateParser();
+    private static final ProducesParser PRODUCES_PARSER = new ProducesParser();
+
     public static final class EntryPoint {
 
         private static final Comparator<EntryPoint> COMPARATOR = (o1, o2) -> PathTemplate.COMPARATOR.compare(o1.pathTemplate,
@@ -37,21 +32,16 @@ public class EntryPointScanner {
         private PathTemplate pathTemplate;
         private MethodInvoker methodInvoker;
         private String produces;
-        private String[] contentTypes;
-        private Pattern[] contentTypePatterns;
+        private Set<MediaType> consumesMediaTypes;
         private String template;
         private Set<String> userRoles;
 
-        private EntryPoint(PathTemplate pathTemplate, String produces, String template, String[] contentTypes, MethodInvoker methodInvoker,
-                Set<String> userRoles) {
+        private EntryPoint(PathTemplate pathTemplate, String produces, String template, Set<MediaType> consumesMediaTypes,
+                MethodInvoker methodInvoker, Set<String> userRoles) {
             this.pathTemplate = pathTemplate;
             this.produces = produces;
             this.template = template;
-            this.contentTypes = contentTypes;
-            this.contentTypePatterns = new Pattern[contentTypes.length];
-            for (int i = 0; i < contentTypes.length; i++) {
-                this.contentTypePatterns[i] = Pattern.compile(contentTypes[i].replace("*", "(.*)"));
-            }
+            this.consumesMediaTypes = consumesMediaTypes;
             this.methodInvoker = methodInvoker;
             this.userRoles = userRoles;
         }
@@ -81,10 +71,6 @@ public class EntryPointScanner {
             return produces;
         }
 
-        public String[] consumes() {
-            return contentTypes;
-        }
-
         public boolean matchUserRole(HttpServletRequest req) {
             if (userRoles.isEmpty()) {
                 return true;
@@ -95,14 +81,9 @@ public class EntryPointScanner {
         public static final String FORM_DATA = "multipart/form-data";
 
         public boolean matchContentType(String contenttype) {
-            for (int i = 0; i < contentTypes.length; i++) {
-                if (contentTypes[i].equals(contenttype)) {
-                    return true;
-                }
-                if (FORM_DATA.equals(contentTypes[i]) && contenttype != null && contenttype.startsWith("multipart/form-data")) {
-                    return true;
-                }
-                if (contentTypePatterns[i].matcher(contenttype).find()) {
+            MediaType ct = MediaType.valueOf(contenttype);
+            for (MediaType mediaType : consumesMediaTypes) {
+                if (mediaType.isCompatible(ct)) {
                     return true;
                 }
             }
@@ -110,65 +91,54 @@ public class EntryPointScanner {
         }
     }
 
-    private static final Set<Class<? extends Annotation>> HTTP_ANNOTATTIONS = new HashSet<>(
-            Arrays.asList(DELETE.class, GET.class, HEAD.class, OPTIONS.class, PATCH.class, POST.class, PUT.class, TRACE.class));
-
     private RoutingConfig routingConfig;
 
     public EntryPointScanner(RoutingConfig routingConfig) {
         this.routingConfig = routingConfig;
     }
 
-    public Map<Class<? extends Annotation>, List<EntryPoint>> scan() {
+    public Map<String, List<EntryPoint>> scan() {
 
-        Map<Class<? extends Annotation>, List<EntryPoint>> entryPoints = createMap();
+        Map<String, List<EntryPoint>> entryPoints = createMap();
 
         for (Class<?> clazz : routingConfig.entryPointClasses()) {
 
-            String classPath = prepareClassPath(clazz.getAnnotation(Path.class));
-            String[] clazzConsumes = findConsumes(clazz);
+            String classPath = PATHTEMPLATE_PARSER.prepare(routingConfig.applicationPath(), clazz.getAnnotation(Path.class));
+            Set<MediaType> classConsumesMediaTypes = CONSUMES_PARSER.consumes(clazz);
 
             for (Method method : clazz.getMethods()) {
 
                 Annotation[] annotations = method.getAnnotations();
                 for (Annotation annotation : annotations) {
 
-                    Class<? extends Annotation> type = annotation.annotationType();
-                    if (HTTP_ANNOTATTIONS.contains(type)) {
+                    String httpMethod = getHttpMethod(annotation);
+                    if (httpMethod != null) {
 
-                        PathTemplate pathTemplate = createPathTemplate(method, classPath);
+                        PathTemplate pathTemplate = PATHTEMPLATE_PARSER.create(method, classPath);
 
-                        String produces = findProduces(method);
+                        String produces = PRODUCES_PARSER.produces(method);
 
-                        String[] contentTypes = findConsumes(method, clazzConsumes);
+                        Set<MediaType> consumesMediaTypes = CONSUMES_PARSER.consumes(method, classConsumesMediaTypes);
 
                         String template = findTemplate(method);
 
-                        MethodInvoker methodInvoker = new MethodInvoker(routingConfig, clazz, method, contentTypes);
+                        MethodInvoker methodInvoker = new MethodInvoker(routingConfig, clazz, method, consumesMediaTypes);
 
                         Set<String> userRoles = findUserRoles(method);
 
-                        EntryPoint entryPoint = new EntryPoint(pathTemplate, produces, template, contentTypes, methodInvoker, userRoles);
-                        entryPoints.get(type).add(entryPoint);
+                        EntryPoint entryPoint = new EntryPoint(pathTemplate, produces, template, consumesMediaTypes, methodInvoker,
+                                userRoles);
+                        entryPoints.get(httpMethod).add(entryPoint);
                     }
                 }
             }
         }
 
-        for (Map.Entry<Class<? extends Annotation>, List<EntryPoint>> entry : entryPoints.entrySet()) {
+        for (Map.Entry<String, List<EntryPoint>> entry : entryPoints.entrySet()) {
             Collections.sort(entry.getValue(), EntryPoint.COMPARATOR);
         }
 
         return entryPoints;
-    }
-
-    private PathTemplate createPathTemplate(Method method, String classPath) {
-        try {
-            String path = classPath.substring(0, classPath.length() - 1) + prepareMethodPath(method.getAnnotation(Path.class));
-            return new PathTemplate(path);
-        } catch (IllegalArgumentException e) {
-            throw new RoutingInitializationException("Path template is incorrect %s", e, method);
-        }
     }
 
     private String findTemplate(Method method) {
@@ -179,35 +149,6 @@ public class EntryPointScanner {
         return null;
     }
 
-    public static final String CONSUMES_DEFAULT = "*/*";
-    public static final String[] CONSUMES_DEFAULTS = new String[] {CONSUMES_DEFAULT};
-
-    private String[] findConsumes(Class<?> clazz) {
-        Consumes consumes = clazz.getAnnotation(Consumes.class);
-        if (consumes != null) {
-            return parseConsumes(consumes.value());
-        }
-        return CONSUMES_DEFAULTS;
-    }
-
-    private String[] findConsumes(Method method, String[] clazzConsumes) {
-        Consumes consumes = method.getAnnotation(Consumes.class);
-        if (consumes != null) {
-            return parseConsumes(consumes.value());
-        }
-        return clazzConsumes;
-    }
-
-    private String[] parseConsumes(String[] consumes) {
-        List<String> list = new ArrayList<>();
-        for (String value : consumes) {
-            for (String subValue : value.split(",")) {
-                list.add(subValue.trim());
-            }
-        }
-        return list.toArray(new String[list.size()]);
-    }
-
     private Set<String> findUserRoles(Method method) {
         UserRoles userRoles = method.getAnnotation(UserRoles.class);
         if (userRoles != null) {
@@ -216,52 +157,22 @@ public class EntryPointScanner {
         return Collections.emptySet();
     }
 
-    public static final String PRODUCES_DEFAULT = "text/plain";
+    private static final Set<String> HTTP_METHODS = new HashSet<>(
+            Arrays.asList(HttpMethod.DELETE, HttpMethod.GET, HttpMethod.HEAD, HttpMethod.OPTIONS, HttpMethod.POST, HttpMethod.PUT));
 
-    private String findProduces(Method method) {
-        Produces produces = method.getAnnotation(Produces.class);
-        if (produces != null) {
-            return produces.value();
+    private String getHttpMethod(Annotation annotation) {
+        HttpMethod httpMethod = annotation.annotationType().getAnnotation(HttpMethod.class);
+        if (httpMethod != null && HTTP_METHODS.contains(httpMethod.value())) {
+            return httpMethod.value();
         }
-        return PRODUCES_DEFAULT;
+        return null;
     }
 
-    private Map<Class<? extends Annotation>, List<EntryPoint>> createMap() {
-        Map<Class<? extends Annotation>, List<EntryPoint>> entryPoints = new HashMap<>();
-        for (Class<? extends Annotation> annotation : HTTP_ANNOTATTIONS) {
-            entryPoints.put(annotation, new ArrayList<>());
+    private Map<String, List<EntryPoint>> createMap() {
+        Map<String, List<EntryPoint>> entryPoints = new HashMap<>();
+        for (String method : HTTP_METHODS) {
+            entryPoints.put(method, new ArrayList<>());
         }
         return entryPoints;
-    }
-
-    private String prepareClassPath(Path classPathAnnotation) {
-        String applicationPath = routingConfig.applicationPath();
-        if (classPathAnnotation == null) {
-            return applicationPath;
-        }
-        String path = classPathAnnotation.value();
-        if (path.charAt(0) != '/') {
-            path = applicationPath + path;
-        } else {
-            path = applicationPath.substring(0, applicationPath.length() - 1) + path;
-        }
-        if (!"/".equals(path) && path.charAt(path.length() - 1) != '/') {
-            path += '/';
-        }
-        return path;
-    }
-
-    private String prepareMethodPath(Path methodPathAnnotation) {
-        if (methodPathAnnotation == null) {
-            return "/";
-        }
-        String path = methodPathAnnotation.value();
-        if (path.charAt(0) != '/') {
-            path = '/' + path;
-        }
-        if (!"/".equals(path) && path.charAt(path.length() - 1) != '/') {
-            path += '/';
-        }
-        return path;
     }
 }

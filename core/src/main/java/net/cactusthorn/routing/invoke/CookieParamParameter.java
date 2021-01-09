@@ -7,10 +7,10 @@ import javax.servlet.ServletContext;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.ws.rs.CookieParam;
 
 import net.cactusthorn.routing.RequestData;
 import net.cactusthorn.routing.RoutingInitializationException;
-import net.cactusthorn.routing.annotation.CookieParam;
 
 public class CookieParamParameter extends MethodParameter {
 

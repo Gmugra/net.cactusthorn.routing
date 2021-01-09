@@ -7,12 +7,18 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.StringReader;
 import java.lang.reflect.*;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.stream.Stream;
 
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
+import javax.ws.rs.Consumes;
+import javax.ws.rs.PathParam;
+import javax.ws.rs.QueryParam;
+import javax.ws.rs.core.MediaType;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -125,11 +131,14 @@ public class MethodInvokerTest extends InvokeTestAncestor {
         Mockito.when(request.getContentType()).thenReturn("test/date");
 
         Method method = findMethod(EntryPoint1.class, "m7");
-        
+
         RoutingConfig config = RoutingConfig.builder(new EntryPoint1Provider()).addEntryPoint(EntryPoint1.class)
-                .setParametersValidator(VALIDATOR).addConsumer("test/date", TEST_CONSUMER).build();
-        
-        MethodInvoker caller = new MethodInvoker(config, EntryPoint1.class, method, new String[] {"test/date"});
+                .setParametersValidator(VALIDATOR).addConsumer(new MediaType("test", "date"), TEST_CONSUMER).build();
+
+        Set<MediaType> consumesMediaTypes = new HashSet<>();
+        consumesMediaTypes.add(new MediaType("test", "date"));
+
+        MethodInvoker caller = new MethodInvoker(config, EntryPoint1.class, method, consumesMediaTypes);
 
         java.util.Date result = (java.util.Date) caller.invoke(request, response, null, null);
 

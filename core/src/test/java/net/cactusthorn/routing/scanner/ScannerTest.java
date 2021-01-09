@@ -3,7 +3,7 @@ package net.cactusthorn.routing.scanner;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import java.lang.annotation.Annotation;
+import java.lang.reflect.Method;
 import java.util.List;
 import java.util.Map;
 
@@ -16,8 +16,15 @@ import net.cactusthorn.routing.EntryPointScanner;
 import net.cactusthorn.routing.PathTemplate;
 import net.cactusthorn.routing.EntryPointScanner.EntryPoint;
 import net.cactusthorn.routing.PathTemplate.PathValues;
+import net.cactusthorn.routing.ProducesParser;
 import net.cactusthorn.routing.RoutingConfig;
-import net.cactusthorn.routing.annotation.*;
+import net.cactusthorn.routing.annotation.Produces;
+import net.cactusthorn.routing.annotation.Template;
+
+import javax.ws.rs.GET;
+import javax.ws.rs.HEAD;
+import javax.ws.rs.HttpMethod;
+import javax.ws.rs.Path;
 
 public class ScannerTest {
 
@@ -38,6 +45,15 @@ public class ScannerTest {
         @GET @Path("/dddd/") public void m4() {
         }
     }
+    
+    protected Method findMethod(Class<?> clazz, String methodName) {
+        for (Method method : clazz.getMethods()) {
+            if (methodName.equals(method.getName())) {
+                return method;
+            }
+        }
+        return null;
+    }
 
     public static class EntryPoint1Provider1 implements ComponentProvider {
 
@@ -51,8 +67,8 @@ public class ScannerTest {
     public void entryPoint1() {
         RoutingConfig config = RoutingConfig.builder(new EntryPoint1Provider1()).addEntryPoint(EntryPoint1.class).build();
         EntryPointScanner f = new EntryPointScanner(config);
-        Map<Class<? extends Annotation>, List<EntryPoint>> entryPoints = f.scan();
-        List<EntryPoint> gets = entryPoints.get(GET.class);
+        Map<String, List<EntryPoint>> entryPoints = f.scan();
+        List<EntryPoint> gets = entryPoints.get(HttpMethod.GET);
 
         for (EntryPoint entryPoint : gets) {
             assertTrue(entryPoint.match("/api/dddd/"));
@@ -91,8 +107,8 @@ public class ScannerTest {
     public void entryPoint2() {
         RoutingConfig config = RoutingConfig.builder(new EntryPoint1Provider2()).addEntryPoint(EntryPoint2.class).build();
         EntryPointScanner f = new EntryPointScanner(config);
-        Map<Class<? extends Annotation>, List<EntryPoint>> entryPoints = f.scan();
-        List<EntryPoint> gets = entryPoints.get(GET.class);
+        Map<String, List<EntryPoint>> entryPoints = f.scan();
+        List<EntryPoint> gets = entryPoints.get(HttpMethod.GET);
 
         for (EntryPoint entryPoint : gets) {
             assertTrue(entryPoint.match("/dddd/"));
@@ -117,11 +133,11 @@ public class ScannerTest {
     public void entryPoint3() {
         RoutingConfig config = RoutingConfig.builder(new EntryPoint1Provider3()).addEntryPoint(EntryPoint3.class).build();
         EntryPointScanner f = new EntryPointScanner(config);
-        Map<Class<? extends Annotation>, List<EntryPoint>> entryPoints = f.scan();
-        EntryPoint entryPoint = entryPoints.get(GET.class).get(0);
+        Map<String, List<EntryPoint>> entryPoints = f.scan();
+        EntryPoint entryPoint = entryPoints.get(HttpMethod.GET).get(0);
 
         assertTrue(entryPoint.match("/"));
-        assertEquals(EntryPointScanner.PRODUCES_DEFAULT, entryPoint.produces());
+        assertEquals(ProducesParser.PRODUCES_DEFAULT, entryPoint.produces());
     }
 
     @Path("api/") //
@@ -148,8 +164,8 @@ public class ScannerTest {
     public void entryPoint4() {
         RoutingConfig config = RoutingConfig.builder(new EntryPoint1Provider4()).addEntryPoint(EntryPoint4.class).build();
         EntryPointScanner f = new EntryPointScanner(config);
-        Map<Class<? extends Annotation>, List<EntryPoint>> entryPoints = f.scan();
-        EntryPoint entryPoint = entryPoints.get(GET.class).get(0);
+        Map<String, List<EntryPoint>> entryPoints = f.scan();
+        EntryPoint entryPoint = entryPoints.get(HttpMethod.GET).get(0);
         PathTemplate.PathValues values = entryPoint.parse("/api/");
 
         assertEquals(PathValues.EMPTY, values);
@@ -161,8 +177,8 @@ public class ScannerTest {
     public void wow() {
         RoutingConfig config = RoutingConfig.builder(new EntryPoint1Provider4()).addEntryPoint(EntryPoint4.class).build();
         EntryPointScanner f = new EntryPointScanner(config);
-        Map<Class<? extends Annotation>, List<EntryPoint>> entryPoints = f.scan();
-        EntryPoint entryPoint = entryPoints.get(HEAD.class).get(0);
+        Map<String, List<EntryPoint>> entryPoints = f.scan();
+        EntryPoint entryPoint = entryPoints.get(HttpMethod.HEAD).get(0);
         assertEquals("wow.html", entryPoint.template());
     }
 }

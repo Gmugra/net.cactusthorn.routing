@@ -2,11 +2,13 @@ package net.cactusthorn.routing.scanner;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-import java.lang.annotation.Annotation;
 import java.util.List;
 import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.ws.rs.GET;
+import javax.ws.rs.HttpMethod;
+import javax.ws.rs.Path;
 
 import org.junit.jupiter.api.Test;
 
@@ -14,8 +16,6 @@ import net.cactusthorn.routing.ComponentProvider;
 import net.cactusthorn.routing.EntryPointScanner;
 import net.cactusthorn.routing.RoutingConfig;
 import net.cactusthorn.routing.EntryPointScanner.EntryPoint;
-import net.cactusthorn.routing.annotation.GET;
-import net.cactusthorn.routing.annotation.Path;
 import net.cactusthorn.routing.scanner.ScannerTest.EntryPoint1Provider1;
 
 public class ScannerSortingTest {
@@ -50,8 +50,8 @@ public class ScannerSortingTest {
     public void entryPoint1() {
         RoutingConfig config = RoutingConfig.builder(new EntryPoint1Provider1()).addEntryPoint(EntryPoint1.class).build();
         EntryPointScanner f = new EntryPointScanner(config);
-        Map<Class<? extends Annotation>, List<EntryPoint>> entryPoints = f.scan();
-        List<EntryPoint> gets = entryPoints.get(GET.class);
+        Map<String, List<EntryPoint>> entryPoints = f.scan();
+        List<EntryPoint> gets = entryPoints.get(HttpMethod.GET);
 
         assertEquals("/api/dddd/sssss/", gets.get(0).pathTemplatePattern());
         assertEquals("/api/(\\d{3})/dddd/", gets.get(1).pathTemplatePattern());

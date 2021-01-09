@@ -3,21 +3,23 @@ package net.cactusthorn.routing.invoke;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
 import java.security.Principal;
+import java.util.Set;
 
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.CookieParam;
+import javax.ws.rs.DefaultValue;
+import javax.ws.rs.QueryParam;
+import javax.ws.rs.HeaderParam;
+import javax.ws.rs.PathParam;
+import javax.ws.rs.FormParam;
 
 import net.cactusthorn.routing.RequestData;
 import net.cactusthorn.routing.annotation.Context;
-import net.cactusthorn.routing.annotation.CookieParam;
-import net.cactusthorn.routing.annotation.FormParam;
 import net.cactusthorn.routing.annotation.FormPart;
-import net.cactusthorn.routing.annotation.HeaderParam;
-import net.cactusthorn.routing.annotation.PathParam;
-import net.cactusthorn.routing.annotation.QueryParam;
-import net.cactusthorn.routing.annotation.DefaultValue;
 import net.cactusthorn.routing.convert.ConvertersHolder;
 
 public abstract class MethodParameter {
@@ -56,7 +58,8 @@ public abstract class MethodParameter {
 
     static final class Factory {
 
-        static MethodParameter create(Method method, Parameter parameter, ConvertersHolder convertersHolder, String[] contentTypes) {
+        static MethodParameter create(Method method, Parameter parameter, ConvertersHolder convertersHolder,
+                Set<MediaType> consumesMediaTypes) {
             Class<?> parameterClassType = parameter.getType();
             if (parameter.getAnnotation(PathParam.class) != null) {
                 return new PathParamParameter(method, parameter, convertersHolder);
@@ -65,7 +68,7 @@ public abstract class MethodParameter {
                 return new QueryParamParameter(method, parameter, convertersHolder);
             }
             if (parameter.getAnnotation(FormParam.class) != null) {
-                return new FormParamParameter(method, parameter, convertersHolder, contentTypes);
+                return new FormParamParameter(method, parameter, convertersHolder, consumesMediaTypes);
             }
             if (parameter.getAnnotation(FormPart.class) != null) {
                 return new FormPartParameter(method, parameter);
@@ -92,7 +95,7 @@ public abstract class MethodParameter {
                 return new PrincipalParameter(parameter);
             }
             if (parameter.getAnnotation(Context.class) != null) {
-                return new BodyParameter(method, parameter, convertersHolder, contentTypes);
+                return new BodyParameter(method, parameter, convertersHolder, consumesMediaTypes);
             }
             return new UnknownParameter(parameter);
         }

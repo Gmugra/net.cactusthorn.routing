@@ -7,9 +7,17 @@ import java.util.List;
 import javax.inject.Inject;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.Part;
+import javax.ws.rs.GET;
+import javax.ws.rs.POST;
+import javax.ws.rs.Path;
+import javax.ws.rs.Consumes;
+import javax.ws.rs.CookieParam;
+import javax.ws.rs.FormParam;
 
 import net.cactusthorn.routing.Response;
-import net.cactusthorn.routing.annotation.*;
+import net.cactusthorn.routing.annotation.FormPart;
+import net.cactusthorn.routing.annotation.Produces;
+import net.cactusthorn.routing.annotation.Template;
 import net.cactusthorn.routing.demo.jetty.dagger.EntryPoint;
 
 @Path("html") //
@@ -57,7 +65,7 @@ public class HtmlEntryPoint implements EntryPoint {
     @POST @Path("form") @Consumes("application/x-www-form-urlencoded") //
     public String doHtml(
             @FormParam("fname") String fname,
-            @FormParam("lname") String lname, 
+            @FormParam("lname") String lname,
             @FormParam("box") List<Integer> box,
             @CookieParam("JSESSIONID") Cookie jsession) {
         return fname + " :: " + lname + " :: " + box + " :: " + jsession.getValue();

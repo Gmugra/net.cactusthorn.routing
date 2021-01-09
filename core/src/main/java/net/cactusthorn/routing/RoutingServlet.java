@@ -1,7 +1,6 @@
 package net.cactusthorn.routing;
 
 import java.io.*;
-import java.lang.annotation.Annotation;
 import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
@@ -9,11 +8,12 @@ import java.util.logging.Logger;
 
 import javax.servlet.*;
 import javax.servlet.http.*;
+import javax.ws.rs.HttpMethod;
+import javax.ws.rs.core.MediaType;
 
 import net.cactusthorn.routing.EntryPointScanner.EntryPoint;
 import net.cactusthorn.routing.RoutingConfig.ConfigProperty;
 import net.cactusthorn.routing.PathTemplate.PathValues;
-import net.cactusthorn.routing.annotation.*;
 import net.cactusthorn.routing.convert.ConverterException;
 import net.cactusthorn.routing.producer.Producer;
 import net.cactusthorn.routing.validate.ParametersValidationException;
@@ -24,7 +24,7 @@ public class RoutingServlet extends HttpServlet {
 
     private static final Logger LOG = Logger.getLogger(RoutingServlet.class.getName());
 
-    private transient Map<Class<? extends Annotation>, List<EntryPoint>> allEntryPoints;
+    private transient Map<String, List<EntryPoint>> allEntryPoints;
     private transient ServletContext servletContext;
     private transient RoutingConfig routingConfig;
     private transient Map<String, Producer> producers;
@@ -54,37 +54,32 @@ public class RoutingServlet extends HttpServlet {
 
     @Override //
     protected void doHead(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        process(req, resp, allEntryPoints.get(HEAD.class));
+        process(req, resp, allEntryPoints.get(HttpMethod.HEAD));
     }
 
     @Override //
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        process(req, resp, allEntryPoints.get(POST.class));
+        process(req, resp, allEntryPoints.get(HttpMethod.POST));
     }
 
     @Override //
     protected void doPut(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        process(req, resp, allEntryPoints.get(PUT.class));
+        process(req, resp, allEntryPoints.get(HttpMethod.PUT));
     }
 
     @Override //
     protected void doDelete(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        process(req, resp, allEntryPoints.get(DELETE.class));
+        process(req, resp, allEntryPoints.get(HttpMethod.DELETE));
     }
 
     @Override //
     protected void doOptions(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        process(req, resp, allEntryPoints.get(OPTIONS.class));
-    }
-
-    @Override //
-    protected void doTrace(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        process(req, resp, allEntryPoints.get(TRACE.class));
+        process(req, resp, allEntryPoints.get(HttpMethod.OPTIONS));
     }
 
     @Override //
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        process(req, resp, allEntryPoints.get(GET.class));
+        process(req, resp, allEntryPoints.get(HttpMethod.GET));
     }
 
     private void process(HttpServletRequest req, HttpServletResponse resp, List<EntryPoint> entryPoints) throws IOException {
@@ -130,7 +125,7 @@ public class RoutingServlet extends HttpServlet {
     private String contentType(HttpServletRequest req) {
         String consumes = req.getContentType();
         if (consumes == null || consumes.trim().isEmpty()) {
-            return EntryPointScanner.CONSUMES_DEFAULT;
+            return MediaType.WILDCARD;
         }
         return consumes;
     }

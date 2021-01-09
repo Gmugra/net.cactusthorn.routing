@@ -12,6 +12,16 @@ import javax.servlet.ServletException;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.ws.rs.Consumes;
+import javax.ws.rs.DELETE;
+import javax.ws.rs.GET;
+import javax.ws.rs.HEAD;
+import javax.ws.rs.OPTIONS;
+import javax.ws.rs.POST;
+import javax.ws.rs.PUT;
+import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
+import javax.ws.rs.core.MediaType;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -81,11 +91,6 @@ public class RoutingServletTest {
         @OPTIONS @Path("api/options") //
         public String options() {
             return "OPTIONS";
-        }
-
-        @TRACE @Path("api/trace") //
-        public String trace() {
-            return "TRACE";
         }
 
         @GET @Produces("aa/bb") @Path("api/produce") //
@@ -192,7 +197,7 @@ public class RoutingServletTest {
     @Test //
     public void wrongConsumes() throws ServletException, IOException {
         Mockito.when(req.getPathInfo()).thenReturn("/api/put");
-        Mockito.when(req.getContentType()).thenReturn("");
+        Mockito.when(req.getContentType()).thenReturn("a/b");
 
         servlet.doPut(req, resp);
 
@@ -215,13 +220,6 @@ public class RoutingServletTest {
         Mockito.when(req.getPathInfo()).thenReturn("/api/options");
         servlet.doOptions(req, resp);
         assertEquals("OPTIONS", stringWriter.toString());
-    }
-
-    @Test //
-    public void trace() throws ServletException, IOException {
-        Mockito.when(req.getPathInfo()).thenReturn("/api/trace");
-        servlet.doTrace(req, resp);
-        assertEquals("TRACE", stringWriter.toString());
     }
 
     @ParameterizedTest //
@@ -374,7 +372,7 @@ public class RoutingServletTest {
     @Test //
     public void init() throws ServletException {
         RoutingConfig c = RoutingConfig.builder(new EntryPoint1Provider()).addEntryPoint(EntryPoint1.class)
-                .setParametersValidator(TEST_VALIDATOR).addConsumer("aa/bb", EXCEPTION_CONSUMER).build();
+                .setParametersValidator(TEST_VALIDATOR).addConsumer(new MediaType("aa","bb"), EXCEPTION_CONSUMER).build();
         RoutingServlet servlet = new RoutingServlet(c);
         RoutingServlet spyServlet = Mockito.spy(servlet);
         Mockito.doReturn(null).when(spyServlet).getServletContext();

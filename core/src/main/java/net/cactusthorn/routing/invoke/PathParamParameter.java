@@ -6,9 +6,9 @@ import java.lang.reflect.Parameter;
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.ws.rs.PathParam;
 
 import net.cactusthorn.routing.RequestData;
-import net.cactusthorn.routing.annotation.PathParam;
 import net.cactusthorn.routing.convert.ConvertersHolder;
 
 public class PathParamParameter extends MethodSingleValueParameter {

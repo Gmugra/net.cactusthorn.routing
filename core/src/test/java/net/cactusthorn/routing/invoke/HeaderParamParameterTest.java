@@ -7,6 +7,9 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
 import java.util.stream.Stream;
 
+import javax.ws.rs.DefaultValue;
+import javax.ws.rs.HeaderParam;
+
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
@@ -14,8 +17,6 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.Mockito;
 
 import net.cactusthorn.routing.RoutingInitializationException;
-import net.cactusthorn.routing.annotation.DefaultValue;
-import net.cactusthorn.routing.annotation.HeaderParam;
 
 public class HeaderParamParameterTest extends InvokeTestAncestor {
 
@@ -24,7 +25,7 @@ public class HeaderParamParameterTest extends InvokeTestAncestor {
         public void simple(@HeaderParam("val") String value) {
         }
 
-        public void byName(@HeaderParam String val) {
+        public void byName(@HeaderParam("") String val) {
         }
 
         public void simpleArray(@HeaderParam("val") String[] values) {

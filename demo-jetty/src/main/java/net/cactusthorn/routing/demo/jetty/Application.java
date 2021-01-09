@@ -23,6 +23,7 @@ import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletRequestWrapper;
+import javax.ws.rs.core.MediaType;
 
 import org.eclipse.jetty.server.*;
 import org.eclipse.jetty.server.handler.HandlerList;
@@ -79,7 +80,7 @@ public class Application {
             .addEntryPoint(main.entryPoints().keySet())
             .addEntryPoint(main.sessionBuilder().build().entryPoints().keySet())
             .addProducer("application/json", new SimpleGsonProducer())
-            .addConsumer("application/json", new SimpleGsonConsumer())
+            .addConsumer(MediaType.APPLICATION_JSON_TYPE, new SimpleGsonConsumer())
             .addProducer("text/html", new SimpleThymeleafProducer("/thymeleaf/"))
             .addConverter(LocalDate.class, new LocalDateConverter())
             .setParametersValidator(new SimpleParametersValidator())

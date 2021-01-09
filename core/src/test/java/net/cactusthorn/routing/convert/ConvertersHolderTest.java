@@ -9,6 +9,8 @@ import net.cactusthorn.routing.Consumer;
 import java.util.Optional;
 import java.util.UUID;
 
+import javax.ws.rs.core.MediaType;
+
 public class ConvertersHolderTest {
 
     public static final Converter TEST_CONVERTER = (req, type, value) -> {
@@ -58,14 +60,14 @@ public class ConvertersHolderTest {
     @Test //
     public void consumer() {
         ConvertersHolder holder = new ConvertersHolder();
-        holder.register("a/b", TEST_CONSUMER);
+        holder.register(new MediaType("a","b"), TEST_CONSUMER);
         // ?
     }
 
     @Test //
     public void consumerNotFound() {
         ConvertersHolder holder = new ConvertersHolder();
-        Optional<ConsumerConverter> c = holder.findConsumerConverter("aa/bb");
+        Optional<ConsumerConverter> c = holder.findConsumerConverter(new MediaType("aa","bb"));
         assertFalse(c.isPresent());
     }
 

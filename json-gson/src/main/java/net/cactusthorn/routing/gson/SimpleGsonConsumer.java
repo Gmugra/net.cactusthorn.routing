@@ -1,5 +1,7 @@
 package net.cactusthorn.routing.gson;
 
+import javax.ws.rs.core.MediaType;
+
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
@@ -19,7 +21,7 @@ public class SimpleGsonConsumer implements Consumer {
     }
 
     @Override //
-    public Object consume(Class<?> clazz, String mediaType, RequestData data) {
+    public Object consume(Class<?> clazz, MediaType mediaType, RequestData data) {
         return gson.fromJson(data.requestBody(), clazz);
     }
 

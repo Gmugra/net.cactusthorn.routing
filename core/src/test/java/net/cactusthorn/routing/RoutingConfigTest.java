@@ -5,6 +5,11 @@ import static org.junit.jupiter.api.Assertions.*;
 import java.util.Optional;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.ws.rs.GET;
+import javax.ws.rs.HttpMethod;
+import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
+import javax.ws.rs.core.MediaType;
 
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
@@ -12,9 +17,6 @@ import org.mockito.Mockito;
 import net.cactusthorn.routing.EntryPointScanner.EntryPoint;
 import net.cactusthorn.routing.PathTemplate.PathValues;
 import net.cactusthorn.routing.RoutingConfig.ConfigProperty;
-import net.cactusthorn.routing.annotation.GET;
-import net.cactusthorn.routing.annotation.Path;
-import net.cactusthorn.routing.annotation.PathParam;
 import net.cactusthorn.routing.convert.Converter;
 import net.cactusthorn.routing.convert.ConverterException;
 import net.cactusthorn.routing.producer.Producer;
@@ -61,7 +63,7 @@ public class RoutingConfigTest {
                 .addConverter(java.util.Date.class, TEST_CONVERTER).build();
 
         EntryPointScanner scanner = new EntryPointScanner(config);
-        EntryPoint entryPoint = scanner.scan().get(GET.class).get(0);
+        EntryPoint entryPoint = scanner.scan().get(HttpMethod.GET).get(0);
 
         HttpServletRequest request = Mockito.mock(HttpServletRequest.class);
         java.util.Date date = (java.util.Date) entryPoint.invoke(request, null, null, PathValues.EMPTY);
@@ -89,7 +91,7 @@ public class RoutingConfigTest {
 
     @Test //
     public void consumer() {
-        RoutingConfig.builder(new EntryPointDateProvider()).addConsumer("aa/bb", TEST_CONSUMER).build();
+        RoutingConfig.builder(new EntryPointDateProvider()).addConsumer(new MediaType("aa","bb"), TEST_CONSUMER).build();
     }
 
     @Test //

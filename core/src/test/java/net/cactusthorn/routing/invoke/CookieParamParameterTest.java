@@ -7,6 +7,7 @@ import java.lang.reflect.Parameter;
 import java.util.stream.Stream;
 
 import javax.servlet.http.Cookie;
+import javax.ws.rs.CookieParam;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -15,7 +16,6 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.Mockito;
 
 import net.cactusthorn.routing.RoutingInitializationException;
-import net.cactusthorn.routing.annotation.CookieParam;
 
 public class CookieParamParameterTest extends InvokeTestAncestor {
 
@@ -27,7 +27,7 @@ public class CookieParamParameterTest extends InvokeTestAncestor {
         public void wrongType(@CookieParam("val") String value) {
         }
 
-        public void byName(@CookieParam Cookie value) {
+        public void byName(@CookieParam("") Cookie value) {
         }
     }
 

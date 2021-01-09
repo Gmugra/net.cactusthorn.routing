@@ -8,6 +8,9 @@ import java.lang.reflect.Parameter;
 import java.util.List;
 import java.util.stream.Stream;
 
+import javax.ws.rs.DefaultValue;
+import javax.ws.rs.PathParam;
+
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -16,8 +19,6 @@ import org.junit.jupiter.params.provider.ValueSource;
 import net.cactusthorn.routing.RoutingInitializationException;
 import net.cactusthorn.routing.PathTemplate.PathValues;
 import net.cactusthorn.routing.RequestData;
-import net.cactusthorn.routing.annotation.DefaultValue;
-import net.cactusthorn.routing.annotation.PathParam;
 
 public class PathParamParameterTest extends InvokeTestAncestor {
 
@@ -41,7 +42,7 @@ public class PathParamParameterTest extends InvokeTestAncestor {
         public void simple(@PathParam("val") int value) {
         }
 
-        public void byName(@PathParam int value) {
+        public void byName(@PathParam("") int value) {
         }
     }
 

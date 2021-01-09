@@ -2,6 +2,8 @@ package net.cactusthorn.routing.convert;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
+import javax.ws.rs.core.MediaType;
+
 import org.junit.jupiter.api.Test;
 
 import net.cactusthorn.routing.Consumer;
@@ -18,13 +20,13 @@ public class ConsumerConverterTest {
 
     @Test //
     public void array() {
-        ConsumerConverter c = new ConsumerConverter("aa/bb", TEST_CONSUMER);
+        ConsumerConverter c = new ConsumerConverter(new MediaType("aa","bb"), TEST_CONSUMER);
         assertThrows(UnsupportedOperationException.class, () -> c.convert(java.util.Date.class, new String[] { "a" }));
     }
 
     @Test //
     public void error() {
-        ConsumerConverter c = new ConsumerConverter("aa/bb", EXCEPTION_CONSUMER);
+        ConsumerConverter c = new ConsumerConverter(new MediaType("aa","bb"), EXCEPTION_CONSUMER);
         assertThrows(RuntimeException.class, () -> c.convert(null, java.util.Date.class, (String)null));
     }
 }

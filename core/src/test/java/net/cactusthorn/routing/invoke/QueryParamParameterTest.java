@@ -7,6 +7,8 @@ import java.lang.reflect.Parameter;
 import java.util.*;
 import java.util.stream.Stream;
 
+import javax.ws.rs.QueryParam;
+
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
@@ -15,7 +17,6 @@ import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.Mockito;
 
 import net.cactusthorn.routing.RoutingInitializationException;
-import net.cactusthorn.routing.annotation.QueryParam;
 
 public class QueryParamParameterTest extends InvokeTestAncestor {
 
@@ -24,7 +25,7 @@ public class QueryParamParameterTest extends InvokeTestAncestor {
         public void array(@QueryParam("val") Integer[] values) {
         }
 
-        public void arrayByName(@QueryParam Integer[] val) {
+        public void arrayByName(@QueryParam("") Integer[] val) {
         }
 
         public void multiArray(@QueryParam("val") int[][] values) {

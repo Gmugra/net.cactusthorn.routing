@@ -1,8 +1,9 @@
 package net.cactusthorn.routing.demo.jetty.entrypoint;
 
 import javax.inject.Inject;
+import javax.ws.rs.GET;
+import javax.ws.rs.Path;
 
-import net.cactusthorn.routing.annotation.*;
 import net.cactusthorn.routing.demo.jetty.dagger.*;
 import net.cactusthorn.routing.demo.jetty.service.IAmSingletonService;
 

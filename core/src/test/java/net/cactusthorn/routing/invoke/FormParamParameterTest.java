@@ -5,7 +5,13 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.stream.Stream;
+
+import javax.ws.rs.DefaultValue;
+import javax.ws.rs.FormParam;
+import javax.ws.rs.core.MediaType;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -14,8 +20,6 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.Mockito;
 
 import net.cactusthorn.routing.RoutingInitializationException;
-import net.cactusthorn.routing.annotation.DefaultValue;
-import net.cactusthorn.routing.annotation.FormParam;
 import net.cactusthorn.routing.convert.ConverterException;
 
 public class FormParamParameterTest extends InvokeTestAncestor {
@@ -31,7 +35,7 @@ public class FormParamParameterTest extends InvokeTestAncestor {
         public void defaultArray(@FormParam("val") @DefaultValue("A") String[] value) {
         }
 
-        public void byName(@FormParam String val) {
+        public void byName(@FormParam("") String val) {
         }
     }
 
@@ -46,7 +50,9 @@ public class FormParamParameterTest extends InvokeTestAncestor {
     public void findFormValue(String methodName, String requestValue, Object expectedValue) throws Exception {
         Method m = findMethod(EntryPoint1.class, methodName);
         Parameter p = m.getParameters()[0];
-        MethodParameter mp = MethodParameter.Factory.create(m, p, HOLDER, new String[] {"application/x-www-form-urlencoded"});
+        Set<MediaType> consumesMediaTypes = new HashSet<>();
+        consumesMediaTypes.add(MediaType.APPLICATION_FORM_URLENCODED_TYPE);
+        MethodParameter mp = MethodParameter.Factory.create(m, p, HOLDER, consumesMediaTypes);
 
         Mockito.when(request.getParameter("val")).thenReturn(requestValue);
         if (requestValue != null) {

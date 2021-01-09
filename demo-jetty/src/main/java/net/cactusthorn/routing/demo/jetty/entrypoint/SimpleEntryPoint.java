@@ -8,14 +8,14 @@ import java.time.LocalDate;
 import javax.inject.Inject;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
+import javax.ws.rs.DefaultValue;
+import javax.ws.rs.GET;
+import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
+import javax.ws.rs.QueryParam;
 
 import net.cactusthorn.routing.Response;
-import net.cactusthorn.routing.annotation.DefaultValue;
-import net.cactusthorn.routing.annotation.GET;
-import net.cactusthorn.routing.annotation.Path;
-import net.cactusthorn.routing.annotation.PathParam;
 import net.cactusthorn.routing.annotation.Produces;
-import net.cactusthorn.routing.annotation.QueryParam;
 import net.cactusthorn.routing.annotation.Template;
 import net.cactusthorn.routing.annotation.UserRoles;
 import net.cactusthorn.routing.demo.jetty.dagger.EntryPoint;
@@ -35,7 +35,7 @@ public class SimpleEntryPoint implements EntryPoint {
     }
 
     @GET @Path("/rest/api/test{ var : \\d+ }") //
-    public String doit(@PathParam("var") int in, @DefaultValue("10.5") @QueryParam Double test) {
+    public String doit(@PathParam("var") int in, @DefaultValue("10.5") @QueryParam("") Double test) {
         return in + " \u00DF " + test + " :: " + this.getClass().getSimpleName() + "@" + this.hashCode();
     }
 

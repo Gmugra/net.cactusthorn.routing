@@ -4,10 +4,12 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.ws.rs.core.MediaType;
 
 import net.cactusthorn.routing.RequestData;
 import net.cactusthorn.routing.RoutingConfig;
@@ -27,7 +29,7 @@ public final class MethodInvoker {
 
     private final List<MethodParameter> parameters = new ArrayList<>();
 
-    public MethodInvoker(RoutingConfig routingConfig, Class<?> clazz, Method method, String[] contentType) {
+    public MethodInvoker(RoutingConfig routingConfig, Class<?> clazz, Method method, Set<MediaType> consumesMediaTypes) {
         this.routingConfig = routingConfig;
         this.clazz = clazz;
         this.method = method;
@@ -35,7 +37,7 @@ public final class MethodInvoker {
             if (parameter.isSynthetic()) {
                 continue;
             }
-            parameters.add(MethodParameter.Factory.create(method, parameter, routingConfig.convertersHolder(), contentType));
+            parameters.add(MethodParameter.Factory.create(method, parameter, routingConfig.convertersHolder(), consumesMediaTypes));
         }
     }
 

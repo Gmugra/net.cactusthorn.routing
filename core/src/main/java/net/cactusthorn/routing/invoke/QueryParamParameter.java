@@ -3,8 +3,9 @@ package net.cactusthorn.routing.invoke;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
 
+import javax.ws.rs.QueryParam;
+
 import net.cactusthorn.routing.convert.ConvertersHolder;
-import net.cactusthorn.routing.annotation.QueryParam;
 
 public class QueryParamParameter extends MethodMultiValueParameter {
 

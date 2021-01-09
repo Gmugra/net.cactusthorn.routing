@@ -4,6 +4,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+import javax.ws.rs.core.MediaType;
+
 import net.cactusthorn.routing.convert.Converter;
 import net.cactusthorn.routing.convert.ConvertersHolder;
 import net.cactusthorn.routing.producer.Producer;
@@ -42,7 +44,7 @@ public final class RoutingConfig {
 
     private Map<String, Producer> producers;
 
-    private Map<String, Consumer> consumers;
+    private Map<MediaType, Consumer> consumers;
 
     private ComponentProvider componentProvider;
 
@@ -58,7 +60,7 @@ public final class RoutingConfig {
                 ConvertersHolder convertersHolder,
                 List<Class<?>> entryPointClasses,
                 Map<String, Producer> producers,
-                Map<String, Consumer> consumers,
+                Map<MediaType, Consumer> consumers,
                 Map<ConfigProperty, Object> configProperties,
                 ParametersValidator validator,
                 String applicationPath) {
@@ -89,7 +91,7 @@ public final class RoutingConfig {
         return producers;
     }
 
-    public Map<String, Consumer> consumers() {
+    public Map<MediaType, Consumer> consumers() {
         return consumers;
     }
 
@@ -119,7 +121,7 @@ public final class RoutingConfig {
 
         private final Map<String, Producer> producers = new HashMap<>();
 
-        private final Map<String, Consumer> consumers = new HashMap<>();
+        private final Map<MediaType, Consumer> consumers = new HashMap<>();
 
         private final Map<ConfigProperty, Object> configProperties = new HashMap<>();
 
@@ -160,7 +162,7 @@ public final class RoutingConfig {
             return this;
         }
 
-        public Builder addConsumer(String mediaType, Consumer consumer) {
+        public Builder addConsumer(MediaType mediaType, Consumer consumer) {
             consumers.put(mediaType, consumer);
             convertersHolder.register(mediaType, consumer);
             return this;
@@ -203,7 +205,7 @@ public final class RoutingConfig {
         public RoutingConfig build() {
 
             Map<String, Producer> unmodifiableProducers = Collections.unmodifiableMap(producers);
-            Map<String, Consumer> unmodifiableConsumers = Collections.unmodifiableMap(consumers);
+            Map<MediaType, Consumer> unmodifiableConsumers = Collections.unmodifiableMap(consumers);
             Map<ConfigProperty, Object> unmodifiableConfigProperties = Collections.unmodifiableMap(configProperties);
 
             return new RoutingConfig(componentProvider, convertersHolder, Collections.unmodifiableList(entryPointClasses),

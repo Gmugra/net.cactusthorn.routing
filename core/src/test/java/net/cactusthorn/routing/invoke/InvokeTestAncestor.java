@@ -1,8 +1,11 @@
 package net.cactusthorn.routing.invoke;
 
 import java.lang.reflect.Method;
+import java.util.HashSet;
+import java.util.Set;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.ws.rs.core.MediaType;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.mockito.Mockito;
@@ -13,7 +16,11 @@ public class InvokeTestAncestor {
 
     protected final static ConvertersHolder HOLDER = new ConvertersHolder();
 
-    protected static final String[] DEFAULT_CONTENT_TYPES = new String[] {"*/*"};
+    protected static final Set<MediaType> DEFAULT_CONTENT_TYPES;
+    static {
+        DEFAULT_CONTENT_TYPES = new HashSet<>();
+        DEFAULT_CONTENT_TYPES.add(MediaType.WILDCARD_TYPE);
+    }
 
     protected HttpServletRequest request;
 
@@ -29,5 +36,11 @@ public class InvokeTestAncestor {
             }
         }
         return null;
+    }
+
+    protected Set<MediaType> mediaTypes(String type, String subtype) {
+        Set<MediaType> mediaTypes = new HashSet<>();
+        mediaTypes.add(new MediaType(type, subtype));
+        return mediaTypes;
     }
 }

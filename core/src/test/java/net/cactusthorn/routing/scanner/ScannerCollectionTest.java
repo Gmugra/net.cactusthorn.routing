@@ -2,12 +2,14 @@ package net.cactusthorn.routing.scanner;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-import java.lang.annotation.Annotation;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.ws.rs.GET;
+import javax.ws.rs.HttpMethod;
+import javax.ws.rs.Path;
 
 import org.junit.jupiter.api.Test;
 
@@ -15,8 +17,6 @@ import net.cactusthorn.routing.ComponentProvider;
 import net.cactusthorn.routing.EntryPointScanner;
 import net.cactusthorn.routing.RoutingConfig;
 import net.cactusthorn.routing.EntryPointScanner.EntryPoint;
-import net.cactusthorn.routing.annotation.GET;
-import net.cactusthorn.routing.annotation.Path;
 
 public class ScannerCollectionTest {
 
@@ -75,8 +75,8 @@ public class ScannerCollectionTest {
         List<Class<?>> classes = Arrays.asList(EntryPoint1.class, EntryPoint2.class, EntryPoint3.class, EntryPoint4.class);
         RoutingConfig config = RoutingConfig.builder(new EntryPointProvider()).addEntryPoint(classes).build();
         EntryPointScanner f = new EntryPointScanner(config);
-        Map<Class<? extends Annotation>, List<EntryPoint>> entryPoints = f.scan();
-        List<EntryPoint> gets = entryPoints.get(GET.class);
+        Map<String, List<EntryPoint>> entryPoints = f.scan();
+        List<EntryPoint> gets = entryPoints.get(HttpMethod.GET);
         assertEquals(4, gets.size());
         for (EntryPoint entryPoint : gets) {
             assertTrue(entryPoint.match("/api/dddd/"));

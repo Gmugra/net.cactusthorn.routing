@@ -53,6 +53,7 @@
         <dependency.junit>5.7.0</dependency.junit>
         <dependency.mockito>3.6.28</dependency.mockito>
         <dependency.servlet>3.1.0</dependency.servlet>
+        <dependency.rs-api>2.1.1</dependency.rs-api>
         <dependency.jetty>9.4.35.v20201120</dependency.jetty>
         <dependency.gson>2.8.6</dependency.gson>
         <dependency.thymeleaf>3.0.12.RELEASE</dependency.thymeleaf>
@@ -134,6 +135,13 @@
                 <groupId>javax.servlet</groupId>
                 <artifactId>javax.servlet-api</artifactId>
                 <version>${dependency.servlet}</version>
+                <scope>provided</scope>
+            </dependency>
+
+            <dependency>
+                <groupId>javax.ws.rs</groupId>
+                <artifactId>javax.ws.rs-api</artifactId>
+                <version>${dependency.rs-api}</version>
             </dependency>
 
             <dependency>
