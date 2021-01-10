@@ -48,7 +48,6 @@ public class RoutingServlet extends HttpServlet {
         servletContext = getServletContext();
         routingConfig.provider().init(servletContext);
         producers.values().forEach(p -> p.init(servletContext, routingConfig.provider()));
-        routingConfig.consumers().values().forEach(p -> p.init(servletContext, routingConfig.provider()));
         routingConfig.validator().ifPresent(v -> v.init(servletContext, routingConfig.provider()));
     }
 

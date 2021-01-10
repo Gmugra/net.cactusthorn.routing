@@ -21,20 +21,17 @@ public class RuntimeDelegateImpl extends RuntimeDelegate {
 
     @Override //
     public UriBuilder createUriBuilder() {
-        // TODO Auto-generated method stub
-        return null;
+        throw new UnsupportedOperationException("createUriBuilder() is not supported");
     }
 
     @Override //
     public ResponseBuilder createResponseBuilder() {
-        // TODO Auto-generated method stub
-        return null;
+        throw new UnsupportedOperationException("createResponseBuilder() is not supported");
     }
 
     @Override //
     public VariantListBuilder createVariantListBuilder() {
-        // TODO Auto-generated method stub
-        return null;
+        throw new UnsupportedOperationException("createVariantListBuilder() is not supported");
     }
 
     @Override //
@@ -53,8 +50,7 @@ public class RuntimeDelegateImpl extends RuntimeDelegate {
 
     @Override //
     public Builder createLinkBuilder() {
-        // TODO Auto-generated method stub
-        return null;
+        throw new UnsupportedOperationException("createLinkBuilder() is not supported");
     }
 
 }

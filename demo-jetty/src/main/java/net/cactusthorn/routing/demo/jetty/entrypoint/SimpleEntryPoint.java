@@ -13,6 +13,7 @@ import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.QueryParam;
+import javax.ws.rs.core.Context;
 
 import net.cactusthorn.routing.Response;
 import net.cactusthorn.routing.annotation.Produces;
@@ -60,7 +61,7 @@ public class SimpleEntryPoint implements EntryPoint {
     }
 
     @GET @UserRoles({ "TestRole" }) @Path("/principal") //
-    public String principal(Principal principal) {
+    public String principal(@Context Principal principal) {
         return principal.getName();
     }
 

@@ -7,6 +7,7 @@ import java.lang.reflect.Parameter;
 import java.util.*;
 import java.util.stream.Stream;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.QueryParam;
 
 import org.junit.jupiter.api.Test;
@@ -16,6 +17,8 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.Mockito;
 
+import net.cactusthorn.routing.ComponentProvider;
+import net.cactusthorn.routing.RoutingConfig;
 import net.cactusthorn.routing.RoutingInitializationException;
 
 public class QueryParamParameterTest extends InvokeTestAncestor {
@@ -51,11 +54,21 @@ public class QueryParamParameterTest extends InvokeTestAncestor {
         }
     }
 
+    public static class EntryPoint1Provider implements ComponentProvider {
+
+        @Override //
+        public Object provide(Class<?> clazz, HttpServletRequest request) {
+            return new EntryPoint1();
+        }
+    }
+
+    private static final RoutingConfig CONFIG = RoutingConfig.builder(new EntryPoint1Provider()).addEntryPoint(EntryPoint1.class).build();
+
     @ParameterizedTest @MethodSource("collectionArguments") //
     public void collections(String methodName, String[] requestValues, Integer[] expected) throws Exception {
         Method m = findMethod(EntryPoint1.class, methodName);
         Parameter p = m.getParameters()[0];
-        MethodParameter mp = MethodParameter.Factory.create(m, p, HOLDER, DEFAULT_CONTENT_TYPES);
+        MethodParameter mp = MethodParameter.Factory.create(m, p, null, CONFIG, DEFAULT_CONTENT_TYPES);
 
         Mockito.when(request.getParameterValues("val")).thenReturn(requestValues);
 
@@ -84,14 +97,14 @@ public class QueryParamParameterTest extends InvokeTestAncestor {
     public void testThrows(String method) {
         Method m = findMethod(EntryPoint1.class, method);
         Parameter p = m.getParameters()[0];
-        assertThrows(RoutingInitializationException.class, () -> MethodParameter.Factory.create(m, p, HOLDER, DEFAULT_CONTENT_TYPES));
+        assertThrows(RoutingInitializationException.class, () -> MethodParameter.Factory.create(m, p, null, CONFIG, DEFAULT_CONTENT_TYPES));
     }
 
     @Test //
     public void nullCollection() throws Exception {
         Method m = findMethod(EntryPoint1.class, "collection");
         Parameter p = m.getParameters()[0];
-        MethodParameter mp = MethodParameter.Factory.create(m, p, HOLDER, DEFAULT_CONTENT_TYPES);
+        MethodParameter mp = MethodParameter.Factory.create(m, p, null, CONFIG, DEFAULT_CONTENT_TYPES);
 
         Mockito.when(request.getParameterValues("val")).thenReturn(null);
 
@@ -105,7 +118,7 @@ public class QueryParamParameterTest extends InvokeTestAncestor {
     public void wrong() {
         Method m = findMethod(EntryPoint1.class, "wrong");
         Parameter p = m.getParameters()[0];
-        MethodParameter mp = MethodParameter.Factory.create(m, p, HOLDER, DEFAULT_CONTENT_TYPES);
+        MethodParameter mp = MethodParameter.Factory.create(m, p, null, CONFIG, DEFAULT_CONTENT_TYPES);
 
         Mockito.when(request.getParameter("val")).thenReturn("abc");
 

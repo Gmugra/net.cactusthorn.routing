@@ -38,9 +38,27 @@ public class InvokeTestAncestor {
         return null;
     }
 
-    protected Set<MediaType> mediaTypes(String type, String subtype) {
+    protected static Set<MediaType> mediaTypes(String type, String subtype) {
         Set<MediaType> mediaTypes = new HashSet<>();
         mediaTypes.add(new MediaType(type, subtype));
+        return mediaTypes;
+    }
+
+    protected static Set<MediaType> mediaTypes(String type, String subtype, String charset) {
+        Set<MediaType> mediaTypes = new HashSet<>();
+        mediaTypes.add(new MediaType(type, subtype).withCharset(charset));
+        return mediaTypes;
+    }
+
+    protected static Set<MediaType> mediaTypes(MediaType mediaType) {
+        Set<MediaType> mediaTypes = new HashSet<>();
+        mediaTypes.add(mediaType);
+        return mediaTypes;
+    }
+
+    protected static Set<MediaType> mediaTypes(MediaType mediaType, String charset) {
+        Set<MediaType> mediaTypes = new HashSet<>();
+        mediaTypes.add(mediaType.withCharset(charset));
         return mediaTypes;
     }
 }

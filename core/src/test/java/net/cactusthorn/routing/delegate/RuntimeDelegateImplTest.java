@@ -12,4 +12,13 @@ public class RuntimeDelegateImplTest {
     public void fromNull() {
         assertThrows(IllegalArgumentException.class, () -> IMPL.createHeaderDelegate(null));
     }
+
+    @Test //
+    public void checkUnsupported() {
+        assertThrows(UnsupportedOperationException.class, () -> IMPL.createUriBuilder());
+        assertThrows(UnsupportedOperationException.class, () -> IMPL.createResponseBuilder());
+        assertThrows(UnsupportedOperationException.class, () -> IMPL.createVariantListBuilder());
+        assertThrows(UnsupportedOperationException.class, () -> IMPL.createEndpoint(null, null));
+        assertThrows(UnsupportedOperationException.class, () -> IMPL.createLinkBuilder());
+    }
 }

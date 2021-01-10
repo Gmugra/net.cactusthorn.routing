@@ -5,7 +5,10 @@ import java.util.Map;
 import java.util.Optional;
 
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.ext.MessageBodyReader;
 
+import net.cactusthorn.routing.bodyreader.TextPlainBodyReader;
+import net.cactusthorn.routing.bodyreader.WildCardBodyReader;
 import net.cactusthorn.routing.convert.Converter;
 import net.cactusthorn.routing.convert.ConvertersHolder;
 import net.cactusthorn.routing.producer.Producer;
@@ -44,7 +47,7 @@ public final class RoutingConfig {
 
     private Map<String, Producer> producers;
 
-    private Map<MediaType, Consumer> consumers;
+    private Map<MediaType, MessageBodyReader<?>> bodyReaders;
 
     private ComponentProvider componentProvider;
 
@@ -60,7 +63,7 @@ public final class RoutingConfig {
                 ConvertersHolder convertersHolder,
                 List<Class<?>> entryPointClasses,
                 Map<String, Producer> producers,
-                Map<MediaType, Consumer> consumers,
+                Map<MediaType, MessageBodyReader<?>> bodyReaders,
                 Map<ConfigProperty, Object> configProperties,
                 ParametersValidator validator,
                 String applicationPath) {
@@ -68,7 +71,7 @@ public final class RoutingConfig {
         this.convertersHolder = convertersHolder;
         this.entryPointClasses = entryPointClasses;
         this.producers = producers;
-        this.consumers = consumers;
+        this.bodyReaders = bodyReaders;
         this.configProperties = configProperties;
         this.validator = validator;
         this.applicationPath = applicationPath;
@@ -91,8 +94,8 @@ public final class RoutingConfig {
         return producers;
     }
 
-    public Map<MediaType, Consumer> consumers() {
-        return consumers;
+    public Map<MediaType, MessageBodyReader<?>> bodyReaders() {
+        return bodyReaders;
     }
 
     public ComponentProvider provider() {
@@ -121,7 +124,7 @@ public final class RoutingConfig {
 
         private final Map<String, Producer> producers = new HashMap<>();
 
-        private final Map<MediaType, Consumer> consumers = new HashMap<>();
+        private final Map<MediaType, MessageBodyReader<?>> bodyReaders = new HashMap<>();
 
         private final Map<ConfigProperty, Object> configProperties = new HashMap<>();
 
@@ -138,6 +141,9 @@ public final class RoutingConfig {
             for (ConfigProperty property : ConfigProperty.values()) {
                 configProperties.put(property, property.ddefault());
             }
+
+            addBodyReader(MediaType.WILDCARD_TYPE, new WildCardBodyReader());
+            addBodyReader(MediaType.TEXT_PLAIN_TYPE, new TextPlainBodyReader(convertersHolder));
 
             addProducer(TextPlainProducer.MEDIA_TYPE, new TextPlainProducer());
         }
@@ -162,9 +168,8 @@ public final class RoutingConfig {
             return this;
         }
 
-        public Builder addConsumer(MediaType mediaType, Consumer consumer) {
-            consumers.put(mediaType, consumer);
-            convertersHolder.register(mediaType, consumer);
+        public Builder addBodyReader(MediaType mediaType, MessageBodyReader<?> bodyReader) {
+            bodyReaders.put(mediaType, bodyReader);
             return this;
         }
 
@@ -205,11 +210,11 @@ public final class RoutingConfig {
         public RoutingConfig build() {
 
             Map<String, Producer> unmodifiableProducers = Collections.unmodifiableMap(producers);
-            Map<MediaType, Consumer> unmodifiableConsumers = Collections.unmodifiableMap(consumers);
+            Map<MediaType, MessageBodyReader<?>> unmodifiableBodyReaders = Collections.unmodifiableMap(bodyReaders);
             Map<ConfigProperty, Object> unmodifiableConfigProperties = Collections.unmodifiableMap(configProperties);
 
             return new RoutingConfig(componentProvider, convertersHolder, Collections.unmodifiableList(entryPointClasses),
-                    unmodifiableProducers, unmodifiableConsumers, unmodifiableConfigProperties, validator, applicationPath);
+                    unmodifiableProducers, unmodifiableBodyReaders, unmodifiableConfigProperties, validator, applicationPath);
         }
     }
 }

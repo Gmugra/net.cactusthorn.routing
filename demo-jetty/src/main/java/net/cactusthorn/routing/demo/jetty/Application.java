@@ -1,7 +1,7 @@
 package net.cactusthorn.routing.demo.jetty;
 
 import net.cactusthorn.routing.*;
-import net.cactusthorn.routing.gson.SimpleGsonConsumer;
+import net.cactusthorn.routing.gson.SimpleGsonBodyReader;
 import net.cactusthorn.routing.gson.SimpleGsonProducer;
 import net.cactusthorn.routing.thymeleaf.SimpleThymeleafProducer;
 import net.cactusthorn.routing.validation.javax.SimpleParametersValidator;
@@ -80,7 +80,7 @@ public class Application {
             .addEntryPoint(main.entryPoints().keySet())
             .addEntryPoint(main.sessionBuilder().build().entryPoints().keySet())
             .addProducer("application/json", new SimpleGsonProducer())
-            .addConsumer(MediaType.APPLICATION_JSON_TYPE, new SimpleGsonConsumer())
+            .addBodyReader(MediaType.APPLICATION_JSON_TYPE, new SimpleGsonBodyReader<>())
             .addProducer("text/html", new SimpleThymeleafProducer("/thymeleaf/"))
             .addConverter(LocalDate.class, new LocalDateConverter())
             .setParametersValidator(new SimpleParametersValidator())

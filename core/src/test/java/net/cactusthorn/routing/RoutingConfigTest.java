@@ -10,6 +10,7 @@ import javax.ws.rs.HttpMethod;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.ext.MessageBodyReader;
 
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
@@ -17,6 +18,7 @@ import org.mockito.Mockito;
 import net.cactusthorn.routing.EntryPointScanner.EntryPoint;
 import net.cactusthorn.routing.PathTemplate.PathValues;
 import net.cactusthorn.routing.RoutingConfig.ConfigProperty;
+import net.cactusthorn.routing.bodyreader.WildCardBodyReader;
 import net.cactusthorn.routing.convert.Converter;
 import net.cactusthorn.routing.convert.ConverterException;
 import net.cactusthorn.routing.producer.Producer;
@@ -31,10 +33,6 @@ public class RoutingConfigTest {
 
     public static final Producer TEST_PRODUCER = (object, template, mediaType, req, resp) -> {
         return;
-    };
-
-    public static final Consumer TEST_CONSUMER = (clazz, mediaType, req) -> {
-        return null;
     };
 
     private static final ParametersValidator TEST_VALIDATOR = (object, method, parameters) -> {
@@ -90,8 +88,11 @@ public class RoutingConfigTest {
     }
 
     @Test //
-    public void consumer() {
-        RoutingConfig.builder(new EntryPointDateProvider()).addConsumer(new MediaType("aa","bb"), TEST_CONSUMER).build();
+    public void bodyReader() {
+        MediaType aabb = new MediaType("aa", "bb");
+        RoutingConfig config = RoutingConfig.builder(new EntryPointDateProvider()).addBodyReader(aabb, new WildCardBodyReader()).build();
+        MessageBodyReader<?> bodyReader = config.bodyReaders().get(aabb);
+        assertNotNull(bodyReader);
     }
 
     @Test //

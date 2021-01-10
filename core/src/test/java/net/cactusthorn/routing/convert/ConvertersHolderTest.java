@@ -4,20 +4,12 @@ import static org.junit.jupiter.api.Assertions.*;
 
 import org.junit.jupiter.api.Test;
 
-import net.cactusthorn.routing.Consumer;
-
 import java.util.Optional;
 import java.util.UUID;
-
-import javax.ws.rs.core.MediaType;
 
 public class ConvertersHolderTest {
 
     public static final Converter TEST_CONVERTER = (req, type, value) -> {
-        return new java.util.Date();
-    };
-
-    public static final Consumer TEST_CONSUMER = (clazz, mediaType, data) -> {
         return new java.util.Date();
     };
 
@@ -54,20 +46,6 @@ public class ConvertersHolderTest {
     public void unknown() {
         ConvertersHolder holder = new ConvertersHolder();
         Optional<Converter> c = holder.findConverter(Math.class);
-        assertFalse(c.isPresent());
-    }
-
-    @Test //
-    public void consumer() {
-        ConvertersHolder holder = new ConvertersHolder();
-        holder.register(new MediaType("a","b"), TEST_CONSUMER);
-        // ?
-    }
-
-    @Test //
-    public void consumerNotFound() {
-        ConvertersHolder holder = new ConvertersHolder();
-        Optional<ConsumerConverter> c = holder.findConsumerConverter(new MediaType("aa","bb"));
         assertFalse(c.isPresent());
     }
 

@@ -21,7 +21,6 @@ import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
-import javax.ws.rs.core.MediaType;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -365,14 +364,10 @@ public class RoutingServletTest {
         assertEquals(403, code.getValue());
     }
 
-    public static final Consumer EXCEPTION_CONSUMER = (clazz, mediaType, data) -> {
-        throw new RuntimeException("TEST IT");
-    };
-
     @Test //
     public void init() throws ServletException {
         RoutingConfig c = RoutingConfig.builder(new EntryPoint1Provider()).addEntryPoint(EntryPoint1.class)
-                .setParametersValidator(TEST_VALIDATOR).addConsumer(new MediaType("aa","bb"), EXCEPTION_CONSUMER).build();
+                .setParametersValidator(TEST_VALIDATOR).build();
         RoutingServlet servlet = new RoutingServlet(c);
         RoutingServlet spyServlet = Mockito.spy(servlet);
         Mockito.doReturn(null).when(spyServlet).getServletContext();

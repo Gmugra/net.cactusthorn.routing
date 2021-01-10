@@ -5,6 +5,7 @@ import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
+import javax.ws.rs.core.MediaType;
 import javax.ws.rs.HeaderParam;
 
 import net.cactusthorn.routing.annotation.*;
@@ -17,13 +18,13 @@ public class GsonEntryPoint implements EntryPoint {
     public GsonEntryPoint() {
     }
 
-    @GET @Produces("application/json") //
+    @GET @Produces(MediaType.APPLICATION_JSON) //
     public DataObject doitGson() {
         return new DataObject("The Name \u00DF", 123);
     }
 
-    @POST @Consumes("application/json") //
-    public String getitGson(@Context DataObject data, @HeaderParam("Accept-Encoding") String acceptEncoding) {
+    @POST @Consumes(MediaType.APPLICATION_JSON) //
+    public String getitGson(DataObject data, @HeaderParam("Accept-Encoding") String acceptEncoding) {
         return data.getName() + "; header : " + acceptEncoding;
     }
 }

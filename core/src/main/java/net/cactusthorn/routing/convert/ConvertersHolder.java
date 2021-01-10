@@ -5,10 +5,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
-import javax.ws.rs.core.MediaType;
-
-import net.cactusthorn.routing.Consumer;
-
 public class ConvertersHolder {
 
     private static final StaticStringMethodConverter VALUE_OF = new StaticStringMethodConverter("valueOf");
@@ -16,8 +12,6 @@ public class ConvertersHolder {
     private static final StringConstructorConverter CONSTRUCTOR = new StringConstructorConverter();
 
     private final Map<Type, Converter> converters = new HashMap<>();
-
-    private final Map<MediaType, ConsumerConverter> consumers = new HashMap<>();
 
     public ConvertersHolder() {
 
@@ -61,15 +55,7 @@ public class ConvertersHolder {
         return Optional.empty();
     }
 
-    public Optional<ConsumerConverter> findConsumerConverter(MediaType mediaType) {
-        return Optional.ofNullable(consumers.get(mediaType));
-    }
-
     public void register(Class<?> clazz, Converter converter) {
         converters.put(clazz, converter);
-    }
-
-    public void register(MediaType mediaType, Consumer consumer) {
-        consumers.put(mediaType, new ConsumerConverter(mediaType, consumer));
     }
 }

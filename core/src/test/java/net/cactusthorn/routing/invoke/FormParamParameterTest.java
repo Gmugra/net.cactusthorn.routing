@@ -9,6 +9,7 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.stream.Stream;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.DefaultValue;
 import javax.ws.rs.FormParam;
 import javax.ws.rs.core.MediaType;
@@ -19,6 +20,8 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.Mockito;
 
+import net.cactusthorn.routing.ComponentProvider;
+import net.cactusthorn.routing.RoutingConfig;
 import net.cactusthorn.routing.RoutingInitializationException;
 import net.cactusthorn.routing.convert.ConverterException;
 
@@ -39,11 +42,21 @@ public class FormParamParameterTest extends InvokeTestAncestor {
         }
     }
 
+    public static class EntryPoint1Provider implements ComponentProvider {
+
+        @Override //
+        public Object provide(Class<?> clazz, HttpServletRequest request) {
+            return new EntryPoint1();
+        }
+    }
+
+    private static final RoutingConfig CONFIG = RoutingConfig.builder(new EntryPoint1Provider()).addEntryPoint(EntryPoint1.class).build();
+
     @Test //
     public void wrongContentType() throws ConverterException {
         Method m = findMethod(EntryPoint1.class, "simple");
         Parameter p = m.getParameters()[0];
-        assertThrows(RoutingInitializationException.class, () -> MethodParameter.Factory.create(m, p, HOLDER, DEFAULT_CONTENT_TYPES));
+        assertThrows(RoutingInitializationException.class, () -> MethodParameter.Factory.create(m, p, null, CONFIG, DEFAULT_CONTENT_TYPES));
     }
 
     @ParameterizedTest @MethodSource("provideArguments") //
@@ -52,11 +65,11 @@ public class FormParamParameterTest extends InvokeTestAncestor {
         Parameter p = m.getParameters()[0];
         Set<MediaType> consumesMediaTypes = new HashSet<>();
         consumesMediaTypes.add(MediaType.APPLICATION_FORM_URLENCODED_TYPE);
-        MethodParameter mp = MethodParameter.Factory.create(m, p, HOLDER, consumesMediaTypes);
+        MethodParameter mp = MethodParameter.Factory.create(m, p, null, CONFIG, consumesMediaTypes);
 
         Mockito.when(request.getParameter("val")).thenReturn(requestValue);
         if (requestValue != null) {
-            Mockito.when(request.getParameterValues("val")).thenReturn(new String[] {requestValue});
+            Mockito.when(request.getParameterValues("val")).thenReturn(new String[] { requestValue });
         }
         Object value = mp.findValue(request, null, null, null);
         if (value.getClass().isArray()) {

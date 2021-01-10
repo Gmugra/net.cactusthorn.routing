@@ -1,13 +1,13 @@
 package net.cactusthorn.routing.invoke;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
 
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.StringReader;
 import java.lang.reflect.*;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Stream;
 
@@ -16,8 +16,11 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import javax.ws.rs.Consumes;
+import javax.ws.rs.POST;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.QueryParam;
+import javax.ws.rs.core.Context;
+import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -28,19 +31,14 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.Mockito;
 
 import net.cactusthorn.routing.ComponentProvider;
-import net.cactusthorn.routing.Consumer;
 import net.cactusthorn.routing.RoutingConfig;
+import net.cactusthorn.routing.ServletTestInputStream;
 import net.cactusthorn.routing.PathTemplate.PathValues;
-import net.cactusthorn.routing.annotation.*;
 import net.cactusthorn.routing.convert.ConverterException;
 import net.cactusthorn.routing.validate.ParametersValidationException;
 import net.cactusthorn.routing.validate.ParametersValidator;
 
 public class MethodInvokerTest extends InvokeTestAncestor {
-
-    public static final Consumer TEST_CONSUMER = (clazz, mediaType, data) -> {
-        return new java.util.Date();
-    };
 
     private static final ParametersValidator VALIDATOR = (object, method, parameters) -> {
     };
@@ -55,28 +53,28 @@ public class MethodInvokerTest extends InvokeTestAncestor {
             return "OK";
         }
 
-        public String m2(HttpSession session) {
+        public String m2(@Context HttpSession session) {
             return (String) session.getAttribute("test");
         }
 
-        public String m3(HttpServletRequest request, @PathParam("in") Integer val, String willBeNull) {
-            return (String) request.getAttribute("req") + val + willBeNull;
+        public String m3(@Context HttpServletRequest request, @PathParam("in") Integer val) {
+            return (String) request.getAttribute("req") + val;
         }
 
         public String m4(@QueryParam("in") Double val) {
             return "" + val;
         }
 
-        public String m5(ServletContext context) {
+        public String m5(@Context ServletContext context) {
             return (String) context.getAttribute("test");
         }
 
-        public String m6(HttpServletResponse response) {
+        public String m6(@Context HttpServletResponse response) {
             return response.getCharacterEncoding();
         }
 
-        @Consumes("test/date") public java.util.Date m7(@Context java.util.Date date) {
-            return date;
+        @POST @Consumes(MediaType.TEXT_PLAIN) public String m7(StringBuffer buf) {
+            return buf.toString();
         }
     }
 
@@ -126,23 +124,27 @@ public class MethodInvokerTest extends InvokeTestAncestor {
     @Test //
     public void invokeM7() throws IOException, ConverterException, ParametersValidationException {
 
-        BufferedReader reader = new BufferedReader(new StringReader("TO HAVE BODY"));
-        Mockito.when(request.getReader()).thenReturn(reader);
-        Mockito.when(request.getContentType()).thenReturn("test/date");
+        Mockito.when(request.getInputStream()).thenReturn(new ServletTestInputStream("TO HAVE BODY"));
+        Mockito.when(request.getContentType()).thenReturn(MediaType.TEXT_PLAIN);
+
+        Map<String, String> headers = new HashMap<>();
+        headers.put(HttpHeaders.CONTENT_TYPE, MediaType.TEXT_PLAIN_TYPE.withCharset("UTF-8").toString());
+        Mockito.when(request.getHeaderNames()).thenReturn(Collections.enumeration(headers.keySet()));
+        Mockito.when(request.getHeaders(HttpHeaders.CONTENT_TYPE)).thenReturn(Collections.enumeration(headers.values()));
 
         Method method = findMethod(EntryPoint1.class, "m7");
 
         RoutingConfig config = RoutingConfig.builder(new EntryPoint1Provider()).addEntryPoint(EntryPoint1.class)
-                .setParametersValidator(VALIDATOR).addConsumer(new MediaType("test", "date"), TEST_CONSUMER).build();
+                .setParametersValidator(VALIDATOR).build();
 
         Set<MediaType> consumesMediaTypes = new HashSet<>();
-        consumesMediaTypes.add(new MediaType("test", "date"));
+        consumesMediaTypes.add(MediaType.TEXT_PLAIN_TYPE);
 
         MethodInvoker caller = new MethodInvoker(config, EntryPoint1.class, method, consumesMediaTypes);
 
-        java.util.Date result = (java.util.Date) caller.invoke(request, response, null, null);
+        String result = (String) caller.invoke(request, response, null, null);
 
-        assertNotNull(result);
+        assertEquals("TO HAVE BODY", result);
     }
 
     private static Stream<Arguments> provideArguments() {
@@ -151,7 +153,7 @@ public class MethodInvokerTest extends InvokeTestAncestor {
             Arguments.of("m0", PathValues.EMPTY, "OK"),
             Arguments.of("m1", new PathValues("in", "123"), 123),
             Arguments.of("m2", PathValues.EMPTY, "YES"),
-            Arguments.of("m3", new PathValues("in", "123"), "EVE123null"),
+            Arguments.of("m3", new PathValues("in", "123"), "EVE123"),
             Arguments.of("m4", null, "120.5"),
             Arguments.of("m5", null, "CONTEXT"),
             Arguments.of("m6", null, "KOI8-R"));

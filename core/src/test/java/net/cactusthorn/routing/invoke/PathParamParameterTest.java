@@ -8,6 +8,7 @@ import java.lang.reflect.Parameter;
 import java.util.List;
 import java.util.stream.Stream;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.DefaultValue;
 import javax.ws.rs.PathParam;
 
@@ -18,7 +19,9 @@ import org.junit.jupiter.params.provider.ValueSource;
 
 import net.cactusthorn.routing.RoutingInitializationException;
 import net.cactusthorn.routing.PathTemplate.PathValues;
+import net.cactusthorn.routing.ComponentProvider;
 import net.cactusthorn.routing.RequestData;
+import net.cactusthorn.routing.RoutingConfig;
 
 public class PathParamParameterTest extends InvokeTestAncestor {
 
@@ -46,18 +49,28 @@ public class PathParamParameterTest extends InvokeTestAncestor {
         }
     }
 
+    public static class EntryPoint1Provider implements ComponentProvider {
+
+        @Override //
+        public Object provide(Class<?> clazz, HttpServletRequest request) {
+            return new EntryPoint1();
+        }
+    }
+
+    private static final RoutingConfig CONFIG = RoutingConfig.builder(new EntryPoint1Provider()).addEntryPoint(EntryPoint1.class).build();
+
     @ParameterizedTest @ValueSource(strings = { "array", "collection", "math" }) //
     public void testThrows(String method) {
         Method m = findMethod(EntryPoint1.class, method);
         Parameter p = m.getParameters()[0];
-        assertThrows(RoutingInitializationException.class, () -> MethodParameter.Factory.create(m, p, HOLDER, DEFAULT_CONTENT_TYPES));
+        assertThrows(RoutingInitializationException.class, () -> MethodParameter.Factory.create(m, p, null, CONFIG, DEFAULT_CONTENT_TYPES));
     }
 
     @ParameterizedTest @MethodSource("provideArguments") //
     public void findValue(String methodName, PathValues pathValues, Object expected) throws Exception {
         Method m = findMethod(EntryPoint1.class, methodName);
         Parameter p = m.getParameters()[0];
-        MethodParameter mp = MethodParameter.Factory.create(m, p, HOLDER, DEFAULT_CONTENT_TYPES);
+        MethodParameter mp = MethodParameter.Factory.create(m, p, null, CONFIG, DEFAULT_CONTENT_TYPES);
 
         RequestData requestData = new RequestData(pathValues);
 

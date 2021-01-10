@@ -2,6 +2,7 @@ package net.cactusthorn.routing.invoke;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
+import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
@@ -14,7 +15,6 @@ import javax.ws.rs.core.MediaType;
 import net.cactusthorn.routing.RequestData;
 import net.cactusthorn.routing.RoutingConfig;
 import net.cactusthorn.routing.RoutingException;
-import net.cactusthorn.routing.RoutingConfig.ConfigProperty;
 import net.cactusthorn.routing.PathTemplate.PathValues;
 import net.cactusthorn.routing.convert.*;
 import net.cactusthorn.routing.validate.ParametersValidationException;
@@ -33,11 +33,14 @@ public final class MethodInvoker {
         this.routingConfig = routingConfig;
         this.clazz = clazz;
         this.method = method;
-        for (Parameter parameter : method.getParameters()) {
-            if (parameter.isSynthetic()) {
+
+        Parameter[] params = method.getParameters();
+        Type[] types = method.getGenericParameterTypes();
+        for (int i = 0; i < params.length; i++) {
+            if (params[i].isSynthetic()) {
                 continue;
             }
-            parameters.add(MethodParameter.Factory.create(method, parameter, routingConfig.convertersHolder(), consumesMediaTypes));
+            parameters.add(MethodParameter.Factory.create(method, params[i], types[i], routingConfig, consumesMediaTypes));
         }
     }
 
@@ -45,12 +48,7 @@ public final class MethodInvoker {
             throws ConverterException, ParametersValidationException {
 
         Object object = routingConfig.provider().provide(clazz, req);
-        RequestData requestData;
-        if (containsBody()) {
-            requestData = new RequestData(req, pathValues, (int) routingConfig.properties().get(ConfigProperty.READ_BODY_BUFFER_SIZE));
-        } else {
-            requestData = new RequestData(pathValues);
-        }
+        RequestData requestData = new RequestData(pathValues);
 
         Object[] values = parameters.size() == 0 ? new Object[0] : new Object[parameters.size()];
 
@@ -72,14 +70,5 @@ public final class MethodInvoker {
         } catch (Exception e) {
             throw new RoutingException("The problem with method invocation", e);
         }
-    }
-
-    private boolean containsBody() {
-        for (MethodParameter value : parameters) {
-            if (value.getClass() == BodyParameter.class) {
-                return true;
-            }
-        }
-        return false;
     }
 }
