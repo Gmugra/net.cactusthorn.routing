@@ -52,6 +52,19 @@ public class RoutingServlet extends HttpServlet {
     }
 
     @Override //
+    protected void service(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        if (req.getMethod().equalsIgnoreCase(HttpMethod.PATCH)) {
+            doPatch(req, resp);
+        } else {
+            super.service(req, resp);
+        }
+    }
+
+    protected void doPatch(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        process(req, resp, allEntryPoints.get(HttpMethod.PATCH));
+    }
+
+    @Override //
     protected void doHead(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         process(req, resp, allEntryPoints.get(HttpMethod.HEAD));
     }

@@ -14,6 +14,7 @@ import javax.servlet.ServletInputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
+import javax.ws.rs.PATCH;
 import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
 import javax.ws.rs.core.HttpHeaders;
@@ -40,7 +41,7 @@ public class BodyReaderParameterTest extends InvokeTestAncestor {
         @POST @Consumes(MediaType.TEXT_PLAIN) public void stream(InputStream input) {
         }
 
-        @POST @Consumes(MediaType.TEXT_PLAIN) public void wrongtype(Runtime input) {
+        @PATCH @Consumes(MediaType.TEXT_PLAIN) public void wrongtype(Runtime input) {
         }
 
         @POST public void wrongNoConsumes(StringBuilder input) {

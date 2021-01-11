@@ -16,7 +16,9 @@ import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
 import javax.ws.rs.HEAD;
+import javax.ws.rs.HttpMethod;
 import javax.ws.rs.OPTIONS;
+import javax.ws.rs.PATCH;
 import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
@@ -90,6 +92,11 @@ public class RoutingServletTest {
         @OPTIONS @Path("api/options") //
         public String options() {
             return "OPTIONS";
+        }
+
+        @PATCH @Path("api/patch") //
+        public String patch() {
+            return "PATCH";
         }
 
         @GET @Produces("aa/bb") @Path("api/produce") //
@@ -172,17 +179,25 @@ public class RoutingServletTest {
     }
 
     @Test //
+    public void defaultService() throws ServletException, IOException {
+        Mockito.when(req.getPathInfo()).thenReturn("/api/head");
+        Mockito.when(req.getMethod()).thenReturn(HttpMethod.HEAD);
+        servlet.service(req, resp);
+        assertEquals(HttpMethod.HEAD, stringWriter.toString());
+    }
+
+    @Test //
     public void head() throws ServletException, IOException {
         Mockito.when(req.getPathInfo()).thenReturn("/api/head");
         servlet.doHead(req, resp);
-        assertEquals("HEAD", stringWriter.toString());
+        assertEquals(HttpMethod.HEAD, stringWriter.toString());
     }
 
     @Test //
     public void post() throws ServletException, IOException {
         Mockito.when(req.getPathInfo()).thenReturn("/api/post");
         servlet.doPost(req, resp);
-        assertEquals("POST", stringWriter.toString());
+        assertEquals(HttpMethod.POST, stringWriter.toString());
     }
 
     @Test //
@@ -190,7 +205,7 @@ public class RoutingServletTest {
         Mockito.when(req.getPathInfo()).thenReturn("/api/put");
         Mockito.when(req.getContentType()).thenReturn("application/json");
         servlet.doPut(req, resp);
-        assertEquals("PUT", stringWriter.toString());
+        assertEquals(HttpMethod.PUT, stringWriter.toString());
     }
 
     @Test //
@@ -211,14 +226,29 @@ public class RoutingServletTest {
     public void delete() throws ServletException, IOException {
         Mockito.when(req.getPathInfo()).thenReturn("/api/delete");
         servlet.doDelete(req, resp);
-        assertEquals("DELETE", stringWriter.toString());
+        assertEquals(HttpMethod.DELETE, stringWriter.toString());
     }
 
     @Test //
     public void options() throws ServletException, IOException {
         Mockito.when(req.getPathInfo()).thenReturn("/api/options");
         servlet.doOptions(req, resp);
-        assertEquals("OPTIONS", stringWriter.toString());
+        assertEquals(HttpMethod.OPTIONS, stringWriter.toString());
+    }
+
+    @Test //
+    public void patch() throws ServletException, IOException {
+        Mockito.when(req.getPathInfo()).thenReturn("/api/patch");
+        servlet.doPatch(req, resp);
+        assertEquals(HttpMethod.PATCH, stringWriter.toString());
+    }
+
+    @Test //
+    public void patchService() throws ServletException, IOException {
+        Mockito.when(req.getPathInfo()).thenReturn("/api/patch");
+        Mockito.when(req.getMethod()).thenReturn("PATCH");
+        servlet.service(req, resp);
+        assertEquals(HttpMethod.PATCH, stringWriter.toString());
     }
 
     @ParameterizedTest //

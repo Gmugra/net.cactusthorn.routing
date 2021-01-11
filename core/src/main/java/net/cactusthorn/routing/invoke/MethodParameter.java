@@ -22,6 +22,7 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.FormParam;
 import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
+import javax.ws.rs.PATCH;
 import javax.ws.rs.core.Context;
 
 import net.cactusthorn.routing.RoutingConfig;
@@ -66,8 +67,7 @@ public abstract class MethodParameter {
         return parameter.getName();
     }
 
-    abstract Object findValue(HttpServletRequest req, HttpServletResponse res, ServletContext con, PathValues pathValues)
-            throws Exception;
+    abstract Object findValue(HttpServletRequest req, HttpServletResponse res, ServletContext con, PathValues pathValues) throws Exception;
 
     static final class Factory {
 
@@ -113,7 +113,8 @@ public abstract class MethodParameter {
                     return new PrincipalParameter(parameter);
                 }
             }
-            if (method.getAnnotation(POST.class) != null || method.getAnnotation(PUT.class) != null) {
+            if (method.getAnnotation(POST.class) != null || method.getAnnotation(PUT.class) != null
+                    || method.getAnnotation(PATCH.class) != null) {
 
                 method.getGenericParameterTypes();
 

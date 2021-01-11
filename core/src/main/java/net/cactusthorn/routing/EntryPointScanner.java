@@ -157,8 +157,8 @@ public class EntryPointScanner {
         return Collections.emptySet();
     }
 
-    private static final Set<String> HTTP_METHODS = new HashSet<>(
-            Arrays.asList(HttpMethod.DELETE, HttpMethod.GET, HttpMethod.HEAD, HttpMethod.OPTIONS, HttpMethod.POST, HttpMethod.PUT));
+    private static final Set<String> HTTP_METHODS = new HashSet<>(Arrays.asList(HttpMethod.DELETE, HttpMethod.GET, HttpMethod.HEAD,
+            HttpMethod.OPTIONS, HttpMethod.POST, HttpMethod.PUT, HttpMethod.PATCH));
 
     private String getHttpMethod(Annotation annotation) {
         HttpMethod httpMethod = annotation.annotationType().getAnnotation(HttpMethod.class);
