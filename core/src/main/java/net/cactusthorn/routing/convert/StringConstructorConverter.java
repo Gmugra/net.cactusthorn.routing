@@ -6,7 +6,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
-import net.cactusthorn.routing.RequestData;
 import net.cactusthorn.routing.RoutingInitializationException;
 
 public class StringConstructorConverter implements Converter {
@@ -14,7 +13,7 @@ public class StringConstructorConverter implements Converter {
     private final Map<Class<?>, Constructor<?>> constructors = new HashMap<>();
 
     @Override //
-    public Object convert(RequestData requestData, Class<?> type, String value)
+    public Object convert(Class<?> type, String value)
             throws InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
         if (value == null) {
             return null;

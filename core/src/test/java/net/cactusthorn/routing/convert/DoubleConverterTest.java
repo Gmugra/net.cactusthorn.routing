@@ -13,9 +13,9 @@ public class DoubleConverterTest {
         DoubleConverter c = new DoubleConverter();
         Double result = (Double) c.convert(Double.class, "125.5");
         assertEquals(125.5d, result);
-        result = (Double) c.convert(null, null, (String) null);
+        result = (Double) c.convert(null, (String) null);
         assertNull(result);
-        result = (Double) c.convert(null, null, "  ");
+        result = (Double) c.convert(null, "  ");
         assertNull(result);
     }
 

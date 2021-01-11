@@ -25,7 +25,6 @@ public final class RoutingConfig {
     public enum ConfigProperty {
 
         // @formatter:off
-        READ_BODY_BUFFER_SIZE(1024),
         RESPONSE_CHARACTER_ENCODING("UTF-8"),
         DEFAULT_REQUEST_CHARACTER_ENCODING("UTF-8");
         // @formatter:on
@@ -170,11 +169,6 @@ public final class RoutingConfig {
 
         public Builder addBodyReader(MediaType mediaType, MessageBodyReader<?> bodyReader) {
             bodyReaders.put(mediaType, bodyReader);
-            return this;
-        }
-
-        public Builder setReadBodyBufferSize(int size) {
-            configProperties.put(ConfigProperty.READ_BODY_BUFFER_SIZE, size);
             return this;
         }
 

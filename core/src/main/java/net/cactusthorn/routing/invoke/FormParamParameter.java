@@ -33,10 +33,10 @@ public class FormParamParameter extends MethodMultiValueParameter {
     }
 
     @Override //
-    protected String findName(Parameter parameter) {
-        String name = parameter.getAnnotation(FormParam.class).value();
+    protected String findName() {
+        String name = parameter().getAnnotation(FormParam.class).value();
         if ("".equals(name)) {
-            return super.findName(parameter);
+            return super.findName();
         }
         return name;
     }

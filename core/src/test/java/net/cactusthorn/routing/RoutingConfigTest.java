@@ -27,7 +27,7 @@ import net.cactusthorn.routing.validate.ParametersValidator;
 
 public class RoutingConfigTest {
 
-    public static final Converter TEST_CONVERTER = (req, type, value) -> {
+    public static final Converter TEST_CONVERTER = (type, value) -> {
         return new java.util.Date();
     };
 
@@ -100,13 +100,6 @@ public class RoutingConfigTest {
         RoutingConfig config = RoutingConfig.builder(new EntryPointDateProvider()).setResponseCharacterEncoding("KOI8-R").build();
         String value = (String) config.properties().get(ConfigProperty.RESPONSE_CHARACTER_ENCODING);
         assertEquals("KOI8-R", value);
-    }
-
-    @Test //
-    public void readBodyBufferSize() {
-        RoutingConfig config = RoutingConfig.builder(new EntryPointDateProvider()).setReadBodyBufferSize(512).build();
-        int value = (int) config.properties().get(ConfigProperty.READ_BODY_BUFFER_SIZE);
-        assertEquals(512, value);
     }
 
     @Test //

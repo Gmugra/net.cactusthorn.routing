@@ -18,8 +18,8 @@ import javax.ws.rs.core.MultivaluedHashMap;
 import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.ext.MessageBodyReader;
 
-import net.cactusthorn.routing.RequestData;
 import net.cactusthorn.routing.RoutingInitializationException;
+import net.cactusthorn.routing.PathTemplate.PathValues;
 
 public final class BodyReaderParameter extends MethodParameter {
 
@@ -42,7 +42,7 @@ public final class BodyReaderParameter extends MethodParameter {
     }
 
     @Override @SuppressWarnings("unchecked") //
-    Object findValue(HttpServletRequest req, HttpServletResponse res, ServletContext con, RequestData requestData) throws Exception {
+    Object findValue(HttpServletRequest req, HttpServletResponse res, ServletContext con, PathValues pathValues) throws Exception {
         MediaType mediaType = contentType(req);
         @SuppressWarnings("rawtypes") MessageBodyReader bodyReader = bodyReaders.get(contentType(req));
         return bodyReader.readFrom(classType(), parameterGenericType, parameter().getAnnotations(), mediaType, getHeaders(req),

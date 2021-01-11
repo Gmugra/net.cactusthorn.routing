@@ -24,9 +24,9 @@ import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
 import javax.ws.rs.core.Context;
 
-import net.cactusthorn.routing.RequestData;
 import net.cactusthorn.routing.RoutingConfig;
 import net.cactusthorn.routing.RoutingInitializationException;
+import net.cactusthorn.routing.PathTemplate.PathValues;
 import net.cactusthorn.routing.annotation.FormPart;
 
 public abstract class MethodParameter {
@@ -39,7 +39,7 @@ public abstract class MethodParameter {
     MethodParameter(Parameter parameter) {
         this.parameter = parameter;
         classType = parameter.getType();
-        name = findName(parameter);
+        name = findName();
         DefaultValue defaultValueAnnotation = parameter.getAnnotation(DefaultValue.class);
         if (defaultValueAnnotation != null) {
             defaultValue = defaultValueAnnotation.value();
@@ -62,12 +62,11 @@ public abstract class MethodParameter {
         return parameter;
     }
 
-    // TODO parameter is not need here
-    protected String findName(Parameter param) {
-        return param.getName();
+    protected String findName() {
+        return parameter.getName();
     }
 
-    abstract Object findValue(HttpServletRequest req, HttpServletResponse res, ServletContext con, RequestData requestData)
+    abstract Object findValue(HttpServletRequest req, HttpServletResponse res, ServletContext con, PathValues pathValues)
             throws Exception;
 
     static final class Factory {

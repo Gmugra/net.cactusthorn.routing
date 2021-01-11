@@ -1,11 +1,9 @@
 package net.cactusthorn.routing.convert;
 
-import net.cactusthorn.routing.RequestData;
-
 public final class PrimitiveConverter implements Converter {
 
     @Override //
-    public Object convert(RequestData requestData, Class<?> type, String value) {
+    public Object convert(Class<?> type, String value) {
         if (Byte.TYPE == type) {
             return convertByte(value);
         }

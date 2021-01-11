@@ -11,9 +11,9 @@ public class IntegerConverterTest {
         IntegerConverter c = new IntegerConverter();
         Integer result = (Integer) c.convert(Integer.class, "125");
         assertEquals(125, result);
-        result = (Integer) c.convert(null, null, (String) null);
+        result = (Integer) c.convert(null, (String) null);
         assertNull(result);
-        result = (Integer) c.convert(null, null, "  ");
+        result = (Integer) c.convert(null, "  ");
         assertNull(result);
     }
 

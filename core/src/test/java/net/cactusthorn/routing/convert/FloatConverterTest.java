@@ -13,9 +13,9 @@ public class FloatConverterTest {
         FloatConverter c = new FloatConverter();
         Float result = (Float) c.convert(Float.class, "125.5");
         assertEquals(125.5f, result);
-        result = (Float) c.convert(null, null, (String) null);
+        result = (Float) c.convert(null, (String) null);
         assertNull(result);
-        result = (Float) c.convert(null, null, "  ");
+        result = (Float) c.convert(null, "  ");
         assertNull(result);
     }
 

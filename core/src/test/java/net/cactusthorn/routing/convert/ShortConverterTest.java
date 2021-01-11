@@ -13,9 +13,9 @@ public class ShortConverterTest {
         ShortConverter c = new ShortConverter();
         Short result = (Short) c.convert(Short.class, "125");
         assertEquals((short)125, result);
-        result = (Short) c.convert(null, null, (String) null);
+        result = (Short) c.convert(null, (String) null);
         assertNull(result);
-        result = (Short) c.convert(null, null, "  ");
+        result = (Short) c.convert(null, "  ");
         assertNull(result);
     }
 

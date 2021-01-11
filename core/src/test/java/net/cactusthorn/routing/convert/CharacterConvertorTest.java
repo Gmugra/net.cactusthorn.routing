@@ -13,9 +13,9 @@ public class CharacterConvertorTest {
         CharacterConverter c = new CharacterConverter();
         Character result = (Character) c.convert(Character.class, "125");
         assertEquals('1', result);
-        result = (Character) c.convert(null, null, (String) null);
+        result = (Character) c.convert(null, (String) null);
         assertNull(result);
-        result = (Character) c.convert(null, null, "");
+        result = (Character) c.convert(null, "");
         assertEquals(Character.MIN_VALUE, result);
     }
 

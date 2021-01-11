@@ -11,9 +11,9 @@ public class BooleanConverterTest {
         BooleanConverter c = new BooleanConverter();
         Boolean result = (Boolean) c.convert(Boolean.class, "true");
         assertTrue(result);
-        result = (Boolean) c.convert(null, null, (String) null);
+        result = (Boolean) c.convert(null, (String) null);
         assertFalse(result);
-        result = (Boolean) c.convert(null, null, "  ");
+        result = (Boolean) c.convert(null, "  ");
         assertFalse(result);
     }
 

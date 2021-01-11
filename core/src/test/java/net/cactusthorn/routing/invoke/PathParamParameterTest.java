@@ -20,7 +20,6 @@ import org.junit.jupiter.params.provider.ValueSource;
 import net.cactusthorn.routing.RoutingInitializationException;
 import net.cactusthorn.routing.PathTemplate.PathValues;
 import net.cactusthorn.routing.ComponentProvider;
-import net.cactusthorn.routing.RequestData;
 import net.cactusthorn.routing.RoutingConfig;
 
 public class PathParamParameterTest extends InvokeTestAncestor {
@@ -72,9 +71,7 @@ public class PathParamParameterTest extends InvokeTestAncestor {
         Parameter p = m.getParameters()[0];
         MethodParameter mp = MethodParameter.Factory.create(m, p, null, CONFIG, DEFAULT_CONTENT_TYPES);
 
-        RequestData requestData = new RequestData(pathValues);
-
-        Object result = mp.findValue(null, null, null, requestData);
+        Object result = mp.findValue(null, null, null, pathValues);
 
         assertEquals(expected, result);
     }

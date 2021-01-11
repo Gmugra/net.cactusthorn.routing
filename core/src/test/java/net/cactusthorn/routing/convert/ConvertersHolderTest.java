@@ -9,7 +9,7 @@ import java.util.UUID;
 
 public class ConvertersHolderTest {
 
-    public static final Converter TEST_CONVERTER = (req, type, value) -> {
+    public static final Converter TEST_CONVERTER = (type, value) -> {
         return new java.util.Date();
     };
 
@@ -31,7 +31,7 @@ public class ConvertersHolderTest {
         ConvertersHolder holder = new ConvertersHolder();
         Converter converter = holder.findConverter(TestEnum.class).get();
         assertEquals(StaticStringMethodConverter.class, converter.getClass());
-        assertEquals(TestEnum.AAAA, converter.convert(null, TestEnum.class, "AAAA"));
+        assertEquals(TestEnum.AAAA, converter.convert(TestEnum.class, "AAAA"));
     }
 
     @Test //

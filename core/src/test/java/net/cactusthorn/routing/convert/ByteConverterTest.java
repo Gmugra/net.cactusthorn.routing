@@ -13,9 +13,9 @@ public class ByteConverterTest {
         ByteConverter c = new ByteConverter();
         Byte result = (Byte) c.convert(Byte.class, "125");
         assertEquals((byte)125, result);
-        result = (Byte) c.convert(null, null, (String) null);
+        result = (Byte) c.convert(null, (String) null);
         assertNull(result);
-        result = (Byte) c.convert(null, null, "  ");
+        result = (Byte) c.convert(null, "  ");
         assertNull(result);
     }
 

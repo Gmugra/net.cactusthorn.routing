@@ -31,7 +31,7 @@ public class StaticStringMethodConverterTest {
     public void invoke() throws Exception {
         StaticStringMethodConverter c = new StaticStringMethodConverter("valueOf");
         c.register(Integer.class);
-        assertEquals(123, c.convert(null, Integer.class, "123"));
+        assertEquals(123, c.convert(Integer.class, "123"));
     }
 
     @Test //

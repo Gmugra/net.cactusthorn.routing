@@ -13,9 +13,9 @@ public class LongConverterTest {
         LongConverter c = new LongConverter();
         Long result = (Long) c.convert(Long.class, "125");
         assertEquals(125L, result);
-        result = (Long) c.convert(null, null, (String) null);
+        result = (Long) c.convert(null, (String) null);
         assertNull(result);
-        result = (Long) c.convert(null, null, "  ");
+        result = (Long) c.convert(null, "  ");
         assertNull(result);
     }
 

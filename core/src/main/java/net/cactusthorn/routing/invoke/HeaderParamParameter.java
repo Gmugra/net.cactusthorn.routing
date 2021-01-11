@@ -8,7 +8,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.ws.rs.HeaderParam;
 
-import net.cactusthorn.routing.RequestData;
+import net.cactusthorn.routing.PathTemplate.PathValues;
 import net.cactusthorn.routing.convert.ConvertersHolder;
 
 public class HeaderParamParameter extends MethodSingleValueParameter {
@@ -23,16 +23,16 @@ public class HeaderParamParameter extends MethodSingleValueParameter {
     }
 
     @Override //
-    protected String findName(Parameter parameter) {
-        String name = parameter.getAnnotation(HeaderParam.class).value();
+    protected String findName() {
+        String name = parameter().getAnnotation(HeaderParam.class).value();
         if ("".equals(name)) {
-            return super.findName(parameter);
+            return super.findName();
         }
         return name;
     }
 
     @Override //
-    Object findValue(HttpServletRequest req, HttpServletResponse res, ServletContext con, RequestData requestData) throws Exception {
+    Object findValue(HttpServletRequest req, HttpServletResponse res, ServletContext con, PathValues pathValues) throws Exception {
         String value = req.getHeader(name());
         if (defaultValue() != null && value == null) {
             value = defaultValue();

@@ -9,8 +9,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.Part;
 
-import net.cactusthorn.routing.RequestData;
 import net.cactusthorn.routing.RoutingInitializationException;
+import net.cactusthorn.routing.PathTemplate.PathValues;
 import net.cactusthorn.routing.annotation.FormPart;
 
 public class FormPartParameter extends MethodParameter {
@@ -25,16 +25,16 @@ public class FormPartParameter extends MethodParameter {
     }
 
     @Override //
-    protected String findName(Parameter parameter) {
-        String name = parameter.getAnnotation(FormPart.class).value();
+    protected String findName() {
+        String name = parameter().getAnnotation(FormPart.class).value();
         if ("".equals(name)) {
-            return super.findName(parameter);
+            return super.findName();
         }
         return name;
     }
 
     @Override //
-    Object findValue(HttpServletRequest req, HttpServletResponse res, ServletContext con, RequestData requestData) throws Exception {
+    Object findValue(HttpServletRequest req, HttpServletResponse res, ServletContext con, PathValues pathValues) throws Exception {
         Collection<Part> parts = req.getParts();
         if (parts == null) {
             return null;

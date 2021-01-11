@@ -1,11 +1,9 @@
 package net.cactusthorn.routing.convert;
 
-import net.cactusthorn.routing.RequestData;
-
 public class ByteConverter implements Converter {
 
     @Override //
-    public Byte convert(RequestData requestData, Class<?> type, String value) {
+    public Byte convert(Class<?> type, String value) {
         if (value == null || value.trim().isEmpty()) {
             return null;
         }
@@ -13,14 +11,14 @@ public class ByteConverter implements Converter {
     }
 
     @Override //
-    public Object convert(RequestData requestData, Class<?> type, String[] value) {
+    public Object convert(Class<?> type, String[] value) {
         if (value == null) {
             return null;
         }
 
         Byte[] array = new Byte[value.length];
         for (int i = 0; i < value.length; i++) {
-            array[i] = convert(requestData, type, value[i]);
+            array[i] = convert(type, value[i]);
         }
         return array;
     }

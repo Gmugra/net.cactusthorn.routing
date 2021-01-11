@@ -12,7 +12,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.ws.rs.core.MediaType;
 
-import net.cactusthorn.routing.RequestData;
 import net.cactusthorn.routing.RoutingConfig;
 import net.cactusthorn.routing.RoutingException;
 import net.cactusthorn.routing.PathTemplate.PathValues;
@@ -48,14 +47,13 @@ public final class MethodInvoker {
             throws ConverterException, ParametersValidationException {
 
         Object object = routingConfig.provider().provide(clazz, req);
-        RequestData requestData = new RequestData(pathValues);
 
         Object[] values = parameters.size() == 0 ? new Object[0] : new Object[parameters.size()];
 
         for (int i = 0; i < parameters.size(); i++) {
             MethodParameter parameter = parameters.get(i);
             try {
-                values[i] = parameter.findValue(req, res, con, requestData);
+                values[i] = parameter.findValue(req, res, con, pathValues);
             } catch (Exception e) {
                 throw new ConverterException(e, i + 1, parameter.getClass().getSimpleName());
             }

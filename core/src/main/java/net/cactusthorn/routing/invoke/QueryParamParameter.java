@@ -14,10 +14,10 @@ public class QueryParamParameter extends MethodMultiValueParameter {
     }
 
     @Override //
-    protected String findName(Parameter parameter) {
-        String name = parameter.getAnnotation(QueryParam.class).value();
+    protected String findName() {
+        String name = parameter().getAnnotation(QueryParam.class).value();
         if ("".equals(name)) {
-            return super.findName(parameter);
+            return super.findName();
         }
         return name;
     }

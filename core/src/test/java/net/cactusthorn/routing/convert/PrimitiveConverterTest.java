@@ -113,6 +113,6 @@ public class PrimitiveConverterTest {
     @Test //
     public void wrongType() {
         PrimitiveConverter c = new PrimitiveConverter();
-        assertThrows(IllegalArgumentException.class, () -> c.convert(null, java.util.Date.class, "true"));
+        assertThrows(IllegalArgumentException.class, () -> c.convert(java.util.Date.class, "true"));
     }
 }

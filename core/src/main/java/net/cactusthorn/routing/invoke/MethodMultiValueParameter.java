@@ -8,7 +8,7 @@ import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import net.cactusthorn.routing.RequestData;
+import net.cactusthorn.routing.PathTemplate.PathValues;
 import net.cactusthorn.routing.convert.Converter;
 import net.cactusthorn.routing.convert.ConvertersHolder;
 
@@ -46,7 +46,7 @@ public abstract class MethodMultiValueParameter extends MethodComplexParameter {
     }
 
     @Override //
-    Object findValue(HttpServletRequest req, HttpServletResponse res, ServletContext con, RequestData requestData) throws Exception {
+    Object findValue(HttpServletRequest req, HttpServletResponse res, ServletContext con, PathValues pathValues) throws Exception {
         if (array) {
             return converter.convert(converterType, arrayValues(req));
         }
