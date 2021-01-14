@@ -9,14 +9,13 @@ import java.util.logging.Logger;
 import javax.servlet.*;
 import javax.servlet.http.*;
 import javax.ws.rs.HttpMethod;
+import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.MediaType;
 
 import net.cactusthorn.routing.EntryPointScanner.EntryPoint;
 import net.cactusthorn.routing.RoutingConfig.ConfigProperty;
 import net.cactusthorn.routing.PathTemplate.PathValues;
-import net.cactusthorn.routing.convert.ConverterException;
 import net.cactusthorn.routing.producer.Producer;
-import net.cactusthorn.routing.validate.ParametersValidationException;
 
 public class RoutingServlet extends HttpServlet {
 
@@ -119,10 +118,8 @@ public class RoutingServlet extends HttpServlet {
                     }
                     Object result = entryPoint.invoke(req, resp, servletContext, values);
                     produce(req, resp, entryPoint, result);
-                } catch (ConverterException ce) {
-                    resp.sendError(HttpServletResponse.SC_BAD_REQUEST, ce.getMessage());
-                } catch (ParametersValidationException ve) {
-                    resp.sendError(HttpServletResponse.SC_BAD_REQUEST, ve.getMessage());
+                } catch (WebApplicationException wae) {
+                    resp.sendError(wae.getResponse().getStatus(), wae.getMessage());
                 } catch (Exception e) { //TODO JAX-RS exception?
                     resp.sendError(HttpServletResponse.SC_BAD_REQUEST, e.getMessage());
                 }

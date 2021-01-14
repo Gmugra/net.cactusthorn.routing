@@ -23,7 +23,6 @@ import org.mockito.Mockito;
 import net.cactusthorn.routing.ComponentProvider;
 import net.cactusthorn.routing.RoutingConfig;
 import net.cactusthorn.routing.RoutingInitializationException;
-import net.cactusthorn.routing.convert.ConverterException;
 
 public class FormParamParameterTest extends InvokeTestAncestor {
 
@@ -53,7 +52,7 @@ public class FormParamParameterTest extends InvokeTestAncestor {
     private static final RoutingConfig CONFIG = RoutingConfig.builder(new EntryPoint1Provider()).addEntryPoint(EntryPoint1.class).build();
 
     @Test //
-    public void wrongContentType() throws ConverterException {
+    public void wrongContentType() {
         Method m = findMethod(EntryPoint1.class, "simple");
         Parameter p = m.getParameters()[0];
         assertThrows(RoutingInitializationException.class, () -> MethodParameter.Factory.create(m, p, null, CONFIG, DEFAULT_CONTENT_TYPES));

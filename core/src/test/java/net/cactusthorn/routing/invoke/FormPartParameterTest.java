@@ -26,7 +26,6 @@ import net.cactusthorn.routing.ComponentProvider;
 import net.cactusthorn.routing.RoutingConfig;
 import net.cactusthorn.routing.RoutingInitializationException;
 import net.cactusthorn.routing.annotation.FormPart;
-import net.cactusthorn.routing.convert.ConverterException;
 
 public class FormPartParameterTest extends InvokeTestAncestor {
 
@@ -100,7 +99,7 @@ public class FormPartParameterTest extends InvokeTestAncestor {
     private static final RoutingConfig CONFIG = RoutingConfig.builder(new EntryPoint1Provider()).addEntryPoint(EntryPoint1.class).build();
 
     @Test //
-    public void wrongType() throws ConverterException {
+    public void wrongType() {
         Method m = findMethod(EntryPoint1.class, "wrongType");
         Parameter p = m.getParameters()[0];
         assertThrows(RoutingInitializationException.class, () -> MethodParameter.Factory.create(m, p, null, CONFIG, DEFAULT_CONTENT_TYPES));

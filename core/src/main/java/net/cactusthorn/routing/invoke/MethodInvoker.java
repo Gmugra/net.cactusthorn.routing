@@ -6,19 +6,22 @@ import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.ws.rs.BadRequestException;
+import javax.ws.rs.ServerErrorException;
 import javax.ws.rs.core.MediaType;
 
 import net.cactusthorn.routing.RoutingConfig;
-import net.cactusthorn.routing.RoutingException;
 import net.cactusthorn.routing.PathTemplate.PathValues;
-import net.cactusthorn.routing.convert.*;
-import net.cactusthorn.routing.validate.ParametersValidationException;
 
 public final class MethodInvoker {
+
+    private static final Logger LOG = Logger.getLogger(MethodInvoker.class.getName());
 
     private RoutingConfig routingConfig;
 
@@ -43,8 +46,9 @@ public final class MethodInvoker {
         }
     }
 
-    public Object invoke(HttpServletRequest req, HttpServletResponse res, ServletContext con, PathValues pathValues)
-            throws ConverterException, ParametersValidationException {
+    private static final String MESSAGE = "Parameter position: %s; Parameter type: %s; %s";
+
+    public Object invoke(HttpServletRequest req, HttpServletResponse res, ServletContext con, PathValues pathValues) {
 
         Object object = routingConfig.provider().provide(clazz, req);
 
@@ -55,7 +59,7 @@ public final class MethodInvoker {
             try {
                 values[i] = parameter.findValue(req, res, con, pathValues);
             } catch (Exception e) {
-                throw new ConverterException(e, i + 1, parameter.getClass().getSimpleName());
+                throw new BadRequestException(String.format(MESSAGE, i + 1, parameter.getClass().getSimpleName(), e), e);
             }
         }
 
@@ -66,7 +70,8 @@ public final class MethodInvoker {
         try {
             return method.invoke(object, values);
         } catch (Exception e) {
-            throw new RoutingException("The problem with method invocation", e);
+            LOG.log(Level.SEVERE, "The problem with method invocation: {0}", new Object[] {e.getMessage()});
+            throw new ServerErrorException("The problem with method invocation", HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e);
         }
     }
 }

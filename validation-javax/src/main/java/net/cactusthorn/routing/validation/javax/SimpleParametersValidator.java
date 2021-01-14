@@ -6,16 +6,16 @@ import java.util.Set;
 import javax.validation.ConstraintViolation;
 import javax.validation.Validation;
 import javax.validation.executable.ExecutableValidator;
+import javax.ws.rs.BadRequestException;
 
 import net.cactusthorn.routing.validate.ParametersValidator;
-import net.cactusthorn.routing.validate.ParametersValidationException;
 
 public class SimpleParametersValidator implements ParametersValidator {
 
     ExecutableValidator executableValidator = Validation.buildDefaultValidatorFactory().getValidator().forExecutables();
 
     @Override //
-    public void validate(Object object, Method method, Object[] parameters) throws ParametersValidationException {
+    public void validate(Object object, Method method, Object[] parameters) {
 
         Set<ConstraintViolation<Object>> violations = executableValidator.validateParameters(object, method, parameters);
 
@@ -27,6 +27,6 @@ public class SimpleParametersValidator implements ParametersValidator {
         for (ConstraintViolation<Object> violation : violations) {
             message += violation.getPropertyPath() + " :: " + violation.getMessage() + ";";
         }
-        throw new ParametersValidationException(message);
+        throw new BadRequestException(message);
     }
 }

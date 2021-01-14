@@ -12,6 +12,7 @@ import javax.servlet.ServletException;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.ws.rs.BadRequestException;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
@@ -34,7 +35,6 @@ import org.mockito.Mockito;
 
 import net.cactusthorn.routing.annotation.*;
 import net.cactusthorn.routing.producer.Producer;
-import net.cactusthorn.routing.validate.ParametersValidationException;
 import net.cactusthorn.routing.validate.ParametersValidator;
 
 public class RoutingServletTest {
@@ -44,7 +44,7 @@ public class RoutingServletTest {
     };
 
     public static final ParametersValidator TEST_VALIDATOR = (object, method, parameters) -> {
-        throw new ParametersValidationException("abc");
+        throw new BadRequestException("abc");
     };
 
     @Path("/") //

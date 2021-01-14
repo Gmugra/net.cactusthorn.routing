@@ -11,5 +11,5 @@ public interface ParametersValidator {
     default void init(ServletContext servletContext, ComponentProvider componentProvider) {
     }
 
-    void validate(Object object, Method method, Object[] parameters) throws ParametersValidationException;
+    void validate(Object object, Method method, Object[] parameters);
 }

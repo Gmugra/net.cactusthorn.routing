@@ -34,8 +34,6 @@ import net.cactusthorn.routing.ComponentProvider;
 import net.cactusthorn.routing.RoutingConfig;
 import net.cactusthorn.routing.ServletTestInputStream;
 import net.cactusthorn.routing.PathTemplate.PathValues;
-import net.cactusthorn.routing.convert.ConverterException;
-import net.cactusthorn.routing.validate.ParametersValidationException;
 import net.cactusthorn.routing.validate.ParametersValidator;
 
 public class MethodInvokerTest extends InvokeTestAncestor {
@@ -107,8 +105,7 @@ public class MethodInvokerTest extends InvokeTestAncestor {
     }
 
     @ParameterizedTest @MethodSource("provideArguments") //
-    public void invokeMethod(String methodName, PathValues pathValues, Object expectedResult)
-            throws ConverterException, ParametersValidationException {
+    public void invokeMethod(String methodName, PathValues pathValues, Object expectedResult) {
 
         RoutingConfig config = RoutingConfig.builder(new EntryPoint1Provider()).addEntryPoint(EntryPoint1.class)
                 .setParametersValidator(VALIDATOR).build();
@@ -122,7 +119,7 @@ public class MethodInvokerTest extends InvokeTestAncestor {
     }
 
     @Test //
-    public void invokeM7() throws IOException, ConverterException, ParametersValidationException {
+    public void invokeM7() throws IOException {
 
         Mockito.when(request.getInputStream()).thenReturn(new ServletTestInputStream("TO HAVE BODY"));
         Mockito.when(request.getContentType()).thenReturn(MediaType.TEXT_PLAIN);

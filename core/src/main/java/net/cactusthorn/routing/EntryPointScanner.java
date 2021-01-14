@@ -14,9 +14,7 @@ import javax.ws.rs.Path;
 import net.cactusthorn.routing.annotation.Template;
 import net.cactusthorn.routing.annotation.UserRoles;
 import net.cactusthorn.routing.PathTemplate.PathValues;
-import net.cactusthorn.routing.convert.ConverterException;
 import net.cactusthorn.routing.invoke.MethodInvoker;
-import net.cactusthorn.routing.validate.ParametersValidationException;
 
 public class EntryPointScanner {
 
@@ -62,8 +60,7 @@ public class EntryPointScanner {
             return template;
         }
 
-        public Object invoke(HttpServletRequest req, HttpServletResponse res, ServletContext con, PathValues pathValues)
-                throws ConverterException, ParametersValidationException {
+        public Object invoke(HttpServletRequest req, HttpServletResponse res, ServletContext con, PathValues pathValues) {
             return methodInvoker.invoke(req, res, con, pathValues);
         }
 

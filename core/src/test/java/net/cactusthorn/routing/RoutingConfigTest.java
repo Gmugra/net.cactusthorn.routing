@@ -20,9 +20,7 @@ import net.cactusthorn.routing.PathTemplate.PathValues;
 import net.cactusthorn.routing.RoutingConfig.ConfigProperty;
 import net.cactusthorn.routing.bodyreader.WildCardBodyReader;
 import net.cactusthorn.routing.convert.Converter;
-import net.cactusthorn.routing.convert.ConverterException;
 import net.cactusthorn.routing.producer.Producer;
-import net.cactusthorn.routing.validate.ParametersValidationException;
 import net.cactusthorn.routing.validate.ParametersValidator;
 
 public class RoutingConfigTest {
@@ -55,7 +53,7 @@ public class RoutingConfigTest {
     }
 
     @Test //
-    public void converter() throws ConverterException, ParametersValidationException {
+    public void converter() {
 
         RoutingConfig config = RoutingConfig.builder(new EntryPointDateProvider()).addEntryPoint(EntryPointDate.class)
                 .addConverter(java.util.Date.class, TEST_CONVERTER).build();
