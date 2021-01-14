@@ -7,7 +7,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.ext.RuntimeDelegate.HeaderDelegate;
 
-public class MediaTypeHeaderDelegate implements HeaderDelegate<MediaType> {
+public final class MediaTypeHeaderDelegate implements HeaderDelegate<MediaType> {
 
     private static final ConcurrentHashMap<String, MediaType> CACHE = new ConcurrentHashMap<>();
     public static final int MAX_CACHE_SIZE = 250;

@@ -81,13 +81,18 @@ public class EntryPointScanner {
         public static final String FORM_DATA = "multipart/form-data";
 
         public boolean matchContentType(String contenttype) {
-            MediaType ct = MediaType.valueOf(contenttype);
-            for (MediaType mediaType : consumesMediaTypes) {
-                if (mediaType.isCompatible(ct)) {
-                    return true;
+            try {
+                MediaType ct = MediaType.valueOf(contenttype);
+                for (MediaType mediaType : consumesMediaTypes) {
+                    if (mediaType.isCompatible(ct)) {
+                        return true;
+                    }
                 }
+                return false;
+            } catch (Exception e) {
+                //TODO should be BadRequestException
+                throw e;
             }
-            return false;
         }
     }
 

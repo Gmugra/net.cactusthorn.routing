@@ -1,11 +1,17 @@
 package net.cactusthorn.routing.delegate;
 
+import java.net.URI;
+import java.util.Date;
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
 
 import javax.ws.rs.core.Application;
+import javax.ws.rs.core.CacheControl;
+import javax.ws.rs.core.EntityTag;
 import javax.ws.rs.core.Link.Builder;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.NewCookie;
 import javax.ws.rs.core.Response.ResponseBuilder;
 import javax.ws.rs.core.UriBuilder;
 import javax.ws.rs.core.Variant.VariantListBuilder;
@@ -17,6 +23,13 @@ public class RuntimeDelegateImpl extends RuntimeDelegate {
 
     public RuntimeDelegateImpl() {
         headerDelegates.put(MediaType.class, new MediaTypeHeaderDelegate());
+        headerDelegates.put(String.class, new StringHeaderDelegate());
+        headerDelegates.put(Locale.class, new LocaleHeaderDelegate());
+        headerDelegates.put(Date.class, new DateHeaderDelegate());
+        headerDelegates.put(URI.class, new UriHeaderDelegate());
+        headerDelegates.put(EntityTag.class, new EntityTagHeaderDelegate());
+        headerDelegates.put(NewCookie.class, new NewCookieHeaderDelegate());
+        headerDelegates.put(CacheControl.class, new CacheControlHeaderDelegate());
     }
 
     @Override //
@@ -26,12 +39,12 @@ public class RuntimeDelegateImpl extends RuntimeDelegate {
 
     @Override //
     public ResponseBuilder createResponseBuilder() {
-        throw new UnsupportedOperationException("createResponseBuilder() is not supported");
+        return new ResponseImpl.ResponseBuilderImpl();
     }
 
     @Override //
     public VariantListBuilder createVariantListBuilder() {
-        throw new UnsupportedOperationException("createVariantListBuilder() is not supported");
+        return new VariantListBuilderImpl();
     }
 
     @Override //
@@ -50,7 +63,7 @@ public class RuntimeDelegateImpl extends RuntimeDelegate {
 
     @Override //
     public Builder createLinkBuilder() {
-        throw new UnsupportedOperationException("createLinkBuilder() is not supported");
+        return new LinkImpl.LinkBuilderImpl();
     }
 
 }

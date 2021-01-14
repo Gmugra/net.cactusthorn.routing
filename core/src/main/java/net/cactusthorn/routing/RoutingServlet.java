@@ -112,17 +112,19 @@ public class RoutingServlet extends HttpServlet {
                     resp.sendError(HttpServletResponse.SC_FORBIDDEN, "Forbidden");
                     return;
                 }
-                if (!entryPoint.matchContentType(contentType)) {
-                    matchContentTypeFail = true;
-                    continue;
-                }
                 try {
+                    if (!entryPoint.matchContentType(contentType)) {
+                        matchContentTypeFail = true;
+                        continue;
+                    }
                     Object result = entryPoint.invoke(req, resp, servletContext, values);
                     produce(req, resp, entryPoint, result);
                 } catch (ConverterException ce) {
                     resp.sendError(HttpServletResponse.SC_BAD_REQUEST, ce.getMessage());
                 } catch (ParametersValidationException ve) {
                     resp.sendError(HttpServletResponse.SC_BAD_REQUEST, ve.getMessage());
+                } catch (Exception e) { //TODO JAX-RS exception?
+                    resp.sendError(HttpServletResponse.SC_BAD_REQUEST, e.getMessage());
                 }
                 return;
             }
