@@ -57,9 +57,6 @@ public final class BodyReaderParameter extends MethodParameter {
     private MultivaluedMap<String, String> getHeaders(HttpServletRequest req) {
         MultivaluedMap<String, String> map = new MultivaluedHashMap<>();
         Enumeration<String> names = req.getHeaderNames();
-        if (names == null) {
-            return map;
-        }
         while (names.hasMoreElements()) {
             String name = names.nextElement();
             Enumeration<String> values = req.getHeaders(name);

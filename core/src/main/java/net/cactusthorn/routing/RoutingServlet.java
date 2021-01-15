@@ -11,6 +11,10 @@ import javax.servlet.http.*;
 import javax.ws.rs.HttpMethod;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response.Status;
+import javax.ws.rs.core.Response.StatusType;
+import javax.ws.rs.ext.RuntimeDelegate;
+import javax.ws.rs.ext.RuntimeDelegate.HeaderDelegate;
 
 import net.cactusthorn.routing.EntryPointScanner.EntryPoint;
 import net.cactusthorn.routing.RoutingConfig.ConfigProperty;
@@ -116,11 +120,11 @@ public class RoutingServlet extends HttpServlet {
                         matchContentTypeFail = true;
                         continue;
                     }
-                    Object result = entryPoint.invoke(req, resp, servletContext, values);
+                    javax.ws.rs.core.Response result = entryPoint.invoke(req, resp, servletContext, values);
                     produce(req, resp, entryPoint, result);
                 } catch (WebApplicationException wae) {
                     resp.sendError(wae.getResponse().getStatus(), wae.getMessage());
-                } catch (Exception e) { //TODO JAX-RS exception?
+                } catch (Exception e) {
                     resp.sendError(HttpServletResponse.SC_BAD_REQUEST, e.getMessage());
                 }
                 return;
@@ -154,50 +158,56 @@ public class RoutingServlet extends HttpServlet {
         return path;
     }
 
-    private void produce(HttpServletRequest req, HttpServletResponse resp, EntryPoint entryPoint, Object result) throws IOException {
-        if (result != null && result.getClass() == Response.class) {
-            produce(req, resp, entryPoint, (Response) result);
+    private void produce(HttpServletRequest req, HttpServletResponse resp, EntryPoint entryPoint, javax.ws.rs.core.Response result)
+            throws IOException {
+        StatusType status = result.getStatusInfo();
+        resp.setStatus(status.getStatusCode());
+        if (status.getStatusCode() == Status.NO_CONTENT.getStatusCode()) {
+            writeHeaders(resp, result);
             return;
         }
-        resp.setCharacterEncoding(responseCharacterEncoding);
+        if (status.getFamily() == Status.Family.REDIRECTION) {
+            writeHeaders(resp, result);
+            return;
+        }
+
         String contentType = entryPoint.produces();
+        MediaType mediaType = result.getMediaType();
+        if (mediaType != null) {
+            contentType = mediaType.toString();
+        }
         resp.setContentType(contentType);
-        producers.get(contentType).produce(result, entryPoint.template(), contentType, req, resp);
+        resp.setCharacterEncoding(responseCharacterEncoding);
+
+        String template = null;
+        Object entity = result.getEntity();
+        if (entity instanceof Templated) {
+            Templated templated = (Templated) entity;
+            template = templated.template();
+            entity = templated.entity();
+        }
+        producers.get(contentType).produce(entity, template, contentType, req, resp);
         LOG.log(Level.FINE, "Producer processing done for Content-Type: {0}", new Object[] {contentType});
     }
 
-    private void produce(HttpServletRequest req, HttpServletResponse resp, EntryPoint entryPoint, Response response) throws IOException {
-
-        response.cookies().forEach(c -> resp.addCookie(c));
-
-        response.headers().entrySet().forEach(e -> e.getValue().forEach(v -> resp.addHeader(e.getKey(), v)));
-        response.intHeaders().entrySet().forEach(e -> e.getValue().forEach(v -> resp.addIntHeader(e.getKey(), v)));
-        response.dateHeaders().entrySet().forEach(e -> e.getValue().forEach(v -> resp.addDateHeader(e.getKey(), v)));
-
-        if (response.redirect().isPresent()) {
-            response.redirect().get().apply(resp);
+    @SuppressWarnings({ "unchecked", "rawtypes" }) //
+    private void writeHeaders(HttpServletResponse response, javax.ws.rs.core.Response result) {
+        if (result.getHeaders() == null) {
             return;
         }
-
-        resp.setCharacterEncoding(response.characterEncoding().orElse(responseCharacterEncoding));
-
-        String contentType = response.contentType().orElse(entryPoint.produces());
-        resp.setContentType(contentType);
-
-        if (response.statusCode() != HttpServletResponse.SC_OK) {
-            resp.setStatus(response.statusCode());
-        }
-
-        String template = response.template().orElse(entryPoint.template());
-
-        if (response.skipProducer()) {
-            if (response.body() != null) {
-                resp.getWriter().write(String.valueOf(response.body()));
+        for (Map.Entry<String, List<Object>> entry : result.getHeaders().entrySet()) {
+            String name = entry.getKey();
+            for (Object header : entry.getValue()) {
+                if (header == null) {
+                    continue;
+                }
+                HeaderDelegate headerDelegate = RuntimeDelegate.getInstance().createHeaderDelegate(header.getClass());
+                if (headerDelegate != null) {
+                    response.addHeader(name, headerDelegate.toString(header));
+                } else {
+                    response.addHeader(name, header.toString());
+                }
             }
-            LOG.fine("Producer processing skipped!");
-            return;
         }
-        producers.get(contentType).produce(response.body(), template, contentType, req, resp);
-        LOG.log(Level.FINE, "Producer processing done for Content-Type: {0}", new Object[] {contentType});
     }
 }

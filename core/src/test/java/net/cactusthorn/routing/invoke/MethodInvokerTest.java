@@ -1,6 +1,6 @@
 package net.cactusthorn.routing.invoke;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.*;
 
 import java.io.IOException;
 import java.lang.reflect.*;
@@ -19,6 +19,7 @@ import javax.ws.rs.Consumes;
 import javax.ws.rs.POST;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.QueryParam;
+import javax.ws.rs.ServerErrorException;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
@@ -73,6 +74,10 @@ public class MethodInvokerTest extends InvokeTestAncestor {
 
         @POST @Consumes(MediaType.TEXT_PLAIN) public String m7(StringBuffer buf) {
             return buf.toString();
+        }
+
+        public void m8(@Context HttpServletResponse response) throws Exception {
+            throw new Exception("test exception");
         }
     }
 
@@ -142,6 +147,17 @@ public class MethodInvokerTest extends InvokeTestAncestor {
         String result = (String) caller.invoke(request, response, null, null);
 
         assertEquals("TO HAVE BODY", result);
+    }
+    
+    @Test //
+    public void invokeM8() throws IOException {
+        RoutingConfig config = RoutingConfig.builder(new EntryPoint1Provider()).addEntryPoint(EntryPoint1.class)
+                .setParametersValidator(VALIDATOR).build();
+
+        Method method = findMethod(EntryPoint1.class, "m8");
+        MethodInvoker caller = new MethodInvoker(config, EntryPoint1.class, method, DEFAULT_CONTENT_TYPES);
+
+        assertThrows(ServerErrorException.class, () -> caller.invoke(request, response, context, null));
     }
 
     private static Stream<Arguments> provideArguments() {

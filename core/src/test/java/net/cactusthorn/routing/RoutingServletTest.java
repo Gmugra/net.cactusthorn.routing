@@ -9,7 +9,6 @@ import java.net.URI;
 import java.net.URISyntaxException;
 
 import javax.servlet.ServletException;
-import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.ws.rs.BadRequestException;
@@ -24,6 +23,9 @@ import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
+import javax.ws.rs.core.Context;
+import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.Status;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -115,29 +117,28 @@ public class RoutingServletTest {
 
         @GET @Path("api/response") //
         public Response response() {
-            return Response.builder().setBody("FROM RESPONSE").setContentType("aa/bb").build();
+            return Response.ok("FROM RESPONSE").type("aa/bb").build();
         }
 
         @GET @Path("api/response/nocontent") //
         public Response responseNoContent() {
-            return Response.builder().build();
-        }
-
-        @GET @Path("api/response/all") @Produces("aa/bb") //
-        public Response responseAll() {
-            Cookie cookie = new Cookie("a", "b");
-            return Response.builder().skipProducer().setBody("FROM RESPONSE").setCharacterEncoding("KOI8-R").setTemplate("TTT")
-                    .setStatus(201).addCookie(cookie).addHeader("h", "v").addIntHeader("hi", 10).addDateHeader("hd", 20L).build();
+            return Response.status(Status.NO_CONTENT).build();
         }
 
         @GET @Path("api/redirect") //
         public Response redirect() throws URISyntaxException {
-            return Response.builder().seeOther(new URI("/xyz")).build();
+            return Response.status(Status.SEE_OTHER).location(new URI("/xyz")).build();
         }
 
         @GET @UserRoles({ "somerole" }) @Path("api/role") //
         public Response role() throws URISyntaxException {
-            return Response.builder().seeOther(new URI("/xyz")).build();
+            return Response.status(Status.SEE_OTHER).location(new URI("/xyz")).build();
+        }
+
+        @GET @Path("api/template") //
+        public Response template(@Context HttpServletRequest request, @Context HttpServletResponse response) {
+            Templated t = new Templated(request, response, "t", "templated result");
+            return Response.ok(t).type("aa/bb").build();
         }
     }
 
@@ -179,6 +180,14 @@ public class RoutingServletTest {
     }
 
     @Test //
+    public void templated() throws ServletException, IOException {
+        Mockito.when(req.getPathInfo()).thenReturn("/api/template");
+        Mockito.when(req.getMethod()).thenReturn(HttpMethod.GET);
+        servlet.service(req, resp);
+        assertEquals("templated result", stringWriter.toString());
+    }
+
+    @Test //
     public void defaultService() throws ServletException, IOException {
         Mockito.when(req.getPathInfo()).thenReturn("/api/head");
         Mockito.when(req.getMethod()).thenReturn(HttpMethod.HEAD);
@@ -206,6 +215,20 @@ public class RoutingServletTest {
         Mockito.when(req.getContentType()).thenReturn("application/json");
         servlet.doPut(req, resp);
         assertEquals(HttpMethod.PUT, stringWriter.toString());
+    }
+
+    @Test //
+    public void wrongHeader() throws ServletException, IOException {
+        Mockito.when(req.getPathInfo()).thenReturn("/api/put");
+        Mockito.when(req.getContentType()).thenReturn("application/json; WWWWWW");
+
+        servlet.doPut(req, resp);
+
+        ArgumentCaptor<Integer> code = ArgumentCaptor.forClass(Integer.class);
+
+        Mockito.verify(resp).sendError(code.capture(), Mockito.any());
+
+        assertEquals(400, code.getValue());
     }
 
     @Test //
@@ -292,7 +315,6 @@ public class RoutingServletTest {
     @ParameterizedTest @ValueSource(strings = { "/api/nocontent", "/api/response/nocontent" }) //
     public void nocontent(String pathInfo) throws ServletException, IOException {
         Mockito.when(req.getPathInfo()).thenReturn(pathInfo);
-        Mockito.when(resp.getStatus()).thenReturn(HttpServletResponse.SC_OK);
 
         servlet.doGet(req, resp);
 
@@ -301,46 +323,6 @@ public class RoutingServletTest {
         Mockito.verify(resp).setStatus(code.capture());
 
         assertEquals(204, code.getValue());
-    }
-
-    @Test //
-    public void responseAll() throws ServletException, IOException {
-        Mockito.when(req.getPathInfo()).thenReturn("/api/response/all");
-        servlet.doGet(req, resp);
-
-        ArgumentCaptor<Integer> code = ArgumentCaptor.forClass(Integer.class);
-        ArgumentCaptor<String> characterEncoding = ArgumentCaptor.forClass(String.class);
-        ArgumentCaptor<Cookie> cookie = ArgumentCaptor.forClass(Cookie.class);
-
-        ArgumentCaptor<String> headerName = ArgumentCaptor.forClass(String.class);
-        ArgumentCaptor<String> headerValue = ArgumentCaptor.forClass(String.class);
-
-        ArgumentCaptor<String> intHeaderName = ArgumentCaptor.forClass(String.class);
-        ArgumentCaptor<Integer> intHeaderValue = ArgumentCaptor.forClass(Integer.class);
-
-        ArgumentCaptor<String> dateHeaderName = ArgumentCaptor.forClass(String.class);
-        ArgumentCaptor<Long> dateHeaderValue = ArgumentCaptor.forClass(Long.class);
-
-        Mockito.verify(resp).setStatus(code.capture());
-        Mockito.verify(resp).setCharacterEncoding(characterEncoding.capture());
-        Mockito.verify(resp).addCookie(cookie.capture());
-
-        Mockito.verify(resp).addHeader(headerName.capture(), headerValue.capture());
-        Mockito.verify(resp).addIntHeader(intHeaderName.capture(), intHeaderValue.capture());
-        Mockito.verify(resp).addDateHeader(dateHeaderName.capture(), dateHeaderValue.capture());
-
-        assertEquals(201, code.getValue());
-        assertEquals("b", cookie.getValue().getValue());
-        assertEquals("KOI8-R", characterEncoding.getValue());
-
-        assertEquals("h", headerName.getValue());
-        assertEquals("v", headerValue.getValue());
-
-        assertEquals("hi", intHeaderName.getValue());
-        assertEquals(10, intHeaderValue.getValue());
-
-        assertEquals("hd", dateHeaderName.getValue());
-        assertEquals(20L, dateHeaderValue.getValue());
     }
 
     @Test //
@@ -353,7 +335,7 @@ public class RoutingServletTest {
         ArgumentCaptor<Integer> code = ArgumentCaptor.forClass(Integer.class);
 
         Mockito.verify(resp).setStatus(code.capture());
-        Mockito.verify(resp).setHeader(Mockito.eq("Location"), header.capture());
+        Mockito.verify(resp).addHeader(Mockito.eq("Location"), header.capture());
 
         assertEquals("/xyz", header.getValue());
         assertEquals(303, code.getValue());

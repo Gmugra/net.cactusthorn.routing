@@ -1,5 +1,6 @@
 package net.cactusthorn.routing.invoke;
 
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
 import java.lang.reflect.Type;
@@ -15,6 +16,7 @@ import javax.servlet.http.HttpServletResponse;
 import javax.ws.rs.BadRequestException;
 import javax.ws.rs.ServerErrorException;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response.Status;
 
 import net.cactusthorn.routing.RoutingConfig;
 import net.cactusthorn.routing.PathTemplate.PathValues;
@@ -69,9 +71,9 @@ public final class MethodInvoker {
 
         try {
             return method.invoke(object, values);
-        } catch (Exception e) {
+        } catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
             LOG.log(Level.SEVERE, "The problem with method invocation: {0}", new Object[] {e.getMessage()});
-            throw new ServerErrorException("The problem with method invocation", HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e);
+            throw new ServerErrorException("The problem with method invocation", Status.INTERNAL_SERVER_ERROR, e);
         }
     }
 }

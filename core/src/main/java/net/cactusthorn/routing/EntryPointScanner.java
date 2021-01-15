@@ -7,7 +7,11 @@ import java.util.*;
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.Status;
+import javax.ws.rs.BadRequestException;
 import javax.ws.rs.HttpMethod;
 import javax.ws.rs.Path;
 
@@ -60,8 +64,19 @@ public class EntryPointScanner {
             return template;
         }
 
-        public Object invoke(HttpServletRequest req, HttpServletResponse res, ServletContext con, PathValues pathValues) {
-            return methodInvoker.invoke(req, res, con, pathValues);
+        public Response invoke(HttpServletRequest req, HttpServletResponse res, ServletContext con, PathValues pathValues) {
+            Object result = methodInvoker.invoke(req, res, con, pathValues);
+            if (result instanceof Response) {
+                return (Response) result;
+            }
+            if (result != null && template == null) {
+                return Response.ok(result).build();
+            }
+            if (result == null && template == null) {
+                return Response.status(Status.NO_CONTENT).build();
+            }
+            Templated templated = new Templated(req, res, template, result);
+            return Response.ok(templated).build();
         }
 
         public String produces() {
@@ -75,8 +90,6 @@ public class EntryPointScanner {
             return userRoles.stream().filter(r -> req.isUserInRole(r)).findAny().isPresent();
         }
 
-        public static final String FORM_DATA = "multipart/form-data";
-
         public boolean matchContentType(String contenttype) {
             try {
                 MediaType ct = MediaType.valueOf(contenttype);
@@ -87,8 +100,7 @@ public class EntryPointScanner {
                 }
                 return false;
             } catch (Exception e) {
-                //TODO should be BadRequestException
-                throw e;
+                throw new BadRequestException(HttpHeaders.CONTENT_TYPE + ": " + e.getMessage());
             }
         }
     }

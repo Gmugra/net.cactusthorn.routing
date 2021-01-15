@@ -14,8 +14,9 @@ import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
+import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.Status;
 
-import net.cactusthorn.routing.Response;
 import net.cactusthorn.routing.annotation.Produces;
 import net.cactusthorn.routing.annotation.Template;
 import net.cactusthorn.routing.annotation.UserRoles;
@@ -52,7 +53,7 @@ public class SimpleEntryPoint implements EntryPoint {
 
     @GET @Path("/seeother") //
     public Response seeother() throws URISyntaxException {
-        return Response.builder().seeOther(new URI("/rest/api/test30?test=33.45")).build();
+        return Response.status(Status.SEE_OTHER).location(new URI("/rest/api/test30?test=33.45")).build();
     }
 
     @GET @Path("/localdate/{date : \\d{8}}") //
