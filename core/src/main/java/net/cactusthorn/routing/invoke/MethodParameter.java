@@ -4,8 +4,6 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
 import java.lang.reflect.Type;
 import java.security.Principal;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Set;
 
 import javax.servlet.ServletContext;
@@ -13,7 +11,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import javax.ws.rs.core.MediaType;
-import javax.ws.rs.ext.MessageBodyReader;
 import javax.ws.rs.CookieParam;
 import javax.ws.rs.DefaultValue;
 import javax.ws.rs.QueryParam;
@@ -71,9 +68,7 @@ public abstract class MethodParameter {
 
     static final class Factory {
 
-        protected static final String ONLY_POST_PUT = "entity parameter supported only for POST and PUT; Method: %s";
-
-        protected static final String BODY_READER_NOT_FOUND = "body reader for media-type %s not found; Method: %s";
+        protected static final String ONLY_POST_PUT_PATCH = "entity parameter supported only for POST, PUT and PATCH; Method: %s";
 
         static MethodParameter create(Method method, Parameter parameter, Type parameterGenericType, RoutingConfig routingConfig,
                 Set<MediaType> consumesMediaTypes) {
@@ -97,38 +92,27 @@ public abstract class MethodParameter {
                 return new CookieParamParameter(method, parameter);
             }
             if (parameter.getAnnotation(Context.class) != null) {
-                if (parameterClassType.isAssignableFrom(HttpServletRequest.class)) {
+                if (HttpServletRequest.class.isAssignableFrom(parameterClassType)) {
                     return new HttpServletRequestParameter(parameter);
                 }
-                if (parameterClassType.isAssignableFrom(HttpServletResponse.class)) {
+                if (HttpServletResponse.class.isAssignableFrom(parameterClassType)) {
                     return new HttpServletResponseParameter(parameter);
                 }
-                if (parameterClassType.isAssignableFrom(HttpSession.class)) {
+                if (HttpSession.class.isAssignableFrom(parameterClassType)) {
                     return new HttpSessionParameter(parameter);
                 }
-                if (parameterClassType.isAssignableFrom(ServletContext.class)) {
+                if (ServletContext.class.isAssignableFrom(parameterClassType)) {
                     return new ServletContextParameter(parameter);
                 }
-                if (parameterClassType.isAssignableFrom(Principal.class)) {
+                if (Principal.class.isAssignableFrom(parameterClassType)) {
                     return new PrincipalParameter(parameter);
                 }
             }
             if (method.getAnnotation(POST.class) != null || method.getAnnotation(PUT.class) != null
                     || method.getAnnotation(PATCH.class) != null) {
-
-                method.getGenericParameterTypes();
-
-                Map<MediaType, MessageBodyReader<?>> found = new HashMap<>();
-                for (MediaType mediaType : consumesMediaTypes) {
-                    MessageBodyReader<?> bodyReader = routingConfig.bodyReaders().get(mediaType);
-                    if (bodyReader == null) {
-                        throw new RoutingInitializationException(BODY_READER_NOT_FOUND, mediaType, method);
-                    }
-                    found.put(mediaType, bodyReader);
-                }
-                return new BodyReaderParameter(method, parameter, parameterGenericType, found);
+                return new BodyReaderParameter(method, parameter, parameterGenericType, consumesMediaTypes, routingConfig.bodyReaders());
             }
-            throw new RoutingInitializationException(ONLY_POST_PUT, method);
+            throw new RoutingInitializationException(ONLY_POST_PUT_PATCH, method);
         }
     }
 }

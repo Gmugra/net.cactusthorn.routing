@@ -49,9 +49,6 @@ public abstract class MethodComplexParameter extends MethodParameter {
         if (type instanceof ParameterizedType) {
             ParameterizedType parameterizedType = (ParameterizedType) type;
             Type[] genericTypes = parameterizedType.getActualTypeArguments();
-            if (genericTypes.length != 1) {
-                throw new RoutingInitializationException(WRONG_COLLECTION_MESSAGE, method);
-            }
             Type genericType = genericTypes[0];
             try {
                 return Class.forName(genericType.getTypeName());

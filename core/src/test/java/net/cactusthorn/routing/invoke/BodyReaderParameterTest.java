@@ -3,6 +3,7 @@ package net.cactusthorn.routing.invoke;
 import static org.junit.jupiter.api.Assertions.*;
 
 import java.io.InputStream;
+import java.io.Reader;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
 import java.util.Collections;
@@ -17,9 +18,9 @@ import javax.ws.rs.GET;
 import javax.ws.rs.PATCH;
 import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
-import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -39,6 +40,9 @@ public class BodyReaderParameterTest extends InvokeTestAncestor {
         }
 
         @POST @Consumes(MediaType.TEXT_PLAIN) public void stream(InputStream input) {
+        }
+
+        @POST @Consumes(MediaType.TEXT_PLAIN) public void reader(Reader input) {
         }
 
         @PATCH @Consumes(MediaType.TEXT_PLAIN) public void wrongtype(Runtime input) {
@@ -64,16 +68,18 @@ public class BodyReaderParameterTest extends InvokeTestAncestor {
 
     private static RoutingConfig CONFIG = RoutingConfig.builder(new EntryPoint1Provider()).addEntryPoint(EntryPoint1.class).build();
 
+    @BeforeAll //
+    protected static void beforeAll() throws Exception {
+        CONFIG.bodyReaders().forEach(r -> r.init(null, CONFIG));
+    }
+
     @Override @BeforeEach //
     protected void setUp() throws Exception {
         super.setUp();
 
         Mockito.when(request.getContentType()).thenReturn(MediaType.TEXT_PLAIN);
-
-        Map<String, String> headers = new HashMap<>();
-        headers.put(HttpHeaders.CONTENT_TYPE, MediaType.TEXT_PLAIN_TYPE.withCharset("UTF-8").toString());
-        Mockito.when(request.getHeaderNames()).thenReturn(Collections.enumeration(headers.keySet()));
-        Mockito.when(request.getHeaders(HttpHeaders.CONTENT_TYPE)).thenReturn(Collections.enumeration(headers.values()));
+        Mockito.when(request.getCharacterEncoding()).thenReturn("UTF-8");
+        Mockito.when(request.getHeaderNames()).thenReturn(Collections.emptyEnumeration());
 
         ServletInputStream is = new ServletTestInputStream("THIS IS IT");
         Mockito.when(request.getInputStream()).thenReturn(is);
@@ -90,12 +96,6 @@ public class BodyReaderParameterTest extends InvokeTestAncestor {
 
     @Test //
     public void setCharset() throws Exception {
-        Map<String, String> headers = new HashMap<>();
-        headers.put(HttpHeaders.CONTENT_TYPE, MediaType.TEXT_PLAIN_TYPE.toString());
-        Mockito.when(request.getHeaderNames()).thenReturn(Collections.enumeration(headers.keySet()));
-        Mockito.when(request.getHeaders(HttpHeaders.CONTENT_TYPE)).thenReturn(Collections.enumeration(headers.values()));
-        Mockito.when(request.getCharacterEncoding()).thenReturn("UTF-8");
-
         Method m = findMethod(EntryPoint1.class, "context");
         Parameter p = m.getParameters()[0];
         MethodParameter body = MethodParameter.Factory.create(m, p, null, CONFIG, mediaTypes(MediaType.TEXT_PLAIN_TYPE));
@@ -109,6 +109,15 @@ public class BodyReaderParameterTest extends InvokeTestAncestor {
         Parameter p = m.getParameters()[0];
         MethodParameter body = MethodParameter.Factory.create(m, p, null, CONFIG, mediaTypes(MediaType.TEXT_PLAIN_TYPE));
         InputStream result = (InputStream) body.findValue(request, null, null, null);
+        assertNotNull(result);
+    }
+
+    @Test //
+    public void reader() throws Exception {
+        Method m = findMethod(EntryPoint1.class, "reader");
+        Parameter p = m.getParameters()[0];
+        MethodParameter body = MethodParameter.Factory.create(m, p, null, CONFIG, mediaTypes(MediaType.TEXT_PLAIN_TYPE));
+        Reader result = (Reader) body.findValue(request, null, null, null);
         assertNotNull(result);
     }
 
@@ -129,12 +138,22 @@ public class BodyReaderParameterTest extends InvokeTestAncestor {
         assertThrows(RoutingInitializationException.class, () -> MethodParameter.Factory.create(m, p, null, CONFIG, mediaTypes(mediaType)));
     }
 
+    @Test //
+    public void headers() throws Exception {
+        Map<String, String> headers = new HashMap<>();
+        headers.put("aaaaa", "bbbb");
+        Mockito.when(request.getHeaderNames()).thenReturn(Collections.enumeration(headers.keySet()));
+        Mockito.when(request.getHeaders("aaaaa")).thenReturn(Collections.enumeration(headers.values()));
+
+        Method m = findMethod(EntryPoint1.class, "stream");
+        Parameter p = m.getParameters()[0];
+        MethodParameter.Factory.create(m, p, null, CONFIG, mediaTypes(MediaType.TEXT_PLAIN_TYPE));
+    }
+
     private static Stream<Arguments> provideArguments() {
         // @formatter:off
         return Stream.of(
             Arguments.of("get", MediaType.WILDCARD),
-            Arguments.of("wrongNoConsumes", MediaType.WILDCARD),
-            Arguments.of("context", new MediaType("test", "wrong")),
             Arguments.of("wrongtype", MediaType.TEXT_PLAIN_TYPE));
         // @formatter:on
     }

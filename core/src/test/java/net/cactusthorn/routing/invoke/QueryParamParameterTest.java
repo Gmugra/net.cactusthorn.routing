@@ -37,13 +37,16 @@ public class QueryParamParameterTest extends InvokeTestAncestor {
         public void wrong(@QueryParam("val") int values) {
         }
 
-        public void collection(@QueryParam("val") Collection<Integer> values) {
+        public void collection(@QueryParam("val") Queue<Integer> values) {
         }
 
         public void list(@QueryParam("val") List<Integer> values) {
         }
 
         public void sortedSet(@QueryParam("val") SortedSet<Integer> values) {
+        }
+
+        public void set(@QueryParam("val") Set<Integer> values) {
         }
 
         public void linkedList(@QueryParam("val") LinkedList<Integer> values) {
@@ -91,6 +94,19 @@ public class QueryParamParameterTest extends InvokeTestAncestor {
             Arguments.of("array", new String[] {"100", "200"}, new Integer[] {100, 200}),
             Arguments.of("arrayByName", new String[] {"100", "200"}, new Integer[] {100, 200}));
         // @formatter:on
+    }
+
+    @Test
+    public void set() throws Exception {
+        Method m = findMethod(EntryPoint1.class, "set");
+        Parameter p = m.getParameters()[0];
+        MethodParameter mp = MethodParameter.Factory.create(m, p, null, CONFIG, DEFAULT_CONTENT_TYPES);
+
+        Mockito.when(request.getParameterValues("val")).thenReturn(new String[] {"10", "20", "20"});
+
+        Set<?> result = (Set<?>)mp.findValue(request, null, null, null);
+
+        assertEquals(2, result.size());
     }
 
     @ParameterizedTest @ValueSource(strings = { "collectionNoGeneric", "multiArray" }) //

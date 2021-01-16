@@ -8,27 +8,30 @@ import java.io.Reader;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;
 
-import javax.ws.rs.core.HttpHeaders;
+import javax.annotation.Priority;
+import javax.servlet.ServletContext;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.MultivaluedMap;
-import javax.ws.rs.ext.MessageBodyReader;
 
+import net.cactusthorn.routing.RoutingConfig;
 import net.cactusthorn.routing.convert.ConvertersHolder;
 
-public class TextPlainBodyReader implements MessageBodyReader<Object> {
+@Priority(BodyReader.LOWEST_PRIORITY) //
+public class WildcardMessageBodyReader implements InitializableMessageBodyReader<Object> {
 
     private ConvertersHolder convertersHolder;
 
-    public TextPlainBodyReader(ConvertersHolder convertersHolder) {
-        this.convertersHolder = convertersHolder;
+    @Override //
+    public void init(ServletContext servletContext, RoutingConfig routingConfig) {
+        this.convertersHolder = routingConfig.convertersHolder();
     }
 
     @Override //
     public boolean isReadable(Class<?> type, Type genericType, Annotation[] annotations, MediaType mediaType) {
-        if (!MediaType.TEXT_PLAIN_TYPE.isCompatible(mediaType)) {
-            return false;
+        if (InputStream.class.isAssignableFrom(type)) {
+            return true;
         }
-        if (type.isAssignableFrom(InputStream.class)) {
+        if (Reader.class.isAssignableFrom(type)) {
             return true;
         }
         return convertersHolder.findConverter(type).isPresent();
@@ -37,11 +40,15 @@ public class TextPlainBodyReader implements MessageBodyReader<Object> {
     @Override //
     public Object readFrom(Class<Object> type, Type genericType, Annotation[] annotations, MediaType mediaType,
             MultivaluedMap<String, String> httpHeaders, InputStream entityStream) throws IOException {
-        if (type.isAssignableFrom(InputStream.class)) {
-            return entityStream;
-        }
         try {
-            return convertersHolder.findConverter(type).get().convert(type, streamToString(httpHeaders, entityStream));
+            if (InputStream.class.isAssignableFrom(type)) {
+                return entityStream;
+            }
+            String charset = mediaType.getParameters().get(MediaType.CHARSET_PARAMETER);
+            if (Reader.class.isAssignableFrom(type)) {
+                return new InputStreamReader(entityStream, charset);
+            }
+            return convertersHolder.findConverter(type).get().convert(type, streamToString(entityStream, charset));
         } catch (IOException ioe) {
             throw ioe;
         } catch (Exception e) {
@@ -49,8 +56,7 @@ public class TextPlainBodyReader implements MessageBodyReader<Object> {
         }
     }
 
-    private String streamToString(MultivaluedMap<String, String> httpHeaders, InputStream inputStream) throws IOException {
-        String charset = MediaType.valueOf(httpHeaders.getFirst(HttpHeaders.CONTENT_TYPE)).getParameters().get(MediaType.CHARSET_PARAMETER);
+    private String streamToString(InputStream inputStream, String charset) throws IOException {
         StringBuilder textBuilder = new StringBuilder();
         try (Reader reader = new BufferedReader(new InputStreamReader(inputStream, charset))) {
             int c = 0;

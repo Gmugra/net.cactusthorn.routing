@@ -7,7 +7,6 @@ import java.io.Reader;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;
 
-import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.ext.MessageBodyReader;
@@ -29,18 +28,20 @@ public class SimpleGsonBodyReader<T> implements MessageBodyReader<T> {
 
     @Override //
     public boolean isReadable(Class<?> type, Type genericType, Annotation[] annotations, MediaType mediaType) {
+        if (InputStream.class.isAssignableFrom(type)) {
+            return false;
+        }
+        if (Reader.class.isAssignableFrom(type)) {
+            return false;
+        }
         return MediaType.APPLICATION_JSON_TYPE.isCompatible(mediaType);
     }
 
-    @SuppressWarnings("unchecked") //
+    @Override //
     public T readFrom(Class<T> type, Type genericType, Annotation[] annotations, MediaType mediaType,
             MultivaluedMap<String, String> httpHeaders, InputStream entityStream) throws IOException {
 
-        String charset = MediaType.valueOf(httpHeaders.getFirst(HttpHeaders.CONTENT_TYPE)).getParameters().get(MediaType.CHARSET_PARAMETER);
-
-        if (type.isAssignableFrom(InputStream.class)) {
-            return (T) entityStream;
-        }
+        String charset = mediaType.getParameters().get(MediaType.CHARSET_PARAMETER);
         try (Reader reader = new InputStreamReader(entityStream, charset)) {
             return gson.fromJson(reader, type);
         }

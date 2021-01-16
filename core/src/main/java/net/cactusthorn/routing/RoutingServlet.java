@@ -40,18 +40,18 @@ public class RoutingServlet extends HttpServlet {
         producers = config.producers();
         responseCharacterEncoding = (String) routingConfig.properties().get(ConfigProperty.RESPONSE_CHARACTER_ENCODING);
         defaultRequestCharacterEncoding = (String) routingConfig.properties().get(ConfigProperty.DEFAULT_REQUEST_CHARACTER_ENCODING);
-
-        EntryPointScanner scanner = new EntryPointScanner(routingConfig);
-        allEntryPoints = scanner.scan();
     }
 
-    @Override //
     public void init() throws ServletException {
         super.init();
         servletContext = getServletContext();
         routingConfig.provider().init(servletContext);
         producers.values().forEach(p -> p.init(servletContext, routingConfig.provider()));
+        routingConfig.bodyReaders().forEach(r -> r.init(servletContext, routingConfig));
         routingConfig.validator().ifPresent(v -> v.init(servletContext, routingConfig.provider()));
+
+        EntryPointScanner scanner = new EntryPointScanner(routingConfig);
+        allEntryPoints = scanner.scan();
     }
 
     @Override //
@@ -192,9 +192,6 @@ public class RoutingServlet extends HttpServlet {
 
     @SuppressWarnings({ "unchecked", "rawtypes" }) //
     private void writeHeaders(HttpServletResponse response, javax.ws.rs.core.Response result) {
-        if (result.getHeaders() == null) {
-            return;
-        }
         for (Map.Entry<String, List<Object>> entry : result.getHeaders().entrySet()) {
             String name = entry.getKey();
             for (Object header : entry.getValue()) {

@@ -15,8 +15,4 @@ public class RoutingInitializationException extends RuntimeException {
     public RoutingInitializationException(String message, Object param1, Object param2) {
         super(String.format(message, param1, param2));
     }
-
-    public RoutingInitializationException(String message, Object param1, Object param2, Object param3) {
-        super(String.format(message, param1, param2, param3));
-    }
 }

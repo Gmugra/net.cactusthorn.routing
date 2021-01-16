@@ -54,6 +54,7 @@
         <dependency.mockito>3.6.28</dependency.mockito>
         <dependency.servlet>3.1.0</dependency.servlet>
         <dependency.rs-api>2.1.1</dependency.rs-api>
+        <dependency.annotation-api>1.3.2</dependency.annotation-api>
         <dependency.jetty>9.4.35.v20201120</dependency.jetty>
         <dependency.gson>2.8.6</dependency.gson>
         <dependency.thymeleaf>3.0.12.RELEASE</dependency.thymeleaf>
@@ -142,6 +143,12 @@
                 <groupId>javax.ws.rs</groupId>
                 <artifactId>javax.ws.rs-api</artifactId>
                 <version>${dependency.rs-api}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>javax.annotation</groupId>
+                <artifactId>javax.annotation-api</artifactId>
+                <version>${dependency.annotation-api}</version>
             </dependency>
 
             <dependency>

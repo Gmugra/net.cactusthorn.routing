@@ -152,7 +152,19 @@ public class RoutingServletTest {
 
     static RoutingConfig config = RoutingConfig.builder(new EntryPoint1Provider()).addEntryPoint(EntryPoint1.class)
             .addProducer("aa/bb", TEST_PRODUCER).build();
-    static RoutingServlet servlet = new RoutingServlet(config);
+
+    static RoutingServlet servlet;
+    static {
+        RoutingServlet tmpServlet = new RoutingServlet(config);
+        RoutingServlet spyServlet = Mockito.spy(tmpServlet);
+        Mockito.doReturn(null).when(spyServlet).getServletContext();
+        try {
+            spyServlet.init();
+        } catch (ServletException e) {
+            e.printStackTrace();
+        }
+        servlet = spyServlet;
+    }
 
     HttpServletRequest req;
     HttpServletResponse resp;
@@ -162,6 +174,7 @@ public class RoutingServletTest {
     void setUp() throws IOException {
         req = Mockito.mock(HttpServletRequest.class);
         resp = Mockito.mock(HttpServletResponse.class);
+        Mockito.when(req.getPathInfo()).thenReturn("/api/wrong/abc");
         stringWriter = new StringWriter();
         Mockito.when(resp.getWriter()).thenReturn(new PrintWriter(stringWriter));
     }
@@ -299,7 +312,10 @@ public class RoutingServletTest {
     @Test //
     public void noEntryPoints() throws ServletException, IOException {
         RoutingConfig c = RoutingConfig.builder(new EntryPoint1Provider()).build();
-        RoutingServlet s = new RoutingServlet(c);
+        RoutingServlet servlet = new RoutingServlet(c);
+        RoutingServlet s = Mockito.spy(servlet);
+        Mockito.doReturn(null).when(s).getServletContext();
+        s.init();
 
         Mockito.when(req.getPathInfo()).thenReturn("/api/get");
 
@@ -345,7 +361,10 @@ public class RoutingServletTest {
     public void validation() throws ServletException, IOException {
         RoutingConfig c = RoutingConfig.builder(new EntryPoint1Provider()).addEntryPoint(EntryPoint1.class)
                 .setParametersValidator(TEST_VALIDATOR).build();
-        RoutingServlet s = new RoutingServlet(c);
+        RoutingServlet servlet = new RoutingServlet(c);
+        RoutingServlet s = Mockito.spy(servlet);
+        Mockito.doReturn(null).when(s).getServletContext();
+        s.init();
 
         Mockito.when(req.getPathInfo()).thenReturn("/api/get");
 
@@ -362,7 +381,10 @@ public class RoutingServletTest {
     public void userRoles() throws ServletException, IOException {
         RoutingConfig c = RoutingConfig.builder(new EntryPoint1Provider()).addEntryPoint(EntryPoint1.class)
                 .setParametersValidator(TEST_VALIDATOR).build();
-        RoutingServlet s = new RoutingServlet(c);
+        RoutingServlet servlet = new RoutingServlet(c);
+        RoutingServlet s = Mockito.spy(servlet);
+        Mockito.doReturn(null).when(s).getServletContext();
+        s.init();
 
         Mockito.when(req.getPathInfo()).thenReturn("/api/role");
         Mockito.when(req.isUserInRole(Mockito.any())).thenReturn(false);
@@ -374,16 +396,6 @@ public class RoutingServletTest {
         Mockito.verify(resp).sendError(code.capture(), Mockito.any());
 
         assertEquals(403, code.getValue());
-    }
-
-    @Test //
-    public void init() throws ServletException {
-        RoutingConfig c = RoutingConfig.builder(new EntryPoint1Provider()).addEntryPoint(EntryPoint1.class)
-                .setParametersValidator(TEST_VALIDATOR).build();
-        RoutingServlet servlet = new RoutingServlet(c);
-        RoutingServlet spyServlet = Mockito.spy(servlet);
-        Mockito.doReturn(null).when(spyServlet).getServletContext();
-        spyServlet.init();
     }
 
     public static class EntryPointWrong {
@@ -402,8 +414,11 @@ public class RoutingServletTest {
     }
 
     @Test //
-    public void initializationException() {
+    public void initializationException() throws ServletException {
         RoutingConfig config = RoutingConfig.builder(new EntryPointWrongProvider()).addEntryPoint(EntryPointWrong.class).build();
-        assertThrows(RoutingInitializationException.class, () -> new RoutingServlet(config));
+        RoutingServlet servlet = new RoutingServlet(config);
+        RoutingServlet s = Mockito.spy(servlet);
+        Mockito.doReturn(null).when(s).getServletContext();
+        assertThrows(RoutingInitializationException.class, () -> s.init());
     }
 }

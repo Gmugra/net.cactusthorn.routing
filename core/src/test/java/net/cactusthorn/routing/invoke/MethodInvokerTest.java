@@ -5,9 +5,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import java.io.IOException;
 import java.lang.reflect.*;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Map;
 import java.util.Set;
 import java.util.stream.Stream;
 
@@ -21,7 +19,6 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.ServerErrorException;
 import javax.ws.rs.core.Context;
-import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -128,19 +125,17 @@ public class MethodInvokerTest extends InvokeTestAncestor {
 
         Mockito.when(request.getInputStream()).thenReturn(new ServletTestInputStream("TO HAVE BODY"));
         Mockito.when(request.getContentType()).thenReturn(MediaType.TEXT_PLAIN);
-
-        Map<String, String> headers = new HashMap<>();
-        headers.put(HttpHeaders.CONTENT_TYPE, MediaType.TEXT_PLAIN_TYPE.withCharset("UTF-8").toString());
-        Mockito.when(request.getHeaderNames()).thenReturn(Collections.enumeration(headers.keySet()));
-        Mockito.when(request.getHeaders(HttpHeaders.CONTENT_TYPE)).thenReturn(Collections.enumeration(headers.values()));
-
-        Method method = findMethod(EntryPoint1.class, "m7");
+        Mockito.when(request.getCharacterEncoding()).thenReturn("UTF-8");
+        Mockito.when(request.getHeaderNames()).thenReturn(Collections.emptyEnumeration());
 
         RoutingConfig config = RoutingConfig.builder(new EntryPoint1Provider()).addEntryPoint(EntryPoint1.class)
                 .setParametersValidator(VALIDATOR).build();
+        config.bodyReaders().forEach(r -> r.init(null, config));
 
         Set<MediaType> consumesMediaTypes = new HashSet<>();
         consumesMediaTypes.add(MediaType.TEXT_PLAIN_TYPE);
+
+        Method method = findMethod(EntryPoint1.class, "m7");
 
         MethodInvoker caller = new MethodInvoker(config, EntryPoint1.class, method, consumesMediaTypes);
 
