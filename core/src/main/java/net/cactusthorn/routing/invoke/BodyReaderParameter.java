@@ -19,8 +19,8 @@ import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.ext.MessageBodyReader;
 
 import net.cactusthorn.routing.RoutingInitializationException;
-import net.cactusthorn.routing.bodyreader.BodyReader;
 import net.cactusthorn.routing.PathTemplate.PathValues;
+import net.cactusthorn.routing.body.reader.BodyReader;
 
 public final class BodyReaderParameter extends MethodParameter {
 
@@ -38,7 +38,7 @@ public final class BodyReaderParameter extends MethodParameter {
         for (MediaType consumesMediaType : consumesMediaTypes) {
             for (BodyReader bodyReader : bodyReaders) {
                 if (consumesMediaType.isCompatible(bodyReader.mediaType())
-                        && bodyReader.isReadable(classType(), parameterGenericType, parameter().getAnnotations(), consumesMediaType)) {
+                        && bodyReader.isProcessable(classType(), parameterGenericType, parameter().getAnnotations(), consumesMediaType)) {
                     messageBodyReaders.put(consumesMediaType, bodyReader.messageBodyReader());
                     break;
                 }

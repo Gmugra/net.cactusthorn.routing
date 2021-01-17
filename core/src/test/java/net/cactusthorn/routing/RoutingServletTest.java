@@ -3,10 +3,11 @@ package net.cactusthorn.routing;
 import static org.junit.jupiter.api.Assertions.*;
 
 import java.io.IOException;
-import java.io.PrintWriter;
-import java.io.StringWriter;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -24,6 +25,7 @@ import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.core.Context;
+import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
@@ -36,14 +38,9 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 
 import net.cactusthorn.routing.annotation.*;
-import net.cactusthorn.routing.producer.Producer;
 import net.cactusthorn.routing.validate.ParametersValidator;
 
 public class RoutingServletTest {
-
-    public static final Producer TEST_PRODUCER = (object, template, mediaType, req, resp) -> {
-        resp.getWriter().write(String.valueOf(object));
-    };
 
     public static final ParametersValidator TEST_VALIDATOR = (object, method, parameters) -> {
         throw new BadRequestException("abc");
@@ -72,8 +69,8 @@ public class RoutingServletTest {
         }
 
         @HEAD @Path("api/head") //
-        public String head() {
-            return "HEAD";
+        public Response head() {
+            return Response.ok().build();
         }
 
         @POST @Path("api/post") //
@@ -87,13 +84,12 @@ public class RoutingServletTest {
         }
 
         @DELETE @Path("api/delete") //
-        public String delete() {
-            return "DELETE";
+        public Response delete() {
+            return Response.accepted().build();
         }
 
         @OPTIONS @Path("api/options") //
-        public String options() {
-            return "OPTIONS";
+        public void options() {
         }
 
         @PATCH @Path("api/patch") //
@@ -135,10 +131,15 @@ public class RoutingServletTest {
             return Response.status(Status.SEE_OTHER).location(new URI("/xyz")).build();
         }
 
-        @GET @Path("api/template") //
+        @POST @Path("api/template") //
         public Response template(@Context HttpServletRequest request, @Context HttpServletResponse response) {
             Templated t = new Templated(request, response, "t", "templated result");
             return Response.ok(t).type("aa/bb").build();
+        }
+
+        @POST @Path("api/template/A") @Template("/xyz.html") @Produces("text/html")//
+        public String templateA(@Context HttpServletRequest request, @Context HttpServletResponse response) {
+            return "some value";
         }
     }
 
@@ -150,8 +151,7 @@ public class RoutingServletTest {
         }
     }
 
-    static RoutingConfig config = RoutingConfig.builder(new EntryPoint1Provider()).addEntryPoint(EntryPoint1.class)
-            .addProducer("aa/bb", TEST_PRODUCER).build();
+    static RoutingConfig config = RoutingConfig.builder(new EntryPoint1Provider()).addEntryPoint(EntryPoint1.class).build();
 
     static RoutingServlet servlet;
     static {
@@ -168,36 +168,48 @@ public class RoutingServletTest {
 
     HttpServletRequest req;
     HttpServletResponse resp;
-    StringWriter stringWriter;
+    ServletTestOutputStream outputStream;
 
     @BeforeEach //
     void setUp() throws IOException {
         req = Mockito.mock(HttpServletRequest.class);
         resp = Mockito.mock(HttpServletResponse.class);
-        Mockito.when(req.getPathInfo()).thenReturn("/api/wrong/abc");
-        stringWriter = new StringWriter();
-        Mockito.when(resp.getWriter()).thenReturn(new PrintWriter(stringWriter));
+        Mockito.when(req.getHeaders(HttpHeaders.ACCEPT)).thenReturn(Collections.emptyEnumeration());
+        //Mockito.when(req.getPathInfo()).thenReturn("/api/wrong/abc");
+        outputStream = new ServletTestOutputStream();
+        Mockito.when(resp.getOutputStream()).thenReturn(outputStream);
     }
 
     @Test //
     public void wrong() throws ServletException, IOException {
         Mockito.when(req.getPathInfo()).thenReturn("/api/wrong/abc");
+        Mockito.when(req.getMethod()).thenReturn(HttpMethod.GET);
 
         servlet.doGet(req, resp);
 
         ArgumentCaptor<Integer> code = ArgumentCaptor.forClass(Integer.class);
-
         Mockito.verify(resp).sendError(code.capture(), Mockito.any());
-
         assertEquals(HttpServletResponse.SC_BAD_REQUEST, code.getValue());
     }
 
     @Test //
     public void templated() throws ServletException, IOException {
         Mockito.when(req.getPathInfo()).thenReturn("/api/template");
-        Mockito.when(req.getMethod()).thenReturn(HttpMethod.GET);
+        Mockito.when(req.getMethod()).thenReturn(HttpMethod.POST);
         servlet.service(req, resp);
-        assertEquals("templated result", stringWriter.toString());
+        assertTrue(outputStream.toString().startsWith("net.cactusthorn.routing.Templated"));
+    }
+
+    @Test //
+    public void templatedA() throws ServletException, IOException {
+        Mockito.when(req.getPathInfo()).thenReturn("/api/template/A");
+        Mockito.when(req.getMethod()).thenReturn(HttpMethod.POST);
+        servlet.service(req, resp);
+
+        ArgumentCaptor<String> contentType = ArgumentCaptor.forClass(String.class);
+        Mockito.verify(resp).setContentType(contentType.capture());
+        assertEquals("text/html;charset=UTF-8",contentType.getValue());
+        assertTrue(outputStream.toString().startsWith("net.cactusthorn.routing.Templated"));
     }
 
     @Test //
@@ -205,42 +217,67 @@ public class RoutingServletTest {
         Mockito.when(req.getPathInfo()).thenReturn("/api/head");
         Mockito.when(req.getMethod()).thenReturn(HttpMethod.HEAD);
         servlet.service(req, resp);
-        assertEquals(HttpMethod.HEAD, stringWriter.toString());
+        ArgumentCaptor<Integer> code = ArgumentCaptor.forClass(Integer.class);
+        Mockito.verify(resp).setStatus(code.capture());
+        assertEquals(200, code.getValue());
     }
 
     @Test //
     public void head() throws ServletException, IOException {
         Mockito.when(req.getPathInfo()).thenReturn("/api/head");
+        Mockito.when(req.getMethod()).thenReturn(HttpMethod.HEAD);
         servlet.doHead(req, resp);
-        assertEquals(HttpMethod.HEAD, stringWriter.toString());
+        ArgumentCaptor<Integer> code = ArgumentCaptor.forClass(Integer.class);
+        Mockito.verify(resp).setStatus(code.capture());
+        assertEquals(200, code.getValue());
     }
 
     @Test //
     public void post() throws ServletException, IOException {
         Mockito.when(req.getPathInfo()).thenReturn("/api/post");
+        Mockito.when(req.getMethod()).thenReturn(HttpMethod.POST);
+        Mockito.when(req.getCharacterEncoding()).thenReturn("UTF-8");
+        List<String> accept = new ArrayList<>();
+        accept.add("text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9");
+        Mockito.when(req.getHeaders(HttpHeaders.ACCEPT)).thenReturn(Collections.enumeration(accept));
         servlet.doPost(req, resp);
-        assertEquals(HttpMethod.POST, stringWriter.toString());
+        assertEquals(HttpMethod.POST, outputStream.toString());
+    }
+
+    @Test //
+    public void notAccept() throws ServletException, IOException {
+        Mockito.when(req.getPathInfo()).thenReturn("/api/post");
+        Mockito.when(req.getMethod()).thenReturn(HttpMethod.POST);
+        List<String> accept = new ArrayList<>();
+        accept.add("application/json");
+        Mockito.when(req.getHeaders(HttpHeaders.ACCEPT)).thenReturn(Collections.enumeration(accept));
+
+        servlet.doPost(req, resp);
+
+        ArgumentCaptor<Integer> code = ArgumentCaptor.forClass(Integer.class);
+        Mockito.verify(resp).sendError(code.capture(), Mockito.any());
+        assertEquals(406, code.getValue());
     }
 
     @Test //
     public void put() throws ServletException, IOException {
         Mockito.when(req.getPathInfo()).thenReturn("/api/put");
         Mockito.when(req.getContentType()).thenReturn("application/json");
+        Mockito.when(req.getMethod()).thenReturn(HttpMethod.PUT);
         servlet.doPut(req, resp);
-        assertEquals(HttpMethod.PUT, stringWriter.toString());
+        assertEquals(HttpMethod.PUT, outputStream.toString());
     }
 
     @Test //
     public void wrongHeader() throws ServletException, IOException {
         Mockito.when(req.getPathInfo()).thenReturn("/api/put");
         Mockito.when(req.getContentType()).thenReturn("application/json; WWWWWW");
+        Mockito.when(req.getMethod()).thenReturn(HttpMethod.PUT);
 
         servlet.doPut(req, resp);
 
         ArgumentCaptor<Integer> code = ArgumentCaptor.forClass(Integer.class);
-
         Mockito.verify(resp).sendError(code.capture(), Mockito.any());
-
         assertEquals(400, code.getValue());
     }
 
@@ -248,43 +285,50 @@ public class RoutingServletTest {
     public void wrongConsumes() throws ServletException, IOException {
         Mockito.when(req.getPathInfo()).thenReturn("/api/put");
         Mockito.when(req.getContentType()).thenReturn("a/b");
+        Mockito.when(req.getMethod()).thenReturn(HttpMethod.PUT);
 
         servlet.doPut(req, resp);
 
         ArgumentCaptor<Integer> code = ArgumentCaptor.forClass(Integer.class);
-
         Mockito.verify(resp).sendError(code.capture(), Mockito.any());
-
         assertEquals(415, code.getValue());
     }
 
     @Test //
     public void delete() throws ServletException, IOException {
         Mockito.when(req.getPathInfo()).thenReturn("/api/delete");
+        Mockito.when(req.getMethod()).thenReturn(HttpMethod.DELETE);
         servlet.doDelete(req, resp);
-        assertEquals(HttpMethod.DELETE, stringWriter.toString());
+        ArgumentCaptor<Integer> code = ArgumentCaptor.forClass(Integer.class);
+        Mockito.verify(resp).setStatus(code.capture());
+        assertEquals(202, code.getValue());
     }
 
     @Test //
     public void options() throws ServletException, IOException {
         Mockito.when(req.getPathInfo()).thenReturn("/api/options");
+        Mockito.when(req.getMethod()).thenReturn(HttpMethod.OPTIONS);
         servlet.doOptions(req, resp);
-        assertEquals(HttpMethod.OPTIONS, stringWriter.toString());
+        ArgumentCaptor<Integer> code = ArgumentCaptor.forClass(Integer.class);
+        Mockito.verify(resp).setStatus(code.capture());
+        assertEquals(204, code.getValue());
     }
 
     @Test //
     public void patch() throws ServletException, IOException {
         Mockito.when(req.getPathInfo()).thenReturn("/api/patch");
+        Mockito.when(req.getMethod()).thenReturn(HttpMethod.PATCH);
+        Mockito.when(req.getContentType()).thenReturn("");
         servlet.doPatch(req, resp);
-        assertEquals(HttpMethod.PATCH, stringWriter.toString());
+        assertEquals(HttpMethod.PATCH, outputStream.toString());
     }
 
     @Test //
     public void patchService() throws ServletException, IOException {
         Mockito.when(req.getPathInfo()).thenReturn("/api/patch");
-        Mockito.when(req.getMethod()).thenReturn("PATCH");
+        Mockito.when(req.getMethod()).thenReturn(HttpMethod.PATCH);
         servlet.service(req, resp);
-        assertEquals(HttpMethod.PATCH, stringWriter.toString());
+        assertEquals(HttpMethod.PATCH, outputStream.toString());
     }
 
     @ParameterizedTest //
@@ -293,12 +337,13 @@ public class RoutingServletTest {
     public void get(String pathInfo, String expectedResponse) throws ServletException, IOException {
         Mockito.when(req.getPathInfo()).thenReturn(pathInfo);
         servlet.doGet(req, resp);
-        assertEquals(expectedResponse, stringWriter.toString());
+        assertEquals(expectedResponse, outputStream.toString());
     }
 
     @Test //
     public void notFound() throws ServletException, IOException {
         Mockito.when(req.getPathInfo()).thenReturn("/aaaabbb");
+        Mockito.when(req.getMethod()).thenReturn(HttpMethod.GET);
 
         servlet.doGet(req, resp);
 
@@ -318,6 +363,7 @@ public class RoutingServletTest {
         s.init();
 
         Mockito.when(req.getPathInfo()).thenReturn("/api/get");
+        Mockito.when(req.getMethod()).thenReturn(HttpMethod.GET);
 
         s.doGet(req, resp);
 
@@ -331,6 +377,7 @@ public class RoutingServletTest {
     @ParameterizedTest @ValueSource(strings = { "/api/nocontent", "/api/response/nocontent" }) //
     public void nocontent(String pathInfo) throws ServletException, IOException {
         Mockito.when(req.getPathInfo()).thenReturn(pathInfo);
+        Mockito.when(req.getMethod()).thenReturn(HttpMethod.GET);
 
         servlet.doGet(req, resp);
 
@@ -344,6 +391,7 @@ public class RoutingServletTest {
     @Test //
     public void redirect() throws ServletException, IOException {
         Mockito.when(req.getPathInfo()).thenReturn("/api/redirect");
+        Mockito.when(req.getMethod()).thenReturn(HttpMethod.GET);
 
         servlet.doGet(req, resp);
 
@@ -367,6 +415,7 @@ public class RoutingServletTest {
         s.init();
 
         Mockito.when(req.getPathInfo()).thenReturn("/api/get");
+        Mockito.when(req.getMethod()).thenReturn(HttpMethod.GET);
 
         s.doGet(req, resp);
 
@@ -388,6 +437,7 @@ public class RoutingServletTest {
 
         Mockito.when(req.getPathInfo()).thenReturn("/api/role");
         Mockito.when(req.isUserInRole(Mockito.any())).thenReturn(false);
+        Mockito.when(req.getMethod()).thenReturn(HttpMethod.GET);
 
         s.doGet(req, resp);
 

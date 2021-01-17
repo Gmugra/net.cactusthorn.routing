@@ -2,8 +2,8 @@ package net.cactusthorn.routing.demo.jetty;
 
 import net.cactusthorn.routing.*;
 import net.cactusthorn.routing.gson.SimpleGsonBodyReader;
-import net.cactusthorn.routing.gson.SimpleGsonProducer;
-import net.cactusthorn.routing.thymeleaf.SimpleThymeleafProducer;
+import net.cactusthorn.routing.gson.SimpleGsonBodyWriter;
+import net.cactusthorn.routing.thymeleaf.SimpleThymeleafBodyWriter;
 import net.cactusthorn.routing.validation.javax.SimpleParametersValidator;
 import net.cactusthorn.routing.demo.jetty.dagger.*;
 
@@ -79,9 +79,9 @@ public class Application {
             RoutingConfig.builder(ComponentProvider)
             .addEntryPoint(main.entryPoints().keySet())
             .addEntryPoint(main.sessionBuilder().build().entryPoints().keySet())
-            .addProducer("application/json", new SimpleGsonProducer())
+            .addBodyWriter(MediaType.APPLICATION_JSON_TYPE, new SimpleGsonBodyWriter<>())
             .addBodyReader(MediaType.APPLICATION_JSON_TYPE, new SimpleGsonBodyReader<>())
-            .addProducer("text/html", new SimpleThymeleafProducer("/thymeleaf/"))
+            .addBodyWriter(MediaType.TEXT_HTML_TYPE, new SimpleThymeleafBodyWriter("/thymeleaf/"))
             .addConverter(LocalDate.class, new LocalDateConverter())
             .setParametersValidator(new SimpleParametersValidator())
             .build();

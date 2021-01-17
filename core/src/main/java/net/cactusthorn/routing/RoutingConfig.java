@@ -6,13 +6,15 @@ import java.util.Optional;
 
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.ext.MessageBodyReader;
+import javax.ws.rs.ext.MessageBodyWriter;
 
-import net.cactusthorn.routing.bodyreader.BodyReader;
-import net.cactusthorn.routing.bodyreader.WildcardMessageBodyReader;
+import net.cactusthorn.routing.body.BodyProcessor;
+import net.cactusthorn.routing.body.reader.BodyReader;
+import net.cactusthorn.routing.body.reader.WildcardMessageBodyReader;
+import net.cactusthorn.routing.body.writer.BodyWriter;
+import net.cactusthorn.routing.body.writer.WildcardMessageBodyWriter;
 import net.cactusthorn.routing.convert.Converter;
 import net.cactusthorn.routing.convert.ConvertersHolder;
-import net.cactusthorn.routing.producer.Producer;
-import net.cactusthorn.routing.producer.TextPlainProducer;
 import net.cactusthorn.routing.validate.ParametersValidator;
 
 import java.util.ArrayList;
@@ -44,7 +46,7 @@ public final class RoutingConfig {
 
     private ConvertersHolder convertersHolder;
 
-    private Map<String, Producer> producers;
+    private List<BodyWriter> bodyWriters;
 
     private List<BodyReader> bodyReaders;
 
@@ -61,7 +63,7 @@ public final class RoutingConfig {
                 ComponentProvider componentProvider,
                 ConvertersHolder convertersHolder,
                 List<Class<?>> entryPointClasses,
-                Map<String, Producer> producers,
+                List<BodyWriter> bodyWriters,
                 List<BodyReader> bodyReaders,
                 Map<ConfigProperty, Object> configProperties,
                 ParametersValidator validator,
@@ -69,7 +71,7 @@ public final class RoutingConfig {
         this.componentProvider = componentProvider;
         this.convertersHolder = convertersHolder;
         this.entryPointClasses = entryPointClasses;
-        this.producers = producers;
+        this.bodyWriters = bodyWriters;
         this.bodyReaders = bodyReaders;
         this.configProperties = configProperties;
         this.validator = validator;
@@ -89,8 +91,8 @@ public final class RoutingConfig {
         return entryPointClasses;
     }
 
-    public Map<String, Producer> producers() {
-        return producers;
+    public List<BodyWriter> bodyWriters() {
+        return bodyWriters;
     }
 
     public List<BodyReader> bodyReaders() {
@@ -121,7 +123,7 @@ public final class RoutingConfig {
 
         private final List<Class<?>> entryPointClasses = new ArrayList<>();
 
-        private final Map<String, Producer> producers = new HashMap<>();
+        private final List<BodyWriter> bodyWriters = new ArrayList<>();
 
         private final List<BodyReader> bodyReaders = new ArrayList<>();
 
@@ -143,7 +145,7 @@ public final class RoutingConfig {
 
             addBodyReader(MediaType.WILDCARD_TYPE, new WildcardMessageBodyReader());
 
-            addProducer(TextPlainProducer.MEDIA_TYPE, new TextPlainProducer());
+            addBodyWriter(MediaType.WILDCARD_TYPE, new WildcardMessageBodyWriter());
         }
 
         public Builder addConverter(Class<?> clazz, Converter converter) {
@@ -161,13 +163,13 @@ public final class RoutingConfig {
             return this;
         }
 
-        public Builder addProducer(String mediaType, Producer producer) {
-            producers.put(mediaType, producer);
+        public Builder addBodyWriter(MediaType mediaType, MessageBodyWriter<?> messageBodyWriter) {
+            bodyWriters.add(new BodyWriter(mediaType, messageBodyWriter));
             return this;
         }
 
-        public Builder addBodyReader(MediaType mediaType, MessageBodyReader<?> bodyReader) {
-            bodyReaders.add(new BodyReader(mediaType, bodyReader));
+        public Builder addBodyReader(MediaType mediaType, MessageBodyReader<?> messageBodyReader) {
+            bodyReaders.add(new BodyReader(mediaType, messageBodyReader));
             return this;
         }
 
@@ -202,13 +204,16 @@ public final class RoutingConfig {
 
         public RoutingConfig build() {
 
-            Map<String, Producer> unmodifiableProducers = Collections.unmodifiableMap(producers);
-            Collections.sort(bodyReaders, BodyReader.COMPARATOR);
+            Collections.sort(bodyWriters, BodyProcessor.COMPARATOR);
+            List<BodyWriter> unmodifiableBodyWriters = Collections.unmodifiableList(bodyWriters);
+
+            Collections.sort(bodyReaders, BodyProcessor.COMPARATOR);
             List<BodyReader> unmodifiableBodyReaders = Collections.unmodifiableList(bodyReaders);
+
             Map<ConfigProperty, Object> unmodifiableConfigProperties = Collections.unmodifiableMap(configProperties);
 
             return new RoutingConfig(componentProvider, convertersHolder, Collections.unmodifiableList(entryPointClasses),
-                    unmodifiableProducers, unmodifiableBodyReaders, unmodifiableConfigProperties, validator, applicationPath);
+                    unmodifiableBodyWriters, unmodifiableBodyReaders, unmodifiableConfigProperties, validator, applicationPath);
         }
     }
 }

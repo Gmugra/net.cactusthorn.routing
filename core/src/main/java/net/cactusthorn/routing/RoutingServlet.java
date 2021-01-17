@@ -9,17 +9,20 @@ import java.util.logging.Logger;
 import javax.servlet.*;
 import javax.servlet.http.*;
 import javax.ws.rs.HttpMethod;
+import javax.ws.rs.ServerErrorException;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.Response.StatusType;
-import javax.ws.rs.ext.RuntimeDelegate;
-import javax.ws.rs.ext.RuntimeDelegate.HeaderDelegate;
+import javax.ws.rs.ext.MessageBodyWriter;
 
 import net.cactusthorn.routing.EntryPointScanner.EntryPoint;
 import net.cactusthorn.routing.RoutingConfig.ConfigProperty;
+import net.cactusthorn.routing.body.writer.BodyWriter;
+import net.cactusthorn.routing.body.writer.MessageBodyHeadersWriter;
+import net.cactusthorn.routing.invoke.MethodInvoker.ReturnObjectInfo;
 import net.cactusthorn.routing.PathTemplate.PathValues;
-import net.cactusthorn.routing.producer.Producer;
 
 public class RoutingServlet extends HttpServlet {
 
@@ -30,14 +33,12 @@ public class RoutingServlet extends HttpServlet {
     private transient Map<String, List<EntryPoint>> allEntryPoints;
     private transient ServletContext servletContext;
     private transient RoutingConfig routingConfig;
-    private transient Map<String, Producer> producers;
     private transient String responseCharacterEncoding;
     private transient String defaultRequestCharacterEncoding;
 
     public RoutingServlet(RoutingConfig config) {
         super();
         routingConfig = config;
-        producers = config.producers();
         responseCharacterEncoding = (String) routingConfig.properties().get(ConfigProperty.RESPONSE_CHARACTER_ENCODING);
         defaultRequestCharacterEncoding = (String) routingConfig.properties().get(ConfigProperty.DEFAULT_REQUEST_CHARACTER_ENCODING);
     }
@@ -46,7 +47,7 @@ public class RoutingServlet extends HttpServlet {
         super.init();
         servletContext = getServletContext();
         routingConfig.provider().init(servletContext);
-        producers.values().forEach(p -> p.init(servletContext, routingConfig.provider()));
+        routingConfig.bodyWriters().forEach(w -> w.init(servletContext, routingConfig));
         routingConfig.bodyReaders().forEach(r -> r.init(servletContext, routingConfig));
         routingConfig.validator().ifPresent(v -> v.init(servletContext, routingConfig.provider()));
 
@@ -107,10 +108,12 @@ public class RoutingServlet extends HttpServlet {
             resp.sendError(HttpServletResponse.SC_NOT_FOUND, "Not Found");
             return;
         }
+        List<MediaType> accept = Http.parseAccept(req);
         boolean matchContentTypeFail = false;
+        boolean matchAcceptFail = false;
         for (EntryPoint entryPoint : entryPoints) {
-            PathValues values = entryPoint.parse(path);
-            if (values != null) {
+            PathValues pathValues = entryPoint.parse(path);
+            if (pathValues != null) {
                 if (!entryPoint.matchUserRole(req)) {
                     resp.sendError(HttpServletResponse.SC_FORBIDDEN, "Forbidden");
                     return;
@@ -120,8 +123,12 @@ public class RoutingServlet extends HttpServlet {
                         matchContentTypeFail = true;
                         continue;
                     }
-                    javax.ws.rs.core.Response result = entryPoint.invoke(req, resp, servletContext, values);
-                    produce(req, resp, entryPoint, result);
+                    if (!entryPoint.matchAccept(accept)) {
+                        matchAcceptFail = true;
+                        continue;
+                    }
+                    Response result = entryPoint.invoke(req, resp, servletContext, pathValues, accept);
+                    produce(resp, entryPoint, result);
                 } catch (WebApplicationException wae) {
                     resp.sendError(wae.getResponse().getStatus(), wae.getMessage());
                 } catch (Exception e) {
@@ -132,17 +139,19 @@ public class RoutingServlet extends HttpServlet {
         }
         if (matchContentTypeFail) {
             resp.sendError(HttpServletResponse.SC_UNSUPPORTED_MEDIA_TYPE, "Unsupported Media Type");
+        } else if (matchAcceptFail) {
+            resp.sendError(HttpServletResponse.SC_NOT_ACCEPTABLE, "Not acceptable");
         } else {
             resp.sendError(HttpServletResponse.SC_NOT_FOUND, "Not Found");
         }
     }
 
     private String contentType(HttpServletRequest req) {
-        String consumes = req.getContentType();
-        if (consumes == null || consumes.trim().isEmpty()) {
+        String contentType = req.getContentType();
+        if (contentType == null || contentType.trim().isEmpty()) {
             return MediaType.WILDCARD;
         }
-        return consumes;
+        return contentType;
     }
 
     private String getPath(String contentType, HttpServletRequest req) {
@@ -158,53 +167,36 @@ public class RoutingServlet extends HttpServlet {
         return path;
     }
 
-    private void produce(HttpServletRequest req, HttpServletResponse resp, EntryPoint entryPoint, javax.ws.rs.core.Response result)
-            throws IOException {
+    @SuppressWarnings({ "unchecked", "rawtypes" }) //
+    private void produce(HttpServletResponse resp, EntryPoint entryPoint, Response result) throws IOException {
+
         StatusType status = result.getStatusInfo();
         resp.setStatus(status.getStatusCode());
-        if (status.getStatusCode() == Status.NO_CONTENT.getStatusCode()) {
-            writeHeaders(resp, result);
-            return;
-        }
-        if (status.getFamily() == Status.Family.REDIRECTION) {
-            writeHeaders(resp, result);
+        if (status.getStatusCode() == Status.NO_CONTENT.getStatusCode() || status.getFamily() == Status.Family.REDIRECTION) {
+            Http.writeHeaders(resp, result.getHeaders());
             return;
         }
 
-        String contentType = entryPoint.produces();
-        MediaType mediaType = result.getMediaType();
-        if (mediaType != null) {
-            contentType = mediaType.toString();
-        }
-        resp.setContentType(contentType);
-        resp.setCharacterEncoding(responseCharacterEncoding);
+        MediaType responseMediaType = Http.findResponseMediaType(result, entryPoint.produces(), responseCharacterEncoding);
+        resp.setContentType(responseMediaType.toString()); // it also set CharacterEncodings
 
-        String template = null;
-        Object entity = result.getEntity();
-        if (entity instanceof Templated) {
-            Templated templated = (Templated) entity;
-            template = templated.template();
-            entity = templated.entity();
-        }
-        producers.get(contentType).produce(entity, template, contentType, req, resp);
-        LOG.log(Level.FINE, "Producer processing done for Content-Type: {0}", new Object[] {contentType});
+        ReturnObjectInfo info = entryPoint.returnObjectInfo();
+
+        MessageBodyHeadersWriter writer = new MessageBodyHeadersWriter(resp, findBodyWriter(responseMediaType));
+
+        writer.writeTo(result.getEntity(), info.type(), info.genericType(), info.annotations(), responseMediaType, result.getHeaders(),
+                resp.getOutputStream());
+
+        LOG.log(Level.FINE, "Producer processing done for Content-Type: {0}", new Object[] {responseMediaType});
     }
 
-    @SuppressWarnings({ "unchecked", "rawtypes" }) //
-    private void writeHeaders(HttpServletResponse response, javax.ws.rs.core.Response result) {
-        for (Map.Entry<String, List<Object>> entry : result.getHeaders().entrySet()) {
-            String name = entry.getKey();
-            for (Object header : entry.getValue()) {
-                if (header == null) {
-                    continue;
-                }
-                HeaderDelegate headerDelegate = RuntimeDelegate.getInstance().createHeaderDelegate(header.getClass());
-                if (headerDelegate != null) {
-                    response.addHeader(name, headerDelegate.toString(header));
-                } else {
-                    response.addHeader(name, header.toString());
-                }
+    @SuppressWarnings("rawtypes") //
+    private MessageBodyWriter findBodyWriter(MediaType responseMediaType) {
+        for (BodyWriter bodyWriter : routingConfig.bodyWriters()) {
+            if (responseMediaType.isCompatible(bodyWriter.mediaType())) {
+                return bodyWriter.messageBodyWriter();
             }
         }
+        throw new ServerErrorException("MessageBodyWriter not found", Status.INTERNAL_SERVER_ERROR);
     }
 }

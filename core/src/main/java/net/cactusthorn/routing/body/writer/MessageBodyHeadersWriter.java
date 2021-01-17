@@ -1,12 +1,10 @@
-package net.cactusthorn.routing.bodywriter;
+package net.cactusthorn.routing.body.writer;
 
 import java.io.FilterOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;
-import java.util.List;
-import java.util.Map;
 
 import javax.servlet.http.HttpServletResponse;
 
@@ -14,8 +12,8 @@ import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.ext.MessageBodyWriter;
-import javax.ws.rs.ext.RuntimeDelegate;
-import javax.ws.rs.ext.RuntimeDelegate.HeaderDelegate;
+
+import net.cactusthorn.routing.Http;
 
 public class MessageBodyHeadersWriter implements MessageBodyWriter<Object> {
 
@@ -58,7 +56,6 @@ public class MessageBodyHeadersWriter implements MessageBodyWriter<Object> {
             this.httpHeaders = httpHeaders;
         }
 
-        @SuppressWarnings("unchecked") //
         private void writeHeaders() {
             if (done) {
                 return;
@@ -67,24 +64,7 @@ public class MessageBodyHeadersWriter implements MessageBodyWriter<Object> {
             if (httpHeaders == null) {
                 return;
             }
-            for (Map.Entry<String, List<Object>> entry : httpHeaders.entrySet()) {
-                List<Object> values = entry.getValue();
-                if (values == null) {
-                    continue;
-                }
-                for (Object value : values) {
-                    if (value == null) {
-                        continue;
-                    }
-                    @SuppressWarnings("rawtypes") //
-                    HeaderDelegate headerDelegate = RuntimeDelegate.getInstance().createHeaderDelegate(value.getClass());
-                    if (headerDelegate != null) {
-                        response.addHeader(entry.getKey(), headerDelegate.toString(value));
-                    } else {
-                        response.addHeader(entry.getKey(), value.toString());
-                    }
-                }
-            }
+            Http.writeHeaders(response, httpHeaders);
         }
 
         @Override //

@@ -1,5 +1,6 @@
 package net.cactusthorn.routing.invoke;
 
+import java.lang.annotation.Annotation;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
@@ -25,6 +26,30 @@ public final class MethodInvoker {
 
     private static final Logger LOG = Logger.getLogger(MethodInvoker.class.getName());
 
+    public static final class ReturnObjectInfo {
+        private Class<?> type;
+        private Type genericType;
+        private Annotation[] annotations;
+
+        private ReturnObjectInfo(Method method) {
+            this.type = method.getReturnType();
+            this.genericType = method.getGenericReturnType();
+            this.annotations = method.getAnnotations();
+        }
+
+        public Class<?> type() {
+            return type;
+        }
+
+        public Type genericType() {
+            return genericType;
+        }
+
+        public Annotation[] annotations() {
+            return annotations;
+        }
+    }
+
     private RoutingConfig routingConfig;
 
     private Class<?> clazz;
@@ -33,11 +58,14 @@ public final class MethodInvoker {
 
     private final List<MethodParameter> parameters = new ArrayList<>();
 
+    private ReturnObjectInfo returnObjectInfo;
+
     public MethodInvoker(RoutingConfig routingConfig, Class<?> clazz, Method method, Set<MediaType> consumesMediaTypes) {
         this.routingConfig = routingConfig;
         this.clazz = clazz;
         this.method = method;
 
+        returnObjectInfo = new ReturnObjectInfo(method);
         Parameter[] params = method.getParameters();
         Type[] types = method.getGenericParameterTypes();
         for (int i = 0; i < params.length; i++) {
@@ -49,6 +77,10 @@ public final class MethodInvoker {
     }
 
     private static final String MESSAGE = "Parameter position: %s; Parameter type: %s; %s";
+
+    public ReturnObjectInfo returnObjectInfo() {
+        return returnObjectInfo;
+    }
 
     public Object invoke(HttpServletRequest req, HttpServletResponse res, ServletContext con, PathValues pathValues) {
 

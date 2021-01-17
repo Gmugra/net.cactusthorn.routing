@@ -1,4 +1,4 @@
-package net.cactusthorn.routing.bodyreader;
+package net.cactusthorn.routing.body.reader;
 
 import static org.junit.jupiter.api.Assertions.*;
 

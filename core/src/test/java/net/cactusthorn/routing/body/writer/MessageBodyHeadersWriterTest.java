@@ -1,4 +1,4 @@
-package net.cactusthorn.routing.bodywriter;
+package net.cactusthorn.routing.body.writer;
 
 import static org.junit.jupiter.api.Assertions.*;
 

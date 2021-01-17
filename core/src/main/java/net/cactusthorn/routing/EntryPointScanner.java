@@ -19,6 +19,7 @@ import net.cactusthorn.routing.annotation.Template;
 import net.cactusthorn.routing.annotation.UserRoles;
 import net.cactusthorn.routing.PathTemplate.PathValues;
 import net.cactusthorn.routing.invoke.MethodInvoker;
+import net.cactusthorn.routing.invoke.MethodInvoker.ReturnObjectInfo;
 
 public class EntryPointScanner {
 
@@ -48,6 +49,26 @@ public class EntryPointScanner {
             this.userRoles = userRoles;
         }
 
+        public Response invoke(HttpServletRequest req, HttpServletResponse res, ServletContext con, PathValues pathValues,
+                List<MediaType> accept) {
+            Object result = methodInvoker.invoke(req, res, con, pathValues);
+            if (result instanceof Response) {
+                return (Response) result;
+            }
+            if (result != null && template == null) {
+                return Response.ok(result).build();
+            }
+            if (result == null && template == null) {
+                return Response.status(Status.NO_CONTENT).build();
+            }
+            Templated templated = new Templated(req, res, template, result);
+            return Response.ok(templated).build();
+        }
+
+        public ReturnObjectInfo returnObjectInfo() {
+            return methodInvoker.returnObjectInfo();
+        }
+
         public boolean match(String path) {
             return pathTemplate.match(path);
         }
@@ -64,23 +85,19 @@ public class EntryPointScanner {
             return template;
         }
 
-        public Response invoke(HttpServletRequest req, HttpServletResponse res, ServletContext con, PathValues pathValues) {
-            Object result = methodInvoker.invoke(req, res, con, pathValues);
-            if (result instanceof Response) {
-                return (Response) result;
-            }
-            if (result != null && template == null) {
-                return Response.ok(result).build();
-            }
-            if (result == null && template == null) {
-                return Response.status(Status.NO_CONTENT).build();
-            }
-            Templated templated = new Templated(req, res, template, result);
-            return Response.ok(templated).build();
-        }
-
         public String produces() {
             return produces;
+        }
+
+        // TODO support multiple values in Produces
+        public boolean matchAccept(List<MediaType> accept) {
+            MediaType producesMediaType = MediaType.valueOf(produces);
+            for (MediaType mediaType : accept) {
+                if (mediaType.isCompatible(producesMediaType)) {
+                    return true;
+                }
+            }
+            return false;
         }
 
         public boolean matchUserRole(HttpServletRequest req) {

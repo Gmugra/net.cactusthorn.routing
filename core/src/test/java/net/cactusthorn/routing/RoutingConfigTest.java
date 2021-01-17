@@ -2,7 +2,6 @@ package net.cactusthorn.routing;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-import java.util.List;
 import java.util.Optional;
 
 import javax.servlet.http.HttpServletRequest;
@@ -14,20 +13,15 @@ import javax.ws.rs.core.MediaType;
 import org.junit.jupiter.api.Test;
 
 import net.cactusthorn.routing.RoutingConfig.ConfigProperty;
-import net.cactusthorn.routing.bodyreader.BodyReader;
-import net.cactusthorn.routing.bodyreader.WildcardMessageBodyReader;
+import net.cactusthorn.routing.body.reader.WildcardMessageBodyReader;
+import net.cactusthorn.routing.body.writer.WildcardMessageBodyWriter;
 import net.cactusthorn.routing.convert.Converter;
-import net.cactusthorn.routing.producer.Producer;
 import net.cactusthorn.routing.validate.ParametersValidator;
 
 public class RoutingConfigTest {
 
     public static final Converter TEST_CONVERTER = (type, value) -> {
         return new java.util.Date();
-    };
-
-    public static final Producer TEST_PRODUCER = (object, template, mediaType, req, resp) -> {
-        return;
     };
 
     private static final ParametersValidator TEST_VALIDATOR = (object, method, parameters) -> {
@@ -49,20 +43,21 @@ public class RoutingConfigTest {
         }
     }
 
-    //TODO FIX IT
-    /*@Test //
-    public void converter() {
-
-        RoutingConfig config = RoutingConfig.builder(new EntryPointDateProvider()).addEntryPoint(EntryPointDate.class)
-                .addConverter(java.util.Date.class, TEST_CONVERTER).build();
-
-        EntryPointScanner scanner = new EntryPointScanner(config);
-        EntryPoint entryPoint = scanner.scan().get(HttpMethod.GET).get(0);
-
-        HttpServletRequest request = Mockito.mock(HttpServletRequest.class);
-        java.util.Date date = (java.util.Date) entryPoint.invoke(request, null, null, PathValues.EMPTY);
-        assertNotNull(date);
-    }*/
+    // TODO FIX IT
+    /*
+     * @Test // public void converter() {
+     * 
+     * RoutingConfig config = RoutingConfig.builder(new
+     * EntryPointDateProvider()).addEntryPoint(EntryPointDate.class)
+     * .addConverter(java.util.Date.class, TEST_CONVERTER).build();
+     * 
+     * EntryPointScanner scanner = new EntryPointScanner(config); EntryPoint
+     * entryPoint = scanner.scan().get(HttpMethod.GET).get(0);
+     * 
+     * HttpServletRequest request = Mockito.mock(HttpServletRequest.class);
+     * java.util.Date date = (java.util.Date) entryPoint.invoke(request, null, null,
+     * PathValues.EMPTY); assertNotNull(date); }
+     */
 
     @Test //
     public void provider() {
@@ -78,17 +73,17 @@ public class RoutingConfigTest {
 
     @Test //
     public void producer() {
-        RoutingConfig config = RoutingConfig.builder(new EntryPointDateProvider()).addProducer("*/*", TEST_PRODUCER).build();
-        Producer producer = config.producers().get("*/*");
-        assertEquals(TEST_PRODUCER.getClass(), producer.getClass());
+        RoutingConfig config = RoutingConfig.builder(new EntryPointDateProvider())
+                .addBodyWriter(MediaType.WILDCARD_TYPE, new WildcardMessageBodyWriter()).build();
+        assertEquals(2, config.bodyWriters().size());
     }
 
     @Test //
     public void bodyReader() {
         MediaType aabb = new MediaType("aa", "bb");
-        RoutingConfig config = RoutingConfig.builder(new EntryPointDateProvider()).addBodyReader(aabb, new WildcardMessageBodyReader()).build();
-        List<BodyReader> bodyReader = config.bodyReaders();
-        assertEquals(2, bodyReader.size());
+        RoutingConfig config = RoutingConfig.builder(new EntryPointDateProvider()).addBodyReader(aabb, new WildcardMessageBodyReader())
+                .build();
+        assertEquals(2, config.bodyReaders().size());
     }
 
     @Test //

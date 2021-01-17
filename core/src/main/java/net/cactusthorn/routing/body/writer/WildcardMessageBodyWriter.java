@@ -1,4 +1,4 @@
-package net.cactusthorn.routing.bodywriter;
+package net.cactusthorn.routing.body.writer;
 
 import java.io.BufferedWriter;
 import java.io.IOException;
@@ -9,12 +9,14 @@ import java.io.Writer;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;
 
+import javax.annotation.Priority;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.ext.MessageBodyWriter;
 
+@Priority(BodyWriter.LOWEST_PRIORITY) //
 public class WildcardMessageBodyWriter implements MessageBodyWriter<Object> {
 
     @Override //

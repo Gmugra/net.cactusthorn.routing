@@ -1,4 +1,4 @@
-package net.cactusthorn.routing.bodyreader;
+package net.cactusthorn.routing.body.reader;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -98,8 +98,8 @@ public class BodyReaderTest {
     @Test //
     public void comparator() {
         List<BodyReader> bodyReaders = new ArrayList<>();
-        bodyReaders.add(new BodyReader(new MediaType("*", "json"), READER));
         bodyReaders.add(new BodyReader(new MediaType("application", "*"), READER));
+        bodyReaders.add(new BodyReader(new MediaType("*", "json"), READER));
         bodyReaders.add(new BodyReader(MediaType.WILDCARD_TYPE, new WildcardMessageBodyReader()));
         bodyReaders.add(null);
         bodyReaders.add(new BodyReader(MediaType.APPLICATION_JSON_TYPE, READER));

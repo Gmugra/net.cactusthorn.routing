@@ -31,6 +31,7 @@ import org.mockito.Mockito;
 import net.cactusthorn.routing.ComponentProvider;
 import net.cactusthorn.routing.RoutingConfig;
 import net.cactusthorn.routing.ServletTestInputStream;
+import net.cactusthorn.routing.invoke.MethodInvoker.ReturnObjectInfo;
 import net.cactusthorn.routing.PathTemplate.PathValues;
 import net.cactusthorn.routing.validate.ParametersValidator;
 
@@ -151,6 +152,11 @@ public class MethodInvokerTest extends InvokeTestAncestor {
 
         Method method = findMethod(EntryPoint1.class, "m8");
         MethodInvoker caller = new MethodInvoker(config, EntryPoint1.class, method, DEFAULT_CONTENT_TYPES);
+
+        ReturnObjectInfo returnObjectInfo = caller.returnObjectInfo();
+        assertEquals(Void.TYPE, returnObjectInfo.type());
+        assertEquals(Void.TYPE, returnObjectInfo.genericType());
+        assertEquals(0, returnObjectInfo.annotations().length);
 
         assertThrows(ServerErrorException.class, () -> caller.invoke(request, response, context, null));
     }

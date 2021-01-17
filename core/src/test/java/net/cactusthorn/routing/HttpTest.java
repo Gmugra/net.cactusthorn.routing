@@ -1,0 +1,87 @@
+package net.cactusthorn.routing;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.ws.rs.core.HttpHeaders;
+import javax.ws.rs.core.MediaType;
+
+import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
+
+public class HttpTest {
+
+    @Test //
+    public void sort() {
+
+        List<MediaType> list = new ArrayList<>();
+        list.add(new MediaType("test", "html", addQ("0.5")));
+        list.add(MediaType.WILDCARD_TYPE);
+        list.add(null);
+        list.add(MediaType.TEXT_PLAIN_TYPE);
+        list.add(new MediaType("application", "json", addQ("0.875")));
+        list.add(new MediaType("test", "*"));
+        list.add(new MediaType("application", "*"));
+        list.add(new MediaType("*", "json"));
+        list.add(null);
+
+        Collections.sort(list, Http.ACCEPT_COMPARATOR);
+
+        assertEquals("text/plain", _toString(list.get(0)));
+        assertEquals("application/json", _toString(list.get(1)));
+        assertEquals("test/html", _toString(list.get(2)));
+        assertEquals("test/*", _toString(list.get(3)));
+        assertEquals("application/*", _toString(list.get(4)));
+        assertEquals("*/json", _toString(list.get(5)));
+        assertEquals("*/*", _toString(list.get(6)));
+        assertEquals("NULL", _toString(list.get(7)));
+        assertEquals("NULL", _toString(list.get(8)));
+    }
+
+    private Map<String, String> addQ(String value) {
+        Map<String, String> result = new HashMap<>();
+        result.put("q", value);
+        return result;
+    }
+
+    private String _toString(MediaType mediaType) {
+        if (mediaType == null) {
+            return "NULL";
+        }
+        return mediaType.getType() + '/' + mediaType.getSubtype();
+    }
+
+    @Test //
+    public void parseAccept() {
+        HttpServletRequest request = Mockito.mock(HttpServletRequest.class);
+        List<String> accept = new ArrayList<>();
+        accept.add(
+                "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9");
+        Mockito.when(request.getHeaders(HttpHeaders.ACCEPT)).thenReturn(Collections.enumeration(accept));
+
+        List<MediaType> mediaTypes = Http.parseAccept(request);
+        assertEquals("text/html", mediaTypes.get(0).toString());
+        assertEquals("application/xhtml+xml", mediaTypes.get(1).toString());
+        assertEquals("image/avif", mediaTypes.get(2).toString());
+        assertEquals("image/webp", mediaTypes.get(3).toString());
+        assertEquals("image/apng", mediaTypes.get(4).toString());
+        assertEquals("application/xml;q=0.9", mediaTypes.get(5).toString());
+        assertEquals("application/signed-exchange;q=0.9;v=b3", mediaTypes.get(6).toString());
+        assertEquals("*/*;q=0.8", mediaTypes.get(7).toString());
+    }
+
+    @Test //
+    public void parseEmptyAccept() {
+        HttpServletRequest request = Mockito.mock(HttpServletRequest.class);
+        Mockito.when(request.getHeaders(HttpHeaders.ACCEPT)).thenReturn(Collections.emptyEnumeration());
+
+        List<MediaType> mediaTypes = Http.parseAccept(request);
+        assertEquals(MediaType.WILDCARD, mediaTypes.get(0).toString());
+    }
+}
