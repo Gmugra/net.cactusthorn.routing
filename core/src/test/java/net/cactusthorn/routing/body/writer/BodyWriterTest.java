@@ -49,29 +49,22 @@ public class BodyWriterTest {
     private static final InitializableWriter INITIALIZABLE_WRITER = new InitializableWriter();
 
     @Test //
-    public void checkNull() {
-        assertThrows(IllegalArgumentException.class, () -> new BodyWriter(null, new WildcardMessageBodyWriter()));
-        assertThrows(IllegalArgumentException.class, () -> new BodyWriter(MediaType.WILDCARD_TYPE, null));
-    }
-
-    @Test //
     public void simple() {
-        BodyWriter bodyWriter = new BodyWriter(MediaType.WILDCARD_TYPE, INITIALIZABLE_WRITER);
+        BodyWriter bodyWriter = new BodyWriter(INITIALIZABLE_WRITER);
         assertEquals(3000, bodyWriter.priority());
-        assertEquals(MediaType.WILDCARD_TYPE, bodyWriter.mediaType());
         assertTrue(bodyWriter.initializable());
         assertNotNull(bodyWriter.messageBodyWriter());
     }
 
     @Test //
     public void initCall() {
-        BodyWriter bodyWriter = new BodyWriter(MediaType.WILDCARD_TYPE, INITIALIZABLE_WRITER);
+        BodyWriter bodyWriter = new BodyWriter(INITIALIZABLE_WRITER);
         assertThrows(UnsupportedOperationException.class, () -> bodyWriter.init(null, null));
     }
 
     @Test //
     public void initNoCall() {
-        BodyWriter bodyWriter = new BodyWriter(MediaType.WILDCARD_TYPE, WRITER);
+        BodyWriter bodyWriter = new BodyWriter(WRITER);
         assertTrue(bodyWriter.isProcessable(null, null, null, null));
         bodyWriter.init(null, null);
     }

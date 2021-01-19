@@ -4,7 +4,6 @@ import static org.junit.jupiter.api.Assertions.*;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.Reader;
 
 import javax.ws.rs.core.MediaType;
 
@@ -42,9 +41,6 @@ public class SimpleGsonBodyReaderTest {
     @Test @SuppressWarnings({ "rawtypes", "unchecked" }) //
     public void isReadable() {
         SimpleGsonBodyReader bodyReader = new SimpleGsonBodyReader(new GsonBuilder().create());
-        assertTrue(bodyReader.isReadable(String.class, null, null, MediaType.APPLICATION_JSON_TYPE));
-        assertFalse(bodyReader.isReadable(String.class, null, null, MediaType.TEXT_PLAIN_TYPE));
-        assertFalse(bodyReader.isReadable(InputStream.class, null, null, MediaType.APPLICATION_JSON_TYPE));
-        assertFalse(bodyReader.isReadable(Reader.class, null, null, MediaType.APPLICATION_JSON_TYPE));
+        assertTrue(bodyReader.isReadable(String.class, null, null, null));
     }
 }

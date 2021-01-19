@@ -37,6 +37,12 @@ public class HtmlEntryPoint implements EntryPoint {
         return "TEST HTML PAGE";
     }
 
+    @GET @Path("manual") //
+    public Response manual() {
+        return Response.ok("<html><head><meta charset=\"UTF-8\"></head><body><b>Ü TEST</b></body></html>").type(MediaType.TEXT_HTML_TYPE)
+                .build();
+    }
+
     @GET @Path("upload") //
     public Response showUpload(@Context HttpServletRequest request, @Context HttpServletResponse response) {
         Templated templated = new Templated(request, response, "/fileupload.html", null);

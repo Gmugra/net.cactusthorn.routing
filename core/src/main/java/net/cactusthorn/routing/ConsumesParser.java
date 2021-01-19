@@ -35,6 +35,6 @@ public final class ConsumesParser {
                 mediaTypes.add(new MediaType(parts[0], parts[1]));
             }
         }
-        return Collections.unmodifiableSet(mediaTypes);
+        return mediaTypes;
     }
 }

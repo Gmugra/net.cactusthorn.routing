@@ -4,23 +4,23 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;
 
 import javax.servlet.ServletContext;
+import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.ext.MessageBodyWriter;
 
 import net.cactusthorn.routing.RoutingConfig;
+import net.cactusthorn.routing.Templated;
+import net.cactusthorn.routing.body.Initializable;
 import net.cactusthorn.routing.body.BodyProcessor;
 
 public class BodyWriter extends BodyProcessor {
 
     private MessageBodyWriter<?> messageBodyWriter;
+    private boolean templated;
 
-    public BodyWriter(MediaType mediaType, MessageBodyWriter<?> messageBodyWriter) {
-        super(mediaType);
-        if (messageBodyWriter == null) {
-            throw new IllegalArgumentException("messageBodyWriter can not be null");
-        }
-        setInitializable(messageBodyWriter instanceof InitializableMessageBodyWriter);
-        setPriority(messageBodyWriter.getClass());
+    public BodyWriter(MessageBodyWriter<?> messageBodyWriter) {
+        super(messageBodyWriter.getClass());
+        templated = TemplatedMessageBodyWriter.class.isAssignableFrom(messageBodyWriter.getClass());
         this.messageBodyWriter = messageBodyWriter;
     }
 
@@ -29,17 +29,31 @@ public class BodyWriter extends BodyProcessor {
         return messageBodyWriter;
     }
 
-    @Override @SuppressWarnings("rawtypes") //
+    @Override //
+    protected String[] getMediaTypeAnnotationValue(Class<?> clazz) {
+        Produces annotation = clazz.getClass().getAnnotation(Produces.class);
+        if (annotation != null) {
+            return annotation.value();
+        }
+        return null;
+    }
+
+    @Override //
     public void init(ServletContext servletContext, RoutingConfig routingConfig) {
         if (initializable()) {
-            ((InitializableMessageBodyWriter) messageBodyWriter).init(servletContext, routingConfig);
+            ((Initializable) messageBodyWriter).init(servletContext, routingConfig);
         }
     }
 
     @Override //
     public boolean isProcessable(Class<?> type, Type genericType, Annotation[] annotations, MediaType mediaType) {
-        return messageBodyWriter.isWriteable(type, genericType, annotations, mediaType);
+        if (templated && type != Templated.class) {
+            return false;
+        }
+        if (!templated && type == Templated.class) {
+            return false;
+        }
+        return super.isProcessable(type, genericType, annotations, mediaType)
+                && messageBodyWriter.isWriteable(type, genericType, annotations, mediaType);
     }
-
-    //public static findBodyWriter
 }

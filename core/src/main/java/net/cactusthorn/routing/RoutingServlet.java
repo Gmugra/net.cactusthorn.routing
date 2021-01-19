@@ -167,7 +167,6 @@ public class RoutingServlet extends HttpServlet {
         return path;
     }
 
-    @SuppressWarnings({ "unchecked", "rawtypes" }) //
     private void produce(HttpServletResponse resp, EntryPoint entryPoint, Response result) throws IOException {
 
         StatusType status = result.getStatusInfo();
@@ -178,11 +177,12 @@ public class RoutingServlet extends HttpServlet {
         }
 
         MediaType responseMediaType = Http.findResponseMediaType(result, entryPoint.produces(), responseCharacterEncoding);
-        resp.setContentType(responseMediaType.toString()); // it also set CharacterEncodings
+        resp.setCharacterEncoding(responseMediaType.getParameters().get(MediaType.CHARSET_PARAMETER));
+        resp.setContentType(new MediaType(responseMediaType.getType(), responseMediaType.getSubtype()).toString());
 
-        ReturnObjectInfo info = entryPoint.returnObjectInfo();
+        ReturnObjectInfo info = entryPoint.returnObjectInfo().withEntity(result.getEntity());
 
-        MessageBodyHeadersWriter writer = new MessageBodyHeadersWriter(resp, findBodyWriter(responseMediaType));
+        MessageBodyHeadersWriter writer = new MessageBodyHeadersWriter(resp, findBodyWriter(responseMediaType, info));
 
         writer.writeTo(result.getEntity(), info.type(), info.genericType(), info.annotations(), responseMediaType, result.getHeaders(),
                 resp.getOutputStream());
@@ -191,9 +191,9 @@ public class RoutingServlet extends HttpServlet {
     }
 
     @SuppressWarnings("rawtypes") //
-    private MessageBodyWriter findBodyWriter(MediaType responseMediaType) {
+    private MessageBodyWriter findBodyWriter(MediaType responseMediaType, ReturnObjectInfo info) {
         for (BodyWriter bodyWriter : routingConfig.bodyWriters()) {
-            if (responseMediaType.isCompatible(bodyWriter.mediaType())) {
+            if (bodyWriter.isProcessable(info.type(), info.genericType(), info.annotations(), responseMediaType)) {
                 return bodyWriter.messageBodyWriter();
             }
         }

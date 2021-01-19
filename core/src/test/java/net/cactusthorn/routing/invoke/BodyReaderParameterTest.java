@@ -3,7 +3,6 @@ package net.cactusthorn.routing.invoke;
 import static org.junit.jupiter.api.Assertions.*;
 
 import java.io.InputStream;
-import java.io.Reader;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
 import java.util.Collections;
@@ -42,7 +41,7 @@ public class BodyReaderParameterTest extends InvokeTestAncestor {
         @POST @Consumes(MediaType.TEXT_PLAIN) public void stream(InputStream input) {
         }
 
-        @POST @Consumes(MediaType.TEXT_PLAIN) public void reader(Reader input) {
+        @POST @Consumes(MediaType.WILDCARD) public void string(String input) {
         }
 
         @PATCH @Consumes(MediaType.TEXT_PLAIN) public void wrongtype(Runtime input) {
@@ -96,6 +95,11 @@ public class BodyReaderParameterTest extends InvokeTestAncestor {
 
     @Test //
     public void setCharset() throws Exception {
+        Map<String, String> headers = new HashMap<>();
+        headers.put("aaaaa", "bbbb");
+        Mockito.when(request.getHeaderNames()).thenReturn(Collections.enumeration(headers.keySet()));
+        Mockito.when(request.getHeaders("aaaaa")).thenReturn(Collections.enumeration(headers.values()));
+        
         Method m = findMethod(EntryPoint1.class, "context");
         Parameter p = m.getParameters()[0];
         MethodParameter body = MethodParameter.Factory.create(m, p, null, CONFIG, mediaTypes(MediaType.TEXT_PLAIN_TYPE));
@@ -113,12 +117,12 @@ public class BodyReaderParameterTest extends InvokeTestAncestor {
     }
 
     @Test //
-    public void reader() throws Exception {
-        Method m = findMethod(EntryPoint1.class, "reader");
+    public void string() throws Exception {
+        Method m = findMethod(EntryPoint1.class, "string");
         Parameter p = m.getParameters()[0];
-        MethodParameter body = MethodParameter.Factory.create(m, p, null, CONFIG, mediaTypes(MediaType.TEXT_PLAIN_TYPE));
-        Reader result = (Reader) body.findValue(request, null, null, null);
-        assertNotNull(result);
+        MethodParameter body = MethodParameter.Factory.create(m, p, null, CONFIG, mediaTypes(MediaType.WILDCARD_TYPE));
+        String result = (String) body.findValue(request, null, null, null);
+        assertEquals("THIS IS IT", result);
     }
 
     @Test //

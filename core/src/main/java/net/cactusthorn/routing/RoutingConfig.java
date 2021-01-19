@@ -4,15 +4,17 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-import javax.ws.rs.core.MediaType;
 import javax.ws.rs.ext.MessageBodyReader;
 import javax.ws.rs.ext.MessageBodyWriter;
 
 import net.cactusthorn.routing.body.BodyProcessor;
 import net.cactusthorn.routing.body.reader.BodyReader;
-import net.cactusthorn.routing.body.reader.WildcardMessageBodyReader;
+import net.cactusthorn.routing.body.reader.InputStreamMessageBodyReader;
+import net.cactusthorn.routing.body.reader.StringMessageBodyReader;
+import net.cactusthorn.routing.body.reader.ConvertersMessageBodyReader;
 import net.cactusthorn.routing.body.writer.BodyWriter;
-import net.cactusthorn.routing.body.writer.WildcardMessageBodyWriter;
+import net.cactusthorn.routing.body.writer.ObjectMessageBodyWriter;
+import net.cactusthorn.routing.body.writer.StringMessageBodyWriter;
 import net.cactusthorn.routing.convert.Converter;
 import net.cactusthorn.routing.convert.ConvertersHolder;
 import net.cactusthorn.routing.validate.ParametersValidator;
@@ -143,9 +145,12 @@ public final class RoutingConfig {
                 configProperties.put(property, property.ddefault());
             }
 
-            addBodyReader(MediaType.WILDCARD_TYPE, new WildcardMessageBodyReader());
+            addBodyReader(new InputStreamMessageBodyReader());
+            addBodyReader(new StringMessageBodyReader());
+            addBodyReader(new ConvertersMessageBodyReader());
 
-            addBodyWriter(MediaType.WILDCARD_TYPE, new WildcardMessageBodyWriter());
+            addBodyWriter(new StringMessageBodyWriter());
+            addBodyWriter(new ObjectMessageBodyWriter());
         }
 
         public Builder addConverter(Class<?> clazz, Converter converter) {
@@ -163,13 +168,13 @@ public final class RoutingConfig {
             return this;
         }
 
-        public Builder addBodyWriter(MediaType mediaType, MessageBodyWriter<?> messageBodyWriter) {
-            bodyWriters.add(new BodyWriter(mediaType, messageBodyWriter));
+        public Builder addBodyWriter(MessageBodyWriter<?> messageBodyWriter) {
+            bodyWriters.add(new BodyWriter(messageBodyWriter));
             return this;
         }
 
-        public Builder addBodyReader(MediaType mediaType, MessageBodyReader<?> messageBodyReader) {
-            bodyReaders.add(new BodyReader(mediaType, messageBodyReader));
+        public Builder addBodyReader(MessageBodyReader<?> messageBodyReader) {
+            bodyReaders.add(new BodyReader(messageBodyReader));
             return this;
         }
 
@@ -204,10 +209,10 @@ public final class RoutingConfig {
 
         public RoutingConfig build() {
 
-            Collections.sort(bodyWriters, BodyProcessor.COMPARATOR);
+            Collections.sort(bodyWriters, BodyProcessor.PRIORITY_COMPARATOR);
             List<BodyWriter> unmodifiableBodyWriters = Collections.unmodifiableList(bodyWriters);
 
-            Collections.sort(bodyReaders, BodyProcessor.COMPARATOR);
+            Collections.sort(bodyReaders, BodyProcessor.PRIORITY_COMPARATOR);
             List<BodyReader> unmodifiableBodyReaders = Collections.unmodifiableList(bodyReaders);
 
             Map<ConfigProperty, Object> unmodifiableConfigProperties = Collections.unmodifiableMap(configProperties);

@@ -10,6 +10,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import javax.servlet.ServletContext;
+import javax.ws.rs.Produces;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.MultivaluedMap;
@@ -25,6 +26,7 @@ import net.cactusthorn.routing.RoutingConfig;
 import net.cactusthorn.routing.Templated;
 import net.cactusthorn.routing.body.writer.TemplatedMessageBodyWriter;
 
+@Produces({MediaType.TEXT_HTML})
 public class SimpleThymeleafBodyWriter implements TemplatedMessageBodyWriter {
 
     private ITemplateEngine templateEngine;
@@ -58,7 +60,7 @@ public class SimpleThymeleafBodyWriter implements TemplatedMessageBodyWriter {
 
     @Override //
     public boolean isWriteable(Class<?> type, Type genericType, Annotation[] annotations, MediaType mediaType) {
-        return MediaType.TEXT_HTML_TYPE.isCompatible(mediaType);
+        return true;
     }
 
     @Override @SuppressWarnings({ "unchecked", "rawtypes" }) //

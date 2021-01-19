@@ -17,9 +17,11 @@ import javax.servlet.http.HttpServletResponse;
 import javax.ws.rs.BadRequestException;
 import javax.ws.rs.ServerErrorException;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
 import net.cactusthorn.routing.RoutingConfig;
+import net.cactusthorn.routing.Templated;
 import net.cactusthorn.routing.PathTemplate.PathValues;
 
 public final class MethodInvoker {
@@ -27,6 +29,9 @@ public final class MethodInvoker {
     private static final Logger LOG = Logger.getLogger(MethodInvoker.class.getName());
 
     public static final class ReturnObjectInfo {
+
+        public static final ReturnObjectInfo TEMPLATED = new ReturnObjectInfo(Templated.class, null, null);
+
         private Class<?> type;
         private Type genericType;
         private Annotation[] annotations;
@@ -35,6 +40,22 @@ public final class MethodInvoker {
             this.type = method.getReturnType();
             this.genericType = method.getGenericReturnType();
             this.annotations = method.getAnnotations();
+        }
+
+        private ReturnObjectInfo(Class<?> type, Type genericType, Annotation[] annotations) {
+            this.type = type;
+            this.genericType = genericType;
+            this.annotations = annotations;
+        }
+
+        public ReturnObjectInfo withEntity(Object entity) {
+            if (entity instanceof Templated) {
+                return ReturnObjectInfo.TEMPLATED;
+            }
+            if (Response.class.isAssignableFrom(type)) {
+                return new ReturnObjectInfo(entity.getClass(), null, annotations);
+            }
+            return this;
         }
 
         public Class<?> type() {

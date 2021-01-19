@@ -23,7 +23,6 @@ import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletRequestWrapper;
-import javax.ws.rs.core.MediaType;
 
 import org.eclipse.jetty.server.*;
 import org.eclipse.jetty.server.handler.HandlerList;
@@ -79,9 +78,9 @@ public class Application {
             RoutingConfig.builder(ComponentProvider)
             .addEntryPoint(main.entryPoints().keySet())
             .addEntryPoint(main.sessionBuilder().build().entryPoints().keySet())
-            .addBodyWriter(MediaType.APPLICATION_JSON_TYPE, new SimpleGsonBodyWriter<>())
-            .addBodyReader(MediaType.APPLICATION_JSON_TYPE, new SimpleGsonBodyReader<>())
-            .addBodyWriter(MediaType.TEXT_HTML_TYPE, new SimpleThymeleafBodyWriter("/thymeleaf/"))
+            .addBodyWriter(new SimpleGsonBodyWriter<>())
+            .addBodyReader(new SimpleGsonBodyReader<>())
+            .addBodyWriter(new SimpleThymeleafBodyWriter("/thymeleaf/"))
             .addConverter(LocalDate.class, new LocalDateConverter())
             .setParametersValidator(new SimpleParametersValidator())
             .build();

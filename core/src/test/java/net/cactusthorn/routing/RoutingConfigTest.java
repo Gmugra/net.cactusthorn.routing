@@ -8,13 +8,12 @@ import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
-import javax.ws.rs.core.MediaType;
 
 import org.junit.jupiter.api.Test;
 
 import net.cactusthorn.routing.RoutingConfig.ConfigProperty;
-import net.cactusthorn.routing.body.reader.WildcardMessageBodyReader;
-import net.cactusthorn.routing.body.writer.WildcardMessageBodyWriter;
+import net.cactusthorn.routing.body.reader.ConvertersMessageBodyReader;
+import net.cactusthorn.routing.body.writer.ObjectMessageBodyWriter;
 import net.cactusthorn.routing.convert.Converter;
 import net.cactusthorn.routing.validate.ParametersValidator;
 
@@ -72,18 +71,17 @@ public class RoutingConfigTest {
     }
 
     @Test //
-    public void producer() {
+    public void bodyWriter() {
         RoutingConfig config = RoutingConfig.builder(new EntryPointDateProvider())
-                .addBodyWriter(MediaType.WILDCARD_TYPE, new WildcardMessageBodyWriter()).build();
-        assertEquals(2, config.bodyWriters().size());
+                .addBodyWriter(new ObjectMessageBodyWriter()).build();
+        assertEquals(3, config.bodyWriters().size());
     }
 
     @Test //
     public void bodyReader() {
-        MediaType aabb = new MediaType("aa", "bb");
-        RoutingConfig config = RoutingConfig.builder(new EntryPointDateProvider()).addBodyReader(aabb, new WildcardMessageBodyReader())
+        RoutingConfig config = RoutingConfig.builder(new EntryPointDateProvider()).addBodyReader(new ConvertersMessageBodyReader())
                 .build();
-        assertEquals(2, config.bodyReaders().size());
+        assertEquals(4, config.bodyReaders().size());
     }
 
     @Test //

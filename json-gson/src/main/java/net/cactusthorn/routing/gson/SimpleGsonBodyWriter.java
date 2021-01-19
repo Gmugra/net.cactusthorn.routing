@@ -6,6 +6,7 @@ import java.io.OutputStreamWriter;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;
 
+import javax.ws.rs.Produces;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.MultivaluedMap;
@@ -15,6 +16,7 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.stream.JsonWriter;
 
+@Produces({MediaType.APPLICATION_JSON})
 public class SimpleGsonBodyWriter<T> implements MessageBodyWriter<T> {
 
     private Gson gson;
@@ -29,10 +31,7 @@ public class SimpleGsonBodyWriter<T> implements MessageBodyWriter<T> {
 
     @Override //
     public boolean isWriteable(Class<?> type, Type genericType, Annotation[] annotations, MediaType mediaType) {
-        if (String.class.isAssignableFrom(type)) {
-            return false;
-        }
-        return MediaType.APPLICATION_JSON_TYPE.isCompatible(mediaType);
+        return true;
     }
 
     @Override //

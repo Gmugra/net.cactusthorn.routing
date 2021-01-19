@@ -13,6 +13,7 @@ import java.util.Set;
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.ws.rs.BadRequestException;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.MultivaluedHashMap;
 import javax.ws.rs.core.MultivaluedMap;
@@ -37,8 +38,7 @@ public final class BodyReaderParameter extends MethodParameter {
 
         for (MediaType consumesMediaType : consumesMediaTypes) {
             for (BodyReader bodyReader : bodyReaders) {
-                if (consumesMediaType.isCompatible(bodyReader.mediaType())
-                        && bodyReader.isProcessable(classType(), parameterGenericType, parameter().getAnnotations(), consumesMediaType)) {
+                if (bodyReader.isProcessable(classType(), parameterGenericType, parameter().getAnnotations(), consumesMediaType)) {
                     messageBodyReaders.put(consumesMediaType, bodyReader.messageBodyReader());
                     break;
                 }
@@ -49,13 +49,23 @@ public final class BodyReaderParameter extends MethodParameter {
         }
     }
 
-    @Override @SuppressWarnings("unchecked") //
+    @SuppressWarnings({ "rawtypes", "unchecked" }) @Override //
     Object findValue(HttpServletRequest req, HttpServletResponse res, ServletContext con, PathValues pathValues) throws Exception {
         MediaType mediaType = contentType(req);
-        @SuppressWarnings("rawtypes") MessageBodyReader bodyReader = messageBodyReaders.get(contentType(req));
+        MessageBodyReader bodyReader = findBodyReader(req);
         MediaType mediaTypeWithCharset = mediaType.withCharset(req.getCharacterEncoding());
         return bodyReader.readFrom(classType(), parameterGenericType, parameter().getAnnotations(), mediaTypeWithCharset, getHeaders(req),
                 req.getInputStream());
+    }
+
+    private MessageBodyReader<?> findBodyReader(HttpServletRequest req) {
+        MediaType requestMediaType = contentType(req);
+        for (Map.Entry<MediaType, MessageBodyReader<?>> entry : messageBodyReaders.entrySet()) {
+            if (entry.getKey().isCompatible(requestMediaType)) {
+                return entry.getValue();
+            }
+        }
+        throw new BadRequestException("Something totally wrong");
     }
 
     private MediaType contentType(HttpServletRequest req) {

@@ -58,8 +58,6 @@ public class SimpleGsonBodyWriterTest {
 
     @Test public void isWriteable() {
         SimpleGsonBodyWriter<DataObject> writer = new SimpleGsonBodyWriter<>(new GsonBuilder().create());
-        assertFalse(writer.isWriteable(String.class, null, null, null));
-        assertFalse(writer.isWriteable(DataObject.class, null, null, MediaType.TEXT_PLAIN_TYPE));
-        assertTrue(writer.isWriteable(DataObject.class, null, null, MediaType.APPLICATION_JSON_TYPE));
+        assertTrue(writer.isWriteable(DataObject.class, null, null, null));
     }
 }

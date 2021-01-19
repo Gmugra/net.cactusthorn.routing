@@ -7,6 +7,7 @@ import java.io.Reader;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;
 
+import javax.ws.rs.Consumes;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.ext.MessageBodyReader;
@@ -14,6 +15,7 @@ import javax.ws.rs.ext.MessageBodyReader;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
+@Consumes({MediaType.APPLICATION_JSON})
 public class SimpleGsonBodyReader<T> implements MessageBodyReader<T> {
 
     private Gson gson;
@@ -28,13 +30,7 @@ public class SimpleGsonBodyReader<T> implements MessageBodyReader<T> {
 
     @Override //
     public boolean isReadable(Class<?> type, Type genericType, Annotation[] annotations, MediaType mediaType) {
-        if (InputStream.class.isAssignableFrom(type)) {
-            return false;
-        }
-        if (Reader.class.isAssignableFrom(type)) {
-            return false;
-        }
-        return MediaType.APPLICATION_JSON_TYPE.isCompatible(mediaType);
+        return true;
     }
 
     @Override //

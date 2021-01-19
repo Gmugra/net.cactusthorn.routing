@@ -3,65 +3,44 @@ package net.cactusthorn.routing.body;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;
 import java.util.Comparator;
+import java.util.HashSet;
+import java.util.Set;
 
 import javax.annotation.Priority;
-import javax.servlet.ServletContext;
 import javax.ws.rs.Priorities;
 import javax.ws.rs.core.MediaType;
 
-import net.cactusthorn.routing.RoutingConfig;
+public abstract class BodyProcessor implements Initializable {
 
-public abstract class BodyProcessor {
-
-    public static final Comparator<BodyProcessor> COMPARATOR = (b1, b2) -> {
-        if (b1 == null && b2 == null) {
+    public static final Comparator<BodyProcessor> PRIORITY_COMPARATOR = (bp1, bp2) -> {
+        if (bp1 == null && bp2 == null) {
             return 0;
         }
-        if (b1 == null) {
+        if (bp1 == null) {
             return 1;
         }
-        if (b2 == null) {
+        if (bp2 == null) {
             return -1;
         }
-
-        int priority = b1.priority() - b2.priority();
-        if (priority != 0) {
-            return priority;
-        }
-
-        if (b1.mediaType().isWildcardType() && !b2.mediaType().isWildcardType()) {
-            return 1;
-        }
-        if (!b1.mediaType().isWildcardType() && b2.mediaType().isWildcardType()) {
-            return -1;
-        }
-        if (b1.mediaType().isWildcardSubtype() && !b2.mediaType().isWildcardSubtype()) {
-            return 1;
-        }
-        if (!b1.mediaType().isWildcardSubtype() && b2.mediaType().isWildcardSubtype()) {
-            return -1;
-        }
-
-        return 0;
+        return bp1.priority() - bp2.priority();
     };
 
     public static final int LOWEST_PRIORITY = 9999;
+    public static final int PRIORITY_HIGHEST = 50;
 
     private int priority;
 
-    private MediaType mmediaType;
+    private Set<MediaType> mmediaTypes;
 
     private boolean initializable;
 
-    public BodyProcessor(MediaType mediaType) {
-        if (mediaType == null) {
-            throw new IllegalArgumentException("mediaType can not be null");
-        }
-        this.mmediaType = new MediaType(mediaType.getType(), mediaType.getSubtype()); // to ignore parameters
-    }
+    private Class<?> bodyProcessorClass;
 
-    public MediaType mediaType() {
-        return mmediaType;
+    public BodyProcessor(Class<?> bodyProcessorClass) {
+        this.bodyProcessorClass = bodyProcessorClass;
+        initializable = Initializable.class.isAssignableFrom(bodyProcessorClass);
+        priority = findPriority(bodyProcessorClass);
+        mmediaTypes = findMediaTypes(bodyProcessorClass);
     }
 
     public int priority() {
@@ -72,25 +51,51 @@ public abstract class BodyProcessor {
         return initializable;
     }
 
-    protected void setInitializable(boolean value) {
-        this.initializable = value;
-    }
-
-    protected void setPriority(Class<?> clazz) {
-        Priority annotation = clazz.getAnnotation(Priority.class);
-        if (annotation != null) {
-            this.priority = annotation.value();
-        } else {
-            this.priority = Priorities.USER;
+    public boolean isProcessable(Class<?> type, Type genericType, Annotation[] annotations, MediaType mediaType) {
+        if (mediaType == null) {
+            return true;
         }
+        for (MediaType value : mmediaTypes) {
+            if (mediaType.isCompatible(value)) {
+                return true;
+            }
+        }
+        return false;
     }
-
-    public abstract void init(ServletContext servletContext, RoutingConfig routingConfig);
-
-    public abstract boolean isProcessable(Class<?> type, Type genericType, Annotation[] annotations, MediaType mediaType);
 
     @Override //
     public String toString() {
-        return mediaType().toString() + "::" + priority();
+        return priority + " :: " + bodyProcessorClass.getName();
+    }
+
+    protected abstract String[] getMediaTypeAnnotationValue(Class<?> clazz);
+
+    private int findPriority(Class<?> clazz) {
+        Priority annotation = clazz.getAnnotation(Priority.class);
+        if (annotation != null) {
+            return annotation.value();
+        }
+        return Priorities.USER;
+    }
+
+    private Set<MediaType> findMediaTypes(Class<?> clazz) {
+        String[] types = getMediaTypeAnnotationValue(clazz);
+        if (types != null) {
+            return parseMediaTypes(types);
+        }
+        Set<MediaType> result = new HashSet<>();
+        result.add(MediaType.WILDCARD_TYPE);
+        return result;
+    }
+
+    private Set<MediaType> parseMediaTypes(String[] types) {
+        Set<MediaType> result = new HashSet<>();
+        for (String value : types) {
+            for (String subValue : value.split(",")) {
+                String[] parts = subValue.trim().split(";")[0].split("/"); // cut all parameters
+                result.add(new MediaType(parts[0], parts[1]));
+            }
+        }
+        return result;
     }
 }
