@@ -16,10 +16,7 @@ public class InputStreamMessageBodyReader implements MessageBodyReader<InputStre
 
     @Override //
     public boolean isReadable(Class<?> type, Type genericType, Annotation[] annotations, MediaType mediaType) {
-        if (InputStream.class.isAssignableFrom(type)) {
-            return true;
-        }
-        return false;
+        return InputStream.class.isAssignableFrom(type);
     }
 
     @Override //

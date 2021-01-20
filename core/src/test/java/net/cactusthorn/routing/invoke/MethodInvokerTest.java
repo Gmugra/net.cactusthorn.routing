@@ -7,6 +7,7 @@ import java.lang.reflect.*;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.logging.Level;
 import java.util.stream.Stream;
 
 import javax.servlet.ServletContext;
@@ -21,6 +22,7 @@ import javax.ws.rs.ServerErrorException;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -92,6 +94,11 @@ public class MethodInvokerTest extends InvokeTestAncestor {
     HttpSession session;
 
     ServletContext context;
+
+    @BeforeAll
+    public static void loggingOff() {
+        java.util.logging.Logger.getLogger("").setLevel(Level.OFF);
+    }
 
     @BeforeEach @Override //
     protected void setUp() throws Exception {
