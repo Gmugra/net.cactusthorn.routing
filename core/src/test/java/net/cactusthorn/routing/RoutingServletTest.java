@@ -30,6 +30,7 @@ import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
+import javax.ws.rs.Produces;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.HttpHeaders;
@@ -52,7 +53,7 @@ import net.cactusthorn.routing.validate.ParametersValidator;
 
 public class RoutingServletTest {
 
-    @javax.ws.rs.Produces(MediaType.TEXT_HTML) public static class TestTemplated implements TemplatedMessageBodyWriter {
+    @Produces(MediaType.TEXT_HTML) public static class TestTemplated implements TemplatedMessageBodyWriter {
 
         @Override public boolean isWriteable(Class<?> type, Type genericType, Annotation[] annotations, MediaType mediaType) {
             return true;
@@ -159,12 +160,17 @@ public class RoutingServletTest {
         @POST @Path("api/template") //
         public Response template(@Context HttpServletRequest request, @Context HttpServletResponse response) {
             Templated t = new Templated(request, response, "t", "templated result");
-            return Response.ok(t).type(MediaType.TEXT_HTML_TYPE).build();
+            return Response.ok(t).type(MediaType.TEXT_HTML_TYPE.withCharset("UTF-8")).build();
         }
 
-        @POST @Path("api/template/A") @Template("/xyz.html") @Produces("text/html")//
-        public String templateA(@Context HttpServletRequest request, @Context HttpServletResponse response) {
+        @POST @Path("api/template/A") @Template("/xyz.html") @Produces("text/html,*/*")//
+        public String templateA() {
             return "some value";
+        }
+
+        @GET @Path("api/wrong/produces") @Produces(MediaType.TEXT_HTML) //
+        public Response wrongProduces() {
+            return Response.ok("some value").type(MediaType.TEXT_PLAIN_TYPE).build();
         }
     }
 
@@ -200,7 +206,6 @@ public class RoutingServletTest {
         req = Mockito.mock(HttpServletRequest.class);
         resp = Mockito.mock(HttpServletResponse.class);
         Mockito.when(req.getHeaders(HttpHeaders.ACCEPT)).thenReturn(Collections.emptyEnumeration());
-        // Mockito.when(req.getPathInfo()).thenReturn("/api/wrong/abc");
         outputStream = new ServletTestOutputStream();
         Mockito.when(resp.getOutputStream()).thenReturn(outputStream);
     }
@@ -486,6 +491,23 @@ public class RoutingServletTest {
         Mockito.verify(resp).sendError(code.capture(), Mockito.any());
 
         assertEquals(403, code.getValue());
+    }
+
+    @Test
+    public void wrongProduces() throws ServletException, IOException {
+        Mockito.when(req.getPathInfo()).thenReturn("/api/wrong/produces");
+        Mockito.when(req.getMethod()).thenReturn(HttpMethod.GET);
+        List<String> accept = new ArrayList<>();
+        accept.add(MediaType.TEXT_HTML);
+        Mockito.when(req.getHeaders(HttpHeaders.ACCEPT)).thenReturn(Collections.enumeration(accept));
+
+        servlet.doGet(req, resp);
+
+        ArgumentCaptor<Integer> code = ArgumentCaptor.forClass(Integer.class);
+
+        Mockito.verify(resp).sendError(code.capture(), Mockito.any());
+
+        assertEquals(406, code.getValue());
     }
 
     public static class EntryPointWrong {

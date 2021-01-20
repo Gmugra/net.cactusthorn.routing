@@ -1,9 +1,10 @@
 package net.cactusthorn.routing.scanner;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -15,16 +16,17 @@ import net.cactusthorn.routing.ComponentProvider;
 import net.cactusthorn.routing.EntryPointScanner;
 import net.cactusthorn.routing.PathTemplate;
 import net.cactusthorn.routing.EntryPointScanner.EntryPoint;
+import net.cactusthorn.routing.Http;
 import net.cactusthorn.routing.PathTemplate.PathValues;
-import net.cactusthorn.routing.ProducesParser;
 import net.cactusthorn.routing.RoutingConfig;
-import net.cactusthorn.routing.annotation.Produces;
 import net.cactusthorn.routing.annotation.Template;
 
 import javax.ws.rs.GET;
 import javax.ws.rs.HEAD;
 import javax.ws.rs.HttpMethod;
 import javax.ws.rs.Path;
+import javax.ws.rs.Produces;
+import javax.ws.rs.core.MediaType;
 
 public class ScannerTest {
 
@@ -137,7 +139,17 @@ public class ScannerTest {
         EntryPoint entryPoint = entryPoints.get(HttpMethod.GET).get(0);
 
         assertTrue(entryPoint.match("/"));
-        assertEquals(ProducesParser.PRODUCES_DEFAULT, entryPoint.produces());
+
+        List<String> header = new ArrayList<>();
+        header.add(MediaType.APPLICATION_JSON);
+        header.add(MediaType.TEXT_PLAIN);
+        List<MediaType> accept = Http.parseAccept(Collections.enumeration(header));
+        assertTrue(entryPoint.matchAccept(accept).isPresent());
+
+        header.clear();
+        header.add(MediaType.APPLICATION_JSON);
+        accept = Http.parseAccept(Collections.enumeration(header));
+        assertFalse(entryPoint.matchAccept(accept).isPresent());
     }
 
     @Path("api/") //
@@ -170,7 +182,11 @@ public class ScannerTest {
 
         assertEquals(PathValues.EMPTY, values);
         assertTrue(entryPoint.match("/api/"));
-        assertEquals("*/*", entryPoint.produces());
+
+        List<String> header = new ArrayList<>();
+        header.add(MediaType.WILDCARD);
+        List<MediaType> accept = Http.parseAccept(Collections.enumeration(header));
+        assertTrue(entryPoint.matchAccept(accept).isPresent());
     }
 
     @Test //

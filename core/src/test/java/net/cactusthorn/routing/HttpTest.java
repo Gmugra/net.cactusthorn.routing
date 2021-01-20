@@ -8,12 +8,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
 
 public class HttpTest {
 
@@ -59,13 +56,11 @@ public class HttpTest {
 
     @Test //
     public void parseAccept() {
-        HttpServletRequest request = Mockito.mock(HttpServletRequest.class);
         List<String> accept = new ArrayList<>();
         accept.add(
                 "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9");
-        Mockito.when(request.getHeaders(HttpHeaders.ACCEPT)).thenReturn(Collections.enumeration(accept));
 
-        List<MediaType> mediaTypes = Http.parseAccept(request);
+        List<MediaType> mediaTypes = Http.parseAccept(Collections.enumeration(accept));
         assertEquals("text/html", mediaTypes.get(0).toString());
         assertEquals("application/xhtml+xml", mediaTypes.get(1).toString());
         assertEquals("image/avif", mediaTypes.get(2).toString());
@@ -78,10 +73,7 @@ public class HttpTest {
 
     @Test //
     public void parseEmptyAccept() {
-        HttpServletRequest request = Mockito.mock(HttpServletRequest.class);
-        Mockito.when(request.getHeaders(HttpHeaders.ACCEPT)).thenReturn(Collections.emptyEnumeration());
-
-        List<MediaType> mediaTypes = Http.parseAccept(request);
+        List<MediaType> mediaTypes = Http.parseAccept(Collections.emptyEnumeration());
         assertEquals(MediaType.WILDCARD, mediaTypes.get(0).toString());
     }
 }

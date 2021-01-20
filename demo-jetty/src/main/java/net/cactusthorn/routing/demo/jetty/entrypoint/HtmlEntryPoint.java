@@ -12,6 +12,7 @@ import javax.servlet.http.Part;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
+import javax.ws.rs.Produces;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
@@ -21,7 +22,6 @@ import javax.ws.rs.FormParam;
 
 import net.cactusthorn.routing.Templated;
 import net.cactusthorn.routing.annotation.FormPart;
-import net.cactusthorn.routing.annotation.Produces;
 import net.cactusthorn.routing.annotation.Template;
 import net.cactusthorn.routing.demo.jetty.dagger.EntryPoint;
 

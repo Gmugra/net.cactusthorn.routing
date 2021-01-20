@@ -7,12 +7,9 @@ import java.util.Enumeration;
 import java.util.List;
 import java.util.Map;
 
-import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.MultivaluedMap;
-import javax.ws.rs.core.Response;
 import javax.ws.rs.ext.RuntimeDelegate;
 import javax.ws.rs.ext.RuntimeDelegate.HeaderDelegate;
 
@@ -83,9 +80,9 @@ public class Http {
         }
     }
 
-    public static List<MediaType> parseAccept(HttpServletRequest request) {
+    public static List<MediaType> parseAccept(Enumeration<String> acceptHeader) {
         List<MediaType> mediaTypes = new ArrayList<>();
-        for (Enumeration<String> e = request.getHeaders(HttpHeaders.ACCEPT); e.hasMoreElements();) {
+        for (Enumeration<String> e = acceptHeader; e.hasMoreElements();) {
             String header = e.nextElement();
             String[] parts = header.split(",");
             for (String part : parts) {
@@ -98,17 +95,5 @@ public class Http {
             Collections.sort(mediaTypes, ACCEPT_COMPARATOR);
         }
         return mediaTypes;
-    }
-
-    // TODO support multiple values in Produces
-    public static MediaType findResponseMediaType(Response response, String produces, String defaultCharset) {
-        if (response.getMediaType() == null) {
-            MediaType producesMediaType = MediaType.valueOf(produces);
-            return producesMediaType.withCharset(defaultCharset);
-        }
-        if (response.getMediaType().getParameters().get(MediaType.CHARSET_PARAMETER) == null) {
-            return response.getMediaType().withCharset(defaultCharset);
-        }
-        return response.getMediaType();
     }
 }

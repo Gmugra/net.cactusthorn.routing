@@ -34,23 +34,22 @@ public class EntryPointScanner {
 
         private PathTemplate pathTemplate;
         private MethodInvoker methodInvoker;
-        private String produces;
+        private List<MediaType> producesMediaTypes;
         private Set<MediaType> consumesMediaTypes;
         private String template;
         private Set<String> userRoles;
 
-        private EntryPoint(PathTemplate pathTemplate, String produces, String template, Set<MediaType> consumesMediaTypes,
-                MethodInvoker methodInvoker, Set<String> userRoles) {
+        private EntryPoint(PathTemplate pathTemplate, String template, List<MediaType> producesMediaTypes,
+                Set<MediaType> consumesMediaTypes, MethodInvoker methodInvoker, Set<String> userRoles) {
             this.pathTemplate = pathTemplate;
-            this.produces = produces;
+            this.producesMediaTypes = producesMediaTypes;
             this.template = template;
             this.consumesMediaTypes = consumesMediaTypes;
             this.methodInvoker = methodInvoker;
             this.userRoles = userRoles;
         }
 
-        public Response invoke(HttpServletRequest req, HttpServletResponse res, ServletContext con, PathValues pathValues,
-                List<MediaType> accept) {
+        public Response invoke(HttpServletRequest req, HttpServletResponse res, ServletContext con, PathValues pathValues) {
             Object result = methodInvoker.invoke(req, res, con, pathValues);
             if (result instanceof Response) {
                 return (Response) result;
@@ -85,19 +84,15 @@ public class EntryPointScanner {
             return template;
         }
 
-        public String produces() {
-            return produces;
-        }
-
-        // TODO support multiple values in Produces
-        public boolean matchAccept(List<MediaType> accept) {
-            MediaType producesMediaType = MediaType.valueOf(produces);
-            for (MediaType mediaType : accept) {
-                if (mediaType.isCompatible(producesMediaType)) {
-                    return true;
+        public Optional<MediaType> matchAccept(List<MediaType> accept) {
+            for (MediaType acceptMediaType : accept) {
+                for (MediaType producesMediaType : producesMediaTypes) {
+                    if (acceptMediaType.isCompatible(producesMediaType)) {
+                        return Optional.of(producesMediaType);
+                    }
                 }
             }
-            return false;
+            return Optional.empty();
         }
 
         public boolean matchUserRole(HttpServletRequest req) {
@@ -136,6 +131,7 @@ public class EntryPointScanner {
 
             String classPath = PATHTEMPLATE_PARSER.prepare(routingConfig.applicationPath(), clazz.getAnnotation(Path.class));
             Set<MediaType> classConsumesMediaTypes = CONSUMES_PARSER.consumes(clazz);
+            List<MediaType> classProducesMediaTypes = PRODUCES_PARSER.produces(clazz);
 
             for (Method method : clazz.getMethods()) {
 
@@ -147,7 +143,7 @@ public class EntryPointScanner {
 
                         PathTemplate pathTemplate = PATHTEMPLATE_PARSER.create(method, classPath);
 
-                        String produces = PRODUCES_PARSER.produces(method);
+                        List<MediaType> producesMediaTypes = PRODUCES_PARSER.produces(method, classProducesMediaTypes);
 
                         Set<MediaType> consumesMediaTypes = CONSUMES_PARSER.consumes(method, classConsumesMediaTypes);
 
@@ -157,8 +153,8 @@ public class EntryPointScanner {
 
                         Set<String> userRoles = findUserRoles(method);
 
-                        EntryPoint entryPoint = new EntryPoint(pathTemplate, produces, template, consumesMediaTypes, methodInvoker,
-                                userRoles);
+                        EntryPoint entryPoint = new EntryPoint(pathTemplate, template, producesMediaTypes, consumesMediaTypes,
+                                methodInvoker, userRoles);
                         entryPoints.get(httpMethod).add(entryPoint);
                     }
                 }

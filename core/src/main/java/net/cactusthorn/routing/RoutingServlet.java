@@ -3,6 +3,7 @@ package net.cactusthorn.routing;
 import java.io.*;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -11,6 +12,7 @@ import javax.servlet.http.*;
 import javax.ws.rs.HttpMethod;
 import javax.ws.rs.ServerErrorException;
 import javax.ws.rs.WebApplicationException;
+import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
@@ -108,7 +110,7 @@ public class RoutingServlet extends HttpServlet {
             resp.sendError(HttpServletResponse.SC_NOT_FOUND, "Not Found");
             return;
         }
-        List<MediaType> accept = Http.parseAccept(req);
+        List<MediaType> accept = Http.parseAccept(req.getHeaders(HttpHeaders.ACCEPT));
         boolean matchContentTypeFail = false;
         boolean matchAcceptFail = false;
         for (EntryPoint entryPoint : entryPoints) {
@@ -123,12 +125,20 @@ public class RoutingServlet extends HttpServlet {
                         matchContentTypeFail = true;
                         continue;
                     }
-                    if (!entryPoint.matchAccept(accept)) {
+                    Optional<MediaType> producesMediaType = entryPoint.matchAccept(accept);
+                    if (!producesMediaType.isPresent()) {
                         matchAcceptFail = true;
                         continue;
                     }
-                    Response result = entryPoint.invoke(req, resp, servletContext, pathValues, accept);
-                    produce(resp, entryPoint, result);
+                    Response result = entryPoint.invoke(req, resp, servletContext, pathValues);
+                    //It could be that in resource method Response object was created manually and media-type was set,
+                    //and this media-type do not match request Accept-header.
+                    //In this case -> response error at ones.
+                    if (!matchAccept(accept, result)) {
+                        resp.sendError(HttpServletResponse.SC_NOT_ACCEPTABLE, "Not acceptable");
+                        return;
+                    }
+                    produce(resp, entryPoint, result, producesMediaType.get());
                 } catch (WebApplicationException wae) {
                     resp.sendError(wae.getResponse().getStatus(), wae.getMessage());
                 } catch (Exception e) {
@@ -167,7 +177,7 @@ public class RoutingServlet extends HttpServlet {
         return path;
     }
 
-    private void produce(HttpServletResponse resp, EntryPoint entryPoint, Response result) throws IOException {
+    private void produce(HttpServletResponse resp, EntryPoint entryPoint, Response result, MediaType producesMediaType) throws IOException {
 
         StatusType status = result.getStatusInfo();
         resp.setStatus(status.getStatusCode());
@@ -176,7 +186,13 @@ public class RoutingServlet extends HttpServlet {
             return;
         }
 
-        MediaType responseMediaType = Http.findResponseMediaType(result, entryPoint.produces(), responseCharacterEncoding);
+        MediaType responseMediaType = producesMediaType;
+        if (result.getMediaType() != null) {
+            responseMediaType = result.getMediaType();
+        }
+        if (responseMediaType.getParameters().get(MediaType.CHARSET_PARAMETER) == null) {
+            responseMediaType = responseMediaType.withCharset(responseCharacterEncoding);
+        }
         resp.setCharacterEncoding(responseMediaType.getParameters().get(MediaType.CHARSET_PARAMETER));
         resp.setContentType(new MediaType(responseMediaType.getType(), responseMediaType.getSubtype()).toString());
 
@@ -198,5 +214,17 @@ public class RoutingServlet extends HttpServlet {
             }
         }
         throw new ServerErrorException("MessageBodyWriter not found", Status.INTERNAL_SERVER_ERROR);
+    }
+
+    private boolean matchAccept(List<MediaType> accept, Response result) {
+        if (result.getMediaType() == null) {
+            return true;
+        }
+        for (MediaType acceptMediaType : accept) {
+            if (acceptMediaType.isCompatible(result.getMediaType())) {
+                return true;
+            }
+        }
+        return false;
     }
 }
