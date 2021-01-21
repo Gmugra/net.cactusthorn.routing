@@ -1,4 +1,4 @@
-package net.cactusthorn.routing;
+package net.cactusthorn.routing.resource;
 
 import java.lang.reflect.Method;
 import java.util.ArrayList;
@@ -7,6 +7,8 @@ import java.util.List;
 
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
+
+import net.cactusthorn.routing.Http;
 
 public final class ProducesParser {
 

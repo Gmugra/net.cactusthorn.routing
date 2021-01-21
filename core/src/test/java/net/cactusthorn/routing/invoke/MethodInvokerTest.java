@@ -117,7 +117,7 @@ public class MethodInvokerTest extends InvokeTestAncestor {
     @ParameterizedTest @MethodSource("provideArguments") //
     public void invokeMethod(String methodName, PathValues pathValues, Object expectedResult) {
 
-        RoutingConfig config = RoutingConfig.builder(new EntryPoint1Provider()).addEntryPoint(EntryPoint1.class)
+        RoutingConfig config = RoutingConfig.builder(new EntryPoint1Provider()).addResource(EntryPoint1.class)
                 .setParametersValidator(VALIDATOR).build();
 
         Method method = findMethod(EntryPoint1.class, methodName);
@@ -136,7 +136,7 @@ public class MethodInvokerTest extends InvokeTestAncestor {
         Mockito.when(request.getCharacterEncoding()).thenReturn("UTF-8");
         Mockito.when(request.getHeaderNames()).thenReturn(Collections.emptyEnumeration());
 
-        RoutingConfig config = RoutingConfig.builder(new EntryPoint1Provider()).addEntryPoint(EntryPoint1.class)
+        RoutingConfig config = RoutingConfig.builder(new EntryPoint1Provider()).addResource(EntryPoint1.class)
                 .setParametersValidator(VALIDATOR).build();
         config.bodyReaders().forEach(r -> r.init(null, config));
 
@@ -154,7 +154,7 @@ public class MethodInvokerTest extends InvokeTestAncestor {
     
     @Test //
     public void invokeM8() throws IOException {
-        RoutingConfig config = RoutingConfig.builder(new EntryPoint1Provider()).addEntryPoint(EntryPoint1.class)
+        RoutingConfig config = RoutingConfig.builder(new EntryPoint1Provider()).addResource(EntryPoint1.class)
                 .setParametersValidator(VALIDATOR).build();
 
         Method method = findMethod(EntryPoint1.class, "m8");

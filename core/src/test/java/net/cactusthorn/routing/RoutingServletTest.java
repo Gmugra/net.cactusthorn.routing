@@ -182,7 +182,7 @@ public class RoutingServletTest {
         }
     }
 
-    static RoutingConfig config = RoutingConfig.builder(new EntryPoint1Provider()).addEntryPoint(EntryPoint1.class).build();
+    static RoutingConfig config = RoutingConfig.builder(new EntryPoint1Provider()).addResource(EntryPoint1.class).build();
 
     static RoutingServlet servlet;
     static {
@@ -224,7 +224,7 @@ public class RoutingServletTest {
 
     @Test //
     public void templated() throws ServletException, IOException {
-        RoutingConfig c = RoutingConfig.builder(new EntryPoint1Provider()).addEntryPoint(EntryPoint1.class)
+        RoutingConfig c = RoutingConfig.builder(new EntryPoint1Provider()).addResource(EntryPoint1.class)
                 .addBodyWriter(new TestTemplated()).build();
         RoutingServlet toSpy = new RoutingServlet(c);
         RoutingServlet s = Mockito.spy(toSpy);
@@ -239,7 +239,7 @@ public class RoutingServletTest {
 
     @Test //
     public void templatedA() throws ServletException, IOException {
-        RoutingConfig c = RoutingConfig.builder(new EntryPoint1Provider()).addEntryPoint(EntryPoint1.class)
+        RoutingConfig c = RoutingConfig.builder(new EntryPoint1Provider()).addResource(EntryPoint1.class)
                 .addBodyWriter(new TestTemplated()).build();
         RoutingServlet toSpy = new RoutingServlet(c);
         RoutingServlet s = Mockito.spy(toSpy);
@@ -452,7 +452,7 @@ public class RoutingServletTest {
 
     @Test //
     public void validation() throws ServletException, IOException {
-        RoutingConfig c = RoutingConfig.builder(new EntryPoint1Provider()).addEntryPoint(EntryPoint1.class)
+        RoutingConfig c = RoutingConfig.builder(new EntryPoint1Provider()).addResource(EntryPoint1.class)
                 .setParametersValidator(TEST_VALIDATOR).build();
         RoutingServlet servlet = new RoutingServlet(c);
         RoutingServlet s = Mockito.spy(servlet);
@@ -473,7 +473,7 @@ public class RoutingServletTest {
 
     @Test //
     public void userRoles() throws ServletException, IOException {
-        RoutingConfig c = RoutingConfig.builder(new EntryPoint1Provider()).addEntryPoint(EntryPoint1.class)
+        RoutingConfig c = RoutingConfig.builder(new EntryPoint1Provider()).addResource(EntryPoint1.class)
                 .setParametersValidator(TEST_VALIDATOR).build();
         RoutingServlet servlet = new RoutingServlet(c);
         RoutingServlet s = Mockito.spy(servlet);
@@ -527,7 +527,7 @@ public class RoutingServletTest {
 
     @Test //
     public void initializationException() throws ServletException {
-        RoutingConfig config = RoutingConfig.builder(new EntryPointWrongProvider()).addEntryPoint(EntryPointWrong.class).build();
+        RoutingConfig config = RoutingConfig.builder(new EntryPointWrongProvider()).addResource(EntryPointWrong.class).build();
         RoutingServlet servlet = new RoutingServlet(config);
         RoutingServlet s = Mockito.spy(servlet);
         Mockito.doReturn(null).when(s).getServletContext();

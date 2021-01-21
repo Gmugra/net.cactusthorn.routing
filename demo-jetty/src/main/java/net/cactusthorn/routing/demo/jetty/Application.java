@@ -76,8 +76,8 @@ public class Application {
         // @formatter:off
         RoutingConfig config =
             RoutingConfig.builder(ComponentProvider)
-            .addEntryPoint(main.entryPoints().keySet())
-            .addEntryPoint(main.sessionBuilder().build().entryPoints().keySet())
+            .addResource(main.entryPoints().keySet())
+            .addResource(main.sessionBuilder().build().entryPoints().keySet())
             .addBodyWriter(new SimpleGsonBodyWriter<>())
             .addBodyReader(new SimpleGsonBodyReader<>())
             .addBodyWriter(new SimpleThymeleafBodyWriter("/thymeleaf/"))

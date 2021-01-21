@@ -44,7 +44,7 @@ public final class RoutingConfig {
         }
     }
 
-    private List<Class<?>> entryPointClasses;
+    private List<Class<?>> resourceClasses;
 
     private ConvertersHolder convertersHolder;
 
@@ -64,7 +64,7 @@ public final class RoutingConfig {
     private RoutingConfig(
                 ComponentProvider componentProvider,
                 ConvertersHolder convertersHolder,
-                List<Class<?>> entryPointClasses,
+                List<Class<?>> resourceClasses,
                 List<BodyWriter> bodyWriters,
                 List<BodyReader> bodyReaders,
                 Map<ConfigProperty, Object> configProperties,
@@ -72,7 +72,7 @@ public final class RoutingConfig {
                 String applicationPath) {
         this.componentProvider = componentProvider;
         this.convertersHolder = convertersHolder;
-        this.entryPointClasses = entryPointClasses;
+        this.resourceClasses = resourceClasses;
         this.bodyWriters = bodyWriters;
         this.bodyReaders = bodyReaders;
         this.configProperties = configProperties;
@@ -89,8 +89,8 @@ public final class RoutingConfig {
         return convertersHolder;
     }
 
-    public List<Class<?>> entryPointClasses() {
-        return entryPointClasses;
+    public List<Class<?>> resourceClasses() {
+        return resourceClasses;
     }
 
     public List<BodyWriter> bodyWriters() {
@@ -123,7 +123,7 @@ public final class RoutingConfig {
 
         private final ConvertersHolder convertersHolder = new ConvertersHolder();
 
-        private final List<Class<?>> entryPointClasses = new ArrayList<>();
+        private final List<Class<?>> resourceClasses = new ArrayList<>();
 
         private final List<BodyWriter> bodyWriters = new ArrayList<>();
 
@@ -158,13 +158,13 @@ public final class RoutingConfig {
             return this;
         }
 
-        public Builder addEntryPoint(Class<?> entryPoint) {
-            entryPointClasses.add(entryPoint);
+        public Builder addResource(Class<?> resource) {
+            resourceClasses.add(resource);
             return this;
         }
 
-        public Builder addEntryPoint(Collection<Class<?>> entryPoints) {
-            entryPointClasses.addAll(entryPoints);
+        public Builder addResource(Collection<Class<?>> resources) {
+            resourceClasses.addAll(resources);
             return this;
         }
 
@@ -217,7 +217,7 @@ public final class RoutingConfig {
 
             Map<ConfigProperty, Object> unmodifiableConfigProperties = Collections.unmodifiableMap(configProperties);
 
-            return new RoutingConfig(componentProvider, convertersHolder, Collections.unmodifiableList(entryPointClasses),
+            return new RoutingConfig(componentProvider, convertersHolder, Collections.unmodifiableList(resourceClasses),
                     unmodifiableBodyWriters, unmodifiableBodyReaders, unmodifiableConfigProperties, validator, applicationPath);
         }
     }

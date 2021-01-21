@@ -1,8 +1,11 @@
-package net.cactusthorn.routing;
+package net.cactusthorn.routing.resource;
 
 import java.lang.reflect.Method;
 
 import javax.ws.rs.Path;
+
+import net.cactusthorn.routing.PathTemplate;
+import net.cactusthorn.routing.RoutingInitializationException;
 
 public final class PathTemplateParser {
 

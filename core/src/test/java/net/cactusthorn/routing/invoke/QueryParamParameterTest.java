@@ -65,7 +65,7 @@ public class QueryParamParameterTest extends InvokeTestAncestor {
         }
     }
 
-    private static final RoutingConfig CONFIG = RoutingConfig.builder(new EntryPoint1Provider()).addEntryPoint(EntryPoint1.class).build();
+    private static final RoutingConfig CONFIG = RoutingConfig.builder(new EntryPoint1Provider()).addResource(EntryPoint1.class).build();
 
     @ParameterizedTest @MethodSource("collectionArguments") //
     public void collections(String methodName, String[] requestValues, Integer[] expected) throws Exception {

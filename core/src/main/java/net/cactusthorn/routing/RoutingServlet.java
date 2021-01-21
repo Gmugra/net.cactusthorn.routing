@@ -19,11 +19,12 @@ import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.Response.StatusType;
 import javax.ws.rs.ext.MessageBodyWriter;
 
-import net.cactusthorn.routing.EntryPointScanner.EntryPoint;
 import net.cactusthorn.routing.RoutingConfig.ConfigProperty;
 import net.cactusthorn.routing.body.writer.BodyWriter;
 import net.cactusthorn.routing.body.writer.MessageBodyHeadersWriter;
 import net.cactusthorn.routing.invoke.MethodInvoker.ReturnObjectInfo;
+import net.cactusthorn.routing.resource.ResourceScanner;
+import net.cactusthorn.routing.resource.ResourceScanner.Resource;
 import net.cactusthorn.routing.PathTemplate.PathValues;
 
 public class RoutingServlet extends HttpServlet {
@@ -32,7 +33,7 @@ public class RoutingServlet extends HttpServlet {
 
     private static final Logger LOG = Logger.getLogger(RoutingServlet.class.getName());
 
-    private transient Map<String, List<EntryPoint>> allEntryPoints;
+    private transient Map<String, List<Resource>> allResources;
     private transient ServletContext servletContext;
     private transient RoutingConfig routingConfig;
     private transient String responseCharacterEncoding;
@@ -53,8 +54,8 @@ public class RoutingServlet extends HttpServlet {
         routingConfig.bodyReaders().forEach(r -> r.init(servletContext, routingConfig));
         routingConfig.validator().ifPresent(v -> v.init(servletContext, routingConfig.provider()));
 
-        EntryPointScanner scanner = new EntryPointScanner(routingConfig);
-        allEntryPoints = scanner.scan();
+        ResourceScanner scanner = new ResourceScanner(routingConfig);
+        allResources = scanner.scan();
     }
 
     @Override //
@@ -67,70 +68,70 @@ public class RoutingServlet extends HttpServlet {
     }
 
     protected void doPatch(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        process(req, resp, allEntryPoints.get(HttpMethod.PATCH));
+        process(req, resp, allResources.get(HttpMethod.PATCH));
     }
 
     @Override //
     protected void doHead(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        process(req, resp, allEntryPoints.get(HttpMethod.HEAD));
+        process(req, resp, allResources.get(HttpMethod.HEAD));
     }
 
     @Override //
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        process(req, resp, allEntryPoints.get(HttpMethod.POST));
+        process(req, resp, allResources.get(HttpMethod.POST));
     }
 
     @Override //
     protected void doPut(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        process(req, resp, allEntryPoints.get(HttpMethod.PUT));
+        process(req, resp, allResources.get(HttpMethod.PUT));
     }
 
     @Override //
     protected void doDelete(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        process(req, resp, allEntryPoints.get(HttpMethod.DELETE));
+        process(req, resp, allResources.get(HttpMethod.DELETE));
     }
 
     @Override //
     protected void doOptions(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        process(req, resp, allEntryPoints.get(HttpMethod.OPTIONS));
+        process(req, resp, allResources.get(HttpMethod.OPTIONS));
     }
 
     @Override //
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        process(req, resp, allEntryPoints.get(HttpMethod.GET));
+        process(req, resp, allResources.get(HttpMethod.GET));
     }
 
-    private void process(HttpServletRequest req, HttpServletResponse resp, List<EntryPoint> entryPoints) throws IOException {
+    private void process(HttpServletRequest req, HttpServletResponse resp, List<Resource> resources) throws IOException {
         String contentType = contentType(req);
         if (req.getCharacterEncoding() == null) {
             req.setCharacterEncoding(defaultRequestCharacterEncoding);
         }
         String path = getPath(contentType, req);
-        if (entryPoints.isEmpty()) {
+        if (resources.isEmpty()) {
             resp.sendError(HttpServletResponse.SC_NOT_FOUND, "Not Found");
             return;
         }
         List<MediaType> accept = Http.parseAccept(req.getHeaders(HttpHeaders.ACCEPT));
         boolean matchContentTypeFail = false;
         boolean matchAcceptFail = false;
-        for (EntryPoint entryPoint : entryPoints) {
-            PathValues pathValues = entryPoint.parse(path);
+        for (Resource resource : resources) {
+            PathValues pathValues = resource.parse(path);
             if (pathValues != null) {
-                if (!entryPoint.matchUserRole(req)) {
+                if (!resource.matchUserRole(req)) {
                     resp.sendError(HttpServletResponse.SC_FORBIDDEN, "Forbidden");
                     return;
                 }
                 try {
-                    if (!entryPoint.matchContentType(contentType)) {
+                    if (!resource.matchContentType(contentType)) {
                         matchContentTypeFail = true;
                         continue;
                     }
-                    Optional<MediaType> producesMediaType = entryPoint.matchAccept(accept);
+                    Optional<MediaType> producesMediaType = resource.matchAccept(accept);
                     if (!producesMediaType.isPresent()) {
                         matchAcceptFail = true;
                         continue;
                     }
-                    Response result = entryPoint.invoke(req, resp, servletContext, pathValues);
+                    Response result = resource.invoke(req, resp, servletContext, pathValues);
                     //It could be that in resource method Response object was created manually and media-type was set,
                     //and this media-type do not match request Accept-header.
                     //In this case -> response error at ones.
@@ -138,7 +139,7 @@ public class RoutingServlet extends HttpServlet {
                         resp.sendError(HttpServletResponse.SC_NOT_ACCEPTABLE, "Not acceptable");
                         return;
                     }
-                    produce(resp, entryPoint, result, producesMediaType.get());
+                    produce(resp, resource, result, producesMediaType.get());
                 } catch (WebApplicationException wae) {
                     resp.sendError(wae.getResponse().getStatus(), wae.getMessage());
                 } catch (Exception e) {
@@ -177,7 +178,7 @@ public class RoutingServlet extends HttpServlet {
         return path;
     }
 
-    private void produce(HttpServletResponse resp, EntryPoint entryPoint, Response result, MediaType producesMediaType) throws IOException {
+    private void produce(HttpServletResponse resp, Resource resource, Response result, MediaType producesMediaType) throws IOException {
 
         StatusType status = result.getStatusInfo();
         resp.setStatus(status.getStatusCode());
@@ -196,7 +197,7 @@ public class RoutingServlet extends HttpServlet {
         resp.setCharacterEncoding(responseMediaType.getParameters().get(MediaType.CHARSET_PARAMETER));
         resp.setContentType(new MediaType(responseMediaType.getType(), responseMediaType.getSubtype()).toString());
 
-        ReturnObjectInfo info = entryPoint.returnObjectInfo().withEntity(result.getEntity());
+        ReturnObjectInfo info = resource.returnObjectInfo().withEntity(result.getEntity());
 
         MessageBodyHeadersWriter writer = new MessageBodyHeadersWriter(resp, findBodyWriter(responseMediaType, info));
 

@@ -1,4 +1,4 @@
-package net.cactusthorn.routing.scanner;
+package net.cactusthorn.routing.resource;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -13,13 +13,12 @@ import javax.servlet.http.HttpServletRequest;
 import org.junit.jupiter.api.Test;
 
 import net.cactusthorn.routing.ComponentProvider;
-import net.cactusthorn.routing.EntryPointScanner;
 import net.cactusthorn.routing.PathTemplate;
-import net.cactusthorn.routing.EntryPointScanner.EntryPoint;
 import net.cactusthorn.routing.Http;
 import net.cactusthorn.routing.PathTemplate.PathValues;
 import net.cactusthorn.routing.RoutingConfig;
 import net.cactusthorn.routing.annotation.Template;
+import net.cactusthorn.routing.resource.ResourceScanner.Resource;
 
 import javax.ws.rs.GET;
 import javax.ws.rs.HEAD;
@@ -67,12 +66,12 @@ public class ScannerTest {
 
     @Test //
     public void entryPoint1() {
-        RoutingConfig config = RoutingConfig.builder(new EntryPoint1Provider1()).addEntryPoint(EntryPoint1.class).build();
-        EntryPointScanner f = new EntryPointScanner(config);
-        Map<String, List<EntryPoint>> entryPoints = f.scan();
-        List<EntryPoint> gets = entryPoints.get(HttpMethod.GET);
+        RoutingConfig config = RoutingConfig.builder(new EntryPoint1Provider1()).addResource(EntryPoint1.class).build();
+        ResourceScanner f = new ResourceScanner(config);
+        Map<String, List<Resource>> entryPoints = f.scan();
+        List<Resource> gets = entryPoints.get(HttpMethod.GET);
 
-        for (EntryPoint entryPoint : gets) {
+        for (Resource entryPoint : gets) {
             assertTrue(entryPoint.match("/api/dddd/"));
         }
     }
@@ -107,12 +106,12 @@ public class ScannerTest {
 
     @Test //
     public void entryPoint2() {
-        RoutingConfig config = RoutingConfig.builder(new EntryPoint1Provider2()).addEntryPoint(EntryPoint2.class).build();
-        EntryPointScanner f = new EntryPointScanner(config);
-        Map<String, List<EntryPoint>> entryPoints = f.scan();
-        List<EntryPoint> gets = entryPoints.get(HttpMethod.GET);
+        RoutingConfig config = RoutingConfig.builder(new EntryPoint1Provider2()).addResource(EntryPoint2.class).build();
+        ResourceScanner f = new ResourceScanner(config);
+        Map<String, List<Resource>> entryPoints = f.scan();
+        List<Resource> gets = entryPoints.get(HttpMethod.GET);
 
-        for (EntryPoint entryPoint : gets) {
+        for (Resource entryPoint : gets) {
             assertTrue(entryPoint.match("/dddd/"));
         }
     }
@@ -133,10 +132,10 @@ public class ScannerTest {
 
     @Test //
     public void entryPoint3() {
-        RoutingConfig config = RoutingConfig.builder(new EntryPoint1Provider3()).addEntryPoint(EntryPoint3.class).build();
-        EntryPointScanner f = new EntryPointScanner(config);
-        Map<String, List<EntryPoint>> entryPoints = f.scan();
-        EntryPoint entryPoint = entryPoints.get(HttpMethod.GET).get(0);
+        RoutingConfig config = RoutingConfig.builder(new EntryPoint1Provider3()).addResource(EntryPoint3.class).build();
+        ResourceScanner f = new ResourceScanner(config);
+        Map<String, List<Resource>> entryPoints = f.scan();
+        Resource entryPoint = entryPoints.get(HttpMethod.GET).get(0);
 
         assertTrue(entryPoint.match("/"));
 
@@ -174,10 +173,10 @@ public class ScannerTest {
 
     @Test //
     public void entryPoint4() {
-        RoutingConfig config = RoutingConfig.builder(new EntryPoint1Provider4()).addEntryPoint(EntryPoint4.class).build();
-        EntryPointScanner f = new EntryPointScanner(config);
-        Map<String, List<EntryPoint>> entryPoints = f.scan();
-        EntryPoint entryPoint = entryPoints.get(HttpMethod.GET).get(0);
+        RoutingConfig config = RoutingConfig.builder(new EntryPoint1Provider4()).addResource(EntryPoint4.class).build();
+        ResourceScanner f = new ResourceScanner(config);
+        Map<String, List<Resource>> entryPoints = f.scan();
+        Resource entryPoint = entryPoints.get(HttpMethod.GET).get(0);
         PathTemplate.PathValues values = entryPoint.parse("/api/");
 
         assertEquals(PathValues.EMPTY, values);
@@ -191,10 +190,10 @@ public class ScannerTest {
 
     @Test //
     public void wow() {
-        RoutingConfig config = RoutingConfig.builder(new EntryPoint1Provider4()).addEntryPoint(EntryPoint4.class).build();
-        EntryPointScanner f = new EntryPointScanner(config);
-        Map<String, List<EntryPoint>> entryPoints = f.scan();
-        EntryPoint entryPoint = entryPoints.get(HttpMethod.HEAD).get(0);
+        RoutingConfig config = RoutingConfig.builder(new EntryPoint1Provider4()).addResource(EntryPoint4.class).build();
+        ResourceScanner f = new ResourceScanner(config);
+        Map<String, List<Resource>> entryPoints = f.scan();
+        Resource entryPoint = entryPoints.get(HttpMethod.HEAD).get(0);
         assertEquals("wow.html", entryPoint.template());
     }
 }

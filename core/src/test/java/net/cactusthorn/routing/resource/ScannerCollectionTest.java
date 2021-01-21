@@ -1,4 +1,4 @@
-package net.cactusthorn.routing.scanner;
+package net.cactusthorn.routing.resource;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -14,9 +14,8 @@ import javax.ws.rs.Path;
 import org.junit.jupiter.api.Test;
 
 import net.cactusthorn.routing.ComponentProvider;
-import net.cactusthorn.routing.EntryPointScanner;
 import net.cactusthorn.routing.RoutingConfig;
-import net.cactusthorn.routing.EntryPointScanner.EntryPoint;
+import net.cactusthorn.routing.resource.ResourceScanner.Resource;
 
 public class ScannerCollectionTest {
 
@@ -73,12 +72,12 @@ public class ScannerCollectionTest {
     @Test //
     public void entryPoint() {
         List<Class<?>> classes = Arrays.asList(EntryPoint1.class, EntryPoint2.class, EntryPoint3.class, EntryPoint4.class);
-        RoutingConfig config = RoutingConfig.builder(new EntryPointProvider()).addEntryPoint(classes).build();
-        EntryPointScanner f = new EntryPointScanner(config);
-        Map<String, List<EntryPoint>> entryPoints = f.scan();
-        List<EntryPoint> gets = entryPoints.get(HttpMethod.GET);
+        RoutingConfig config = RoutingConfig.builder(new EntryPointProvider()).addResource(classes).build();
+        ResourceScanner f = new ResourceScanner(config);
+        Map<String, List<Resource>> entryPoints = f.scan();
+        List<Resource> gets = entryPoints.get(HttpMethod.GET);
         assertEquals(4, gets.size());
-        for (EntryPoint entryPoint : gets) {
+        for (Resource entryPoint : gets) {
             assertTrue(entryPoint.match("/api/dddd/"));
         }
     }

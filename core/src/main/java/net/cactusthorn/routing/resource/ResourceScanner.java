@@ -1,4 +1,4 @@
-package net.cactusthorn.routing;
+package net.cactusthorn.routing.resource;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
@@ -17,19 +17,22 @@ import javax.ws.rs.Path;
 
 import net.cactusthorn.routing.annotation.Template;
 import net.cactusthorn.routing.annotation.UserRoles;
+import net.cactusthorn.routing.PathTemplate;
+import net.cactusthorn.routing.RoutingConfig;
+import net.cactusthorn.routing.Templated;
 import net.cactusthorn.routing.PathTemplate.PathValues;
 import net.cactusthorn.routing.invoke.MethodInvoker;
 import net.cactusthorn.routing.invoke.MethodInvoker.ReturnObjectInfo;
 
-public class EntryPointScanner {
+public class ResourceScanner {
 
     private static final ConsumesParser CONSUMES_PARSER = new ConsumesParser();
     private static final PathTemplateParser PATHTEMPLATE_PARSER = new PathTemplateParser();
     private static final ProducesParser PRODUCES_PARSER = new ProducesParser();
 
-    public static final class EntryPoint {
+    public static final class Resource {
 
-        private static final Comparator<EntryPoint> COMPARATOR = (o1, o2) -> PathTemplate.COMPARATOR.compare(o1.pathTemplate,
+        private static final Comparator<Resource> COMPARATOR = (o1, o2) -> PathTemplate.COMPARATOR.compare(o1.pathTemplate,
                 o2.pathTemplate);
 
         private PathTemplate pathTemplate;
@@ -39,7 +42,7 @@ public class EntryPointScanner {
         private String template;
         private Set<String> userRoles;
 
-        private EntryPoint(PathTemplate pathTemplate, String template, List<MediaType> producesMediaTypes,
+        private Resource(PathTemplate pathTemplate, String template, List<MediaType> producesMediaTypes,
                 Set<MediaType> consumesMediaTypes, MethodInvoker methodInvoker, Set<String> userRoles) {
             this.pathTemplate = pathTemplate;
             this.producesMediaTypes = producesMediaTypes;
@@ -119,15 +122,15 @@ public class EntryPointScanner {
 
     private RoutingConfig routingConfig;
 
-    public EntryPointScanner(RoutingConfig routingConfig) {
+    public ResourceScanner(RoutingConfig routingConfig) {
         this.routingConfig = routingConfig;
     }
 
-    public Map<String, List<EntryPoint>> scan() {
+    public Map<String, List<Resource>> scan() {
 
-        Map<String, List<EntryPoint>> entryPoints = createMap();
+        Map<String, List<Resource>> resources = createMap();
 
-        for (Class<?> clazz : routingConfig.entryPointClasses()) {
+        for (Class<?> clazz : routingConfig.resourceClasses()) {
 
             String classPath = PATHTEMPLATE_PARSER.prepare(routingConfig.applicationPath(), clazz.getAnnotation(Path.class));
             Set<MediaType> classConsumesMediaTypes = CONSUMES_PARSER.consumes(clazz);
@@ -153,19 +156,19 @@ public class EntryPointScanner {
 
                         Set<String> userRoles = findUserRoles(method);
 
-                        EntryPoint entryPoint = new EntryPoint(pathTemplate, template, producesMediaTypes, consumesMediaTypes,
+                        Resource resource = new Resource(pathTemplate, template, producesMediaTypes, consumesMediaTypes,
                                 methodInvoker, userRoles);
-                        entryPoints.get(httpMethod).add(entryPoint);
+                        resources.get(httpMethod).add(resource);
                     }
                 }
             }
         }
 
-        for (Map.Entry<String, List<EntryPoint>> entry : entryPoints.entrySet()) {
-            Collections.sort(entry.getValue(), EntryPoint.COMPARATOR);
+        for (Map.Entry<String, List<Resource>> entry : resources.entrySet()) {
+            Collections.sort(entry.getValue(), Resource.COMPARATOR);
         }
 
-        return entryPoints;
+        return resources;
     }
 
     private String findTemplate(Method method) {
@@ -195,11 +198,11 @@ public class EntryPointScanner {
         return null;
     }
 
-    private Map<String, List<EntryPoint>> createMap() {
-        Map<String, List<EntryPoint>> entryPoints = new HashMap<>();
+    private Map<String, List<Resource>> createMap() {
+        Map<String, List<Resource>> resources = new HashMap<>();
         for (String method : HTTP_METHODS) {
-            entryPoints.put(method, new ArrayList<>());
+            resources.put(method, new ArrayList<>());
         }
-        return entryPoints;
+        return resources;
     }
 }

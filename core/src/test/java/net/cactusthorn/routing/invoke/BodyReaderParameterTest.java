@@ -65,7 +65,7 @@ public class BodyReaderParameterTest extends InvokeTestAncestor {
         }
     }
 
-    private static RoutingConfig CONFIG = RoutingConfig.builder(new EntryPoint1Provider()).addEntryPoint(EntryPoint1.class).build();
+    private static RoutingConfig CONFIG = RoutingConfig.builder(new EntryPoint1Provider()).addResource(EntryPoint1.class).build();
 
     @BeforeAll //
     protected static void beforeAll() throws Exception {

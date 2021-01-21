@@ -1,4 +1,4 @@
-package net.cactusthorn.routing;
+package net.cactusthorn.routing.resource;
 
 import java.lang.reflect.Method;
 import java.util.Collections;

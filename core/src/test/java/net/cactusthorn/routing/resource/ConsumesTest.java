@@ -1,4 +1,4 @@
-package net.cactusthorn.routing.scanner;
+package net.cactusthorn.routing.resource;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -19,7 +19,7 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 
 import net.cactusthorn.routing.*;
-import net.cactusthorn.routing.EntryPointScanner.EntryPoint;
+import net.cactusthorn.routing.resource.ResourceScanner.Resource;
 
 public class ConsumesTest {
 
@@ -73,10 +73,10 @@ public class ConsumesTest {
 
     @ParameterizedTest @MethodSource("provideArguments") //
     public void testIt(ComponentProvider provider, Class<?> entryPointClass, String httpMethod, String match ) {
-        RoutingConfig config = RoutingConfig.builder(provider).addEntryPoint(entryPointClass).build();
-        EntryPointScanner scanner = new EntryPointScanner(config);
-        Map<String, List<EntryPoint>> entryPoints = scanner.scan();
-        EntryPoint entryPoint = entryPoints.get(httpMethod).get(0);
+        RoutingConfig config = RoutingConfig.builder(provider).addResource(entryPointClass).build();
+        ResourceScanner scanner = new ResourceScanner(config);
+        Map<String, List<Resource>> entryPoints = scanner.scan();
+        Resource entryPoint = entryPoints.get(httpMethod).get(0);
         assertTrue(entryPoint.matchContentType(match));
     }
 
