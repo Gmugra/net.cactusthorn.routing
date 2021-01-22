@@ -19,7 +19,7 @@ However: such implementations are trivial issue.
 
 Examples:
 * **json-gson** module as example of _application/json_ Reader & Writer using [GSON](https://github.com/google/gson)
-* **thymeleaf** module as example of _text/html_ Producer using [Thymeleaf](https://www.thymeleaf.org)
+* **thymeleaf** module as example of _text/html_ Writer using [Thymeleaf](https://www.thymeleaf.org)
 
 ### ComponentProvider
 
@@ -158,6 +158,7 @@ public class Application {
 ### MessageBodyReaders
 
 Default(if the annotation is not present) priority is javax.ws.rs.Priorities.USER
+
 Default(if the annotation is not present) consumes is "\*/*\"
 
 For the next types MessageBodyReaders are provided:
@@ -215,6 +216,7 @@ public class MyClassMessageBodyReader implements net.cactusthorn.routing.body.re
 ### MessageBodyWriters
 
 Default(if the annotation is not present) priority is javax.ws.rs.Priorities.USER
+
 Default(if the annotation is not present) produces is "\*/*\"
 
 For the next types MessageBodyReaders are provided:
