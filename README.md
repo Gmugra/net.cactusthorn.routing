@@ -1,24 +1,47 @@
 
 # net.cactusthorn.routing
 
-Lightweight Java library for HTTP requests routing in context of Servlet API
+Lightweight [JAX-RS](https://www.oracle.com/technical-resources/articles/java/jax-rs.html) implementation.
 
 [![Build Status](https://travis-ci.com/Gmugra/net.cactusthorn.routing.svg?branch=main)](https://travis-ci.com/Gmugra/net.cactusthorn.routing) [![Coverage Status](https://coveralls.io/repos/github/Gmugra/net.cactusthorn.routing/badge.svg?branch=main)](https://coveralls.io/github/Gmugra/net.cactusthorn.routing?branch=main) [![GitHub release (latest by date)](https://img.shields.io/github/v/release/Gmugra/net.cactusthorn.routing)](https://github.com/Gmugra/net.cactusthorn.routing/releases/tag/v0.26) [![Maven Central with version prefix filter](https://img.shields.io/maven-central/v/net.cactusthorn.routing/core/0.26)](https://search.maven.org/search?q=g:net.cactusthorn.routing) [![GitHub](https://img.shields.io/github/license/Gmugra/net.cactusthorn.routing)](https://github.com/Gmugra/net.cactusthorn.routing/blob/main/LICENSE) [![Build by Maven](http://maven.apache.org/images/logos/maven-feather.png)](http://maven.apache.org)
 
 ## Introduction
 
-The library provides an annotation based API in [JAX-RS specification](https://www.oracle.com/technical-resources/articles/java/jax-rs.html) "like" style to redirect HTTP request to a specific method. **And nothing more**.
+The main goal is to get small library for HTTP request routing, based on JAX-RS specification.
 
-Usual annotations in usual way e.g.:
+## Compromises
+
+### MessageBodyReaders & MessageBodyReaders
+
+The library do not provide complex MessageBodyReaders/Writers out of the box.
+So, to get support for XML or JSON need to provide MessageBodyReaders/Writers implementations.
+However: such implementations are trivial issue.
+
+Examples:
+* **json-gson** module as example of _application/json_ Reader & Writer using [GSON](https://github.com/google/gson)
+* **thymeleaf** module as example of _text/html_ Producer using [Thymeleaf](https://www.thymeleaf.org)
+
+### ComponentProvider
+
+Implementation of ComponentProvider interface required to  provide JAX-RS resources instances.
+It seems that implementation for ComponentProvider is not so easy, because you need "scopes" (Request and/or Session) or even Singletons.
+But it's not. All of that is natural features of any good dependency injection framework (e.g. [Dagger 2](https://dagger.dev), [Guice](https://github.com/google/guice), [HK2](https://javaee.github.io/hk2/) ).
+It's anyway good idea to use dependency injection in the application, so all what is need for ComponentProvider: link it with dependency injection framework which you are using.
+
+Example:
+* **demo-jetty** module is Demo Application: it uses [Dagger 2](https://dagger.dev) for dependency injection and as the basis for the _ComponentProvider_ implementation.
+
+### Usage
+
+Usual JAX-RS resources, e.g:
+
 ```java
-import net.cactusthorn.routing.annotation.*;
-
 @Path("/my")
 public class MyEntryPoint {
 
     @GET
     @Path("something/{ id : \\d{6} }/{var1}-{var2}")
-    @Produces("application/json")
+    @Produces(MediaType.APPLICATION_JSON)
     public MySomething getIt(
         @PathParam("id") int id,
         @PathParam("var1") String var1,
@@ -28,10 +51,12 @@ public class MyEntryPoint {
         return new MySomething(...);
     }
 }
-```
-Provide list of the annotated classes to the servlet, plug the servlet in the servlet-container, and... it works.
 
+```
+
+Provide list of the annotated classes to the servlet and plug the servlet in the servlet-container.
 In combination with embedded Jetty it's looks like that:
+
 ```java
 import net.cactusthorn.routing.*;
 import net.cactusthorn.routing.gson.*;
@@ -46,17 +71,18 @@ public class Application {
 
     public static void main(String... args) {
 
-        ComponentProvider provider = new MyComponentProvider(...);
+        ComponentProvider myComponentProvider = new MyComponentProvider(...);
         Collection<Class<?>> entryPoints = ...
         Converter converter = new MyLocalDateConverter(...);
 
         RoutingConfig config =
-            RoutingConfig.builder(provider)
+            RoutingConfig.builder(myComponentProvider)
+            .addEntryPoint(MyEntryPoint.class)
             .addEntryPoint(entryPoints)
-            .addProducer("application/json", new SimpleGsonProducer())
-            .addConsumer("application/json", new SimpleGsonConsumer())
-            .addProducer("text/html", new SimpleThymeleafProducer("/thymeleaf/"))
-            .addConverter(java.time.LocalDate.class, converter);
+            .addBodyWriter(new SimpleGsonBodyWriter<>())
+            .addBodyReader(new SimpleGsonBodyReader<>())
+            .addBodyWriter(new SimpleThymeleafBodyWriter("/thymeleaf/"))
+            .addConverter(LocalDate.class, new LocalDateConverter())
             .setParametersValidator(new SimpleParametersValidator())
             .build();
 
@@ -72,78 +98,197 @@ public class Application {
 
         Server jetty = new Server(8080);
         jetty.setHandler(servletContext);
-
         jetty.start();
         jetty.join();
     }
 }
+
 ```
-The library is doing only routing, but it's expected that the application provides implementations for several interfaces:
-1. ComponentProvider - which will provide EntryPoint instances
-1. multiple Producers which will generate responses based on Content-Type
-1. multiple Consumers to convert request body to Java objects based on Content-Type
 
-**The basic idea**: build web application with only the components you prefer.
-The Routing Library JAR itself is less then 100KB (+ ~ 100KB _javax.servlet-api_ JAR).
+## Supported features
 
-The flow is simple:
-1. The Servlet get the HTTP request, and find the method which should process it.
-1. It get the EntryPoint instance from the ComponentProvider, convert parameters(if necessary use Consumer to convert request-body) and invoke the method.
-1. It get from the method return-Object, find Producer and provide the object to Producer, which write result into response output stream.
+### Request to resource matching
 
-#### ComponentProvider
-It seems that implementation for ComponentProvider is not so easy, because you need "scopes" (Request and/or Session) or even Singletons.
-But it's not. All of that is natural features of any good dependency injection framework (e.g. [Dagger 2](https://dagger.dev), [Guice](https://github.com/google/guice), [HK2](https://javaee.github.io/hk2/) ). It's anyway good idea to use dependency injection in the application, so all what is necessary in ComponentProvider - link it with dependency injection framework which you are using.
+1. URI template matched to request URI according JAX-RS rules
+1. If no one resource found then HTTP response with status 404 send back to client.
+1. If some resources was found, but @Consumes-annotation of no one of them fit Content-Type request-header: HTTP response with status 415 send back to client.
+1. If some resources was found, but @Produces-annotation of no one of them fit Accept request-header: HTTP response with status 406 send back to client.
 
-#### Producers & Consumers
-Providing implementations is relative trivial issue, because there are lot of powerful libraries around, which can do any of that.
-As result, implementation of the interface is question of several lines of code. Look at **json-gson** module as example of _application/json_ Producer & Consumer using [GSON](https://github.com/google/gson) and **thymeleaf** module as example of _text/html_ Producer using [Thymeleaf](https://www.thymeleaf.org)
+### Method parameter types converting
 
-## Example
-
-The **demo-jetty** module is full functional example.
-
-It uses the embedded [Jetty](https://www.eclipse.org/jetty/) as servlet-container,
-and [Dagger 2](https://dagger.dev) for dependency injection and as the basis for the _ComponentProvider_.
-
-More or less there are examples of everything:
-Various "simple" requests, JSON, File uploading (multipart/form-data), HTML with Thymeleaf, Scopes, parameters validation with javax.validation, @UserRoles
-
-## Features
-
-1. @Path for class and/or method (regular expressions support; routing priority like in JAX-RS)
-1. @GET @POST and so on
-1. Types converting for:
-   1. primitive types
-   1. classes with _public static valeuOf(String arg)_ method.
-   1. classes with a public constructor that accepts a single String argument.
-   1. classes with _public static fromString(String arg)_ method.
-   1. _Converter_ interface: to write custom converters.
-1. @PathParam, @QueryParam, @FormParam, @CookieParam, @HeaderParam, @FormPart for parameters.
+1. all primitive types
+1. classes with _public static valeuOf(String arg)_ method.
+1. classes with a public constructor that accepts a single String argument.
+1. classes with _public static fromString(String arg)_ method.
+1. _Converter_ interface: to write custom converters.
 1. Arrays support for @QueryParam & @FormParam
 1. Collections support for @QueryParam & @FormParam
-   1. Interfaces List\<T\>, Set\<T\>, SortedSet\<T\>, Collection\<T\> where T is supported by type converting
-   1. any class which is not abstract and _Collections.class.isAssignableFrom( this class ) == true_
+   * Interfaces List\<T\>, Set\<T\>, SortedSet\<T\>, Collection\<T\> where T is supported by type converting
+   * any class which is not abstract and _Collections.class.isAssignableFrom( this class ) == true_
+
+### JAX-RS
+
+1. @Path for class and/or method
+   * path-parameters (with regular expressions support)
+1. @GET @POST @DELETE @HEAD @OPTIONS @PATCH @PUT for method
+1. @PathParam, @QueryParam, @FormParam, @CookieParam, @HeaderParam, @FormPart for method parameters.
 1. @DefaultValue for @PathParam, @QueryParam, @FormParam, @HeaderParam
-1. @Produce, @Template and Producer interface. Implementation examples:
-   1. application/json: _SimpleGsonProducer_ (**json-gson** module)
-   1. text/html: _SimpleThymeleafProducer_ (**thymeleaf** module)
-1. @Consumes for class and/or method. To specify Content-Type as additional routing filter. Wildcard is supported (e.g. text/* )
-1. Consumer interface. Implementation examples:
-   1. application/json: _SimpleGsonConsumer_ (**json-gson** module)
-1. Inject _HttpServletRequest_, _HttpServletResponse_, _HttpSession_, _ServletContext_, _java.security.Principal_ in method parameters
-1. _Response_ class to manually construct response.
+1. @Consumes for class and/or method
+   * default(if not present) is "\*/\*"
+1. @Produces for class and/or method
+   * default(if not present) is "text/plain"
+1. @Context for method parameters. At the moment suport next types:
+   * HttpServletRequest
+   * HttpServletResponse
+   * HttpSession
+   * ServletContext
+   * java.security.Principal
+1. javax.ws.rs.core.Response
+
+### Extensions
+
 1. ParametersValidator interface to integrate additional validations e.g. _javax.validation_
-   1. Implemetation example is **validation-javax** module
-1. @UserRoles annotation
+   * Implemetation example is **validation-javax** module
+1. @UserRoles method annotation
    1. to check entry point against request.isUserInRole(...)
    1. Implemetation example exists in **demo-jetty** module
+1. @Template annotation, Templated-class and TemplatedMessageBodyWriter to implement message body writers for html-template-engines (e.g. FreeMarker, Thymeleaf)
+   * Implemetation example is **thymeleaf** module
 
-TODO
-1. @Converter to override "default" converter for some parameter
-1. @MatrixParam
-1. PathSegment
-1. AsyncResponse
+### MessageBodyReaders
+
+Default(if the annotation is not present) priority is javax.ws.rs.Priorities.USER
+Default(if the annotation is not present) consumes is "\*/*\"
+
+For the next types MessageBodyReaders are provided:
+Type | Priority
+-----| --------
+java.io.InputStream | 50
+java.lang.String | 50
+Any convertable from String | 9999
+
+#### Simple
+
+```java
+@javax.annotation.Priority(3000)
+@javax.ws.rs.Consumes({MediaType.APPLICATION_JSON, MediaType.TEXT_HTML})
+public class MyClassMessageBodyReader implements javax.ws.rs.ext.MessageBodyReader<MyClass> {
+
+    @Override
+    public boolean isReadable(Class<?> type, Type genericType, Annotation[] annotations, MediaType mediaType) {
+        ...
+    }
+
+    @Override
+    public MyClass readFrom(Class<InputStream> type, Type genericType, Annotation[] annotations, MediaType mediaType,
+            MultivaluedMap<String, String> httpHeaders, InputStream entityStream) {
+        ...
+    }
+}
+```
+
+#### Initializable
+
+```java
+@javax.annotation.Priority(3000)
+@javax.ws.rs.Consumes({MediaType.APPLICATION_JSON, MediaType.TEXT_HTML})
+public class MyClassMessageBodyReader implements net.cactusthorn.routing.body.reader.InitializableMessageBodyReader<MyClass> {
+
+    @Override
+    public void init(ServletContext servletContext, RoutingConfig routingConfig) {
+        ...
+    }
+
+    @Override
+    public boolean isReadable(Class<?> type, Type genericType, Annotation[] annotations, MediaType mediaType) {
+        ...
+    }
+
+    @Override
+    public MyClass readFrom(Class<InputStream> type, Type genericType, Annotation[] annotations, MediaType mediaType,
+            MultivaluedMap<String, String> httpHeaders, InputStream entityStream) {
+        ...
+    }
+}
+```
+
+### MessageBodyWriters
+
+Default(if the annotation is not present) priority is javax.ws.rs.Priorities.USER
+Default(if the annotation is not present) produces is "\*/*\"
+
+For the next types MessageBodyReaders are provided:
+Type | Priority
+-----| --------
+java.lang.String | 50
+java.lang.Object | 9999
+
+
+#### Simple
+```java
+@javax.annotation.Priority(3000)
+@javax.ws.rs.Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_HTML})
+public class MyClassMessageBodyWriter implements javax.ws.rs.ext.MessageBodyWriter<MyClass> {
+
+    @Override
+    public boolean isWriteable(Class<?> type, Type genericType, Annotation[] annotations, MediaType mediaType) {
+        ...
+    }
+
+    @Override
+    public void writeTo(MyClass entity, Class<?> type, Type genericType, Annotation[] annotations, MediaType mediaType,
+            MultivaluedMap<String, Object> httpHeaders, OutputStream entityStream) throws IOException, WebApplicationException {
+        ...
+    }
+}
+```
+
+#### Initializable
+```java
+@javax.annotation.Priority(3000)
+@javax.ws.rs.Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_HTML})
+public class MyClassMessageBodyWriter implements net.cactusthorn.routing.body.writer.InitializableMessageBodyWriter<MyClass> {
+
+    @Override
+    public void init(ServletContext servletContext, RoutingConfig routingConfig) {
+        ...
+    }
+
+    @Override
+    public boolean isWriteable(Class<?> type, Type genericType, Annotation[] annotations, MediaType mediaType) {
+        ...
+    }
+
+    @Override
+    public void writeTo(MyClass entity, Class<?> type, Type genericType, Annotation[] annotations, MediaType mediaType,
+            MultivaluedMap<String, Object> httpHeaders, OutputStream entityStream) throws IOException, WebApplicationException {
+        ...
+    }
+}
+```
+
+#### Templated
+```java
+@Produces({MediaType.TEXT_HTML})
+public class SimpleThymeleafBodyWriter implements net.cactusthorn.routing.body.writer.TemplatedMessageBodyWriter {
+
+    @Override
+    public void init(ServletContext servletContext, RoutingConfig routingConfig) {
+        ...
+    }
+
+    @Override
+    public boolean isWriteable(Class<?> type, Type genericType, Annotation[] annotations, MediaType mediaType) {
+        ...
+    }
+
+    @Override
+    public void writeTo(Templated templated, Class<?> type, Type genericType, Annotation[] annotations, MediaType mediaType,
+            MultivaluedMap<String, Object> httpHeaders, OutputStream entityStream) throws IOException, WebApplicationException {
+        ...
+    }
+}
+```
 
 ## DOWNLOAD
 
@@ -152,16 +297,11 @@ TODO
 <dependency>
     <groupId>net.cactusthorn.routing</groupId>
     <artifactId>core</artifactId>
-    <version>0.26</version>
+    <version>0.27</version>
 </dependency>
 ```
 
 Public Releases can be also downloaded from [GitHub Releases](https://github.com/Gmugra/net.cactusthorn.routing/releases) or [GitHub Packages](https://github.com/Gmugra?tab=packages&repo_name=net.cactusthorn.routing)
 
-
 ## LICENSE
-
 net.cactusthorn.routing is released under the BSD license. See LICENSE file included for the details.
-
-
-
