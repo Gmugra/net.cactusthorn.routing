@@ -2,9 +2,10 @@ package net.cactusthorn.routing.demo.jetty.dagger;
 
 import java.util.Map;
 
-import javax.inject.*;
+import javax.inject.Provider;
+import javax.inject.Singleton;
 
-import dagger.*;
+import dagger.Component;
 import net.cactusthorn.routing.demo.jetty.service.IAmSingletonService;
 
 @Singleton @Component(modules = { RequestScopeModule.class, SessionBuilderModule.class }) //

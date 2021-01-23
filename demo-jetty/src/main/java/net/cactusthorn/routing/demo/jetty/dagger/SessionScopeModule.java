@@ -1,7 +1,10 @@
 package net.cactusthorn.routing.demo.jetty.dagger;
 
-import dagger.*;
-import dagger.multibindings.*;
+import dagger.Binds;
+import dagger.Module;
+import dagger.multibindings.IntoMap;
+import dagger.multibindings.ClassKey;
+
 import net.cactusthorn.routing.demo.jetty.entrypoint.SessionScopeEntryPoint;
 
 @Module //

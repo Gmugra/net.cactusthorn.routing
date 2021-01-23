@@ -6,6 +6,7 @@ import java.io.OutputStreamWriter;
 import java.io.Writer;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -44,6 +45,7 @@ public class SimpleThymeleafBodyWriter implements TemplatedMessageBodyWriter {
         templateResolver.setSuffix(".html");
         templateResolver.setCacheTTLMs(Long.valueOf(3600000L));
         templateResolver.setCacheable(true);
+        templateResolver.setCharacterEncoding(StandardCharsets.UTF_8.name());
 
         TemplateEngine engine = new TemplateEngine();
         engine.setTemplateResolver(templateResolver);

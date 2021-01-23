@@ -1,6 +1,6 @@
 package net.cactusthorn.routing.demo.jetty.dagger;
 
-import dagger.*;
+import dagger.Subcomponent;
 
 import java.util.Map;
 
