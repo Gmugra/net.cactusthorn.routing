@@ -9,7 +9,6 @@ import java.util.Set;
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpSession;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.CookieParam;
 import javax.ws.rs.DefaultValue;
@@ -97,9 +96,6 @@ public abstract class MethodParameter {
                 }
                 if (HttpServletResponse.class.isAssignableFrom(parameterClassType)) {
                     return new HttpServletResponseParameter(parameter);
-                }
-                if (HttpSession.class.isAssignableFrom(parameterClassType)) {
-                    return new HttpSessionParameter(parameter);
                 }
                 if (ServletContext.class.isAssignableFrom(parameterClassType)) {
                     return new ServletContextParameter(parameter);

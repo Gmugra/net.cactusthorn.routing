@@ -13,7 +13,6 @@ import java.util.stream.Stream;
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpSession;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.POST;
 import javax.ws.rs.PathParam;
@@ -52,10 +51,6 @@ public class MethodInvokerTest extends InvokeTestAncestor {
             return "OK";
         }
 
-        public String m2(@Context HttpSession session) {
-            return (String) session.getAttribute("test");
-        }
-
         public String m3(@Context HttpServletRequest request, @PathParam("in") Integer val) {
             return (String) request.getAttribute("req") + val;
         }
@@ -91,8 +86,6 @@ public class MethodInvokerTest extends InvokeTestAncestor {
 
     HttpServletResponse response;
 
-    HttpSession session;
-
     ServletContext context;
 
     @BeforeAll
@@ -103,13 +96,10 @@ public class MethodInvokerTest extends InvokeTestAncestor {
     @BeforeEach @Override //
     protected void setUp() throws Exception {
         super.setUp();
-        session = Mockito.mock(HttpSession.class);
         context = Mockito.mock(ServletContext.class);
         response = Mockito.mock(HttpServletResponse.class);
         Mockito.when(request.getAttribute("req")).thenReturn("EVE");
         Mockito.when(request.getParameter("in")).thenReturn("120.5");
-        Mockito.when(request.getSession(false)).thenReturn(session);
-        Mockito.when(session.getAttribute("test")).thenReturn("YES");
         Mockito.when(context.getAttribute("test")).thenReturn("CONTEXT");
         Mockito.when(response.getCharacterEncoding()).thenReturn("KOI8-R");
     }
@@ -173,7 +163,6 @@ public class MethodInvokerTest extends InvokeTestAncestor {
         return Stream.of(
             Arguments.of("m0", PathValues.EMPTY, "OK"),
             Arguments.of("m1", new PathValues("in", "123"), 123),
-            Arguments.of("m2", PathValues.EMPTY, "YES"),
             Arguments.of("m3", new PathValues("in", "123"), "EVE123"),
             Arguments.of("m4", null, "120.5"),
             Arguments.of("m5", null, "CONTEXT"),

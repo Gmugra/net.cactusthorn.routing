@@ -140,7 +140,6 @@ public class Application {
 1. @Context for method parameters. At the moment suport next types:
    * HttpServletRequest
    * HttpServletResponse
-   * HttpSession
    * ServletContext
    * java.security.Principal
 1. javax.ws.rs.core.Response
