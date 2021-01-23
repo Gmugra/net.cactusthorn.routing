@@ -61,6 +61,7 @@
         <dependency.dagger>2.30.1</dependency.dagger>
         <dependency.hibernate-validator>6.2.0.Final</dependency.hibernate-validator>
         <dependency.javax.el>3.0.1-b12</dependency.javax.el>
+        <dependency.jaxb>2.3.1</dependency.jaxb>
 
         <plugin.compiler>3.8.1</plugin.compiler>
         <plugin.jar>3.2.0</plugin.jar>
@@ -188,6 +189,12 @@
                 <groupId>com.google.dagger</groupId>
                 <artifactId>dagger</artifactId>
                 <version>${dependency.dagger}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>javax.xml.bind</groupId>
+                <artifactId>jaxb-api</artifactId>
+                <version>${dependency.jaxb}</version>
             </dependency>
 
             <dependency>
@@ -574,6 +581,12 @@
 
         <profile>
             <id>coverage</id>
+            <dependencies>
+                <dependency>
+                    <groupId>javax.xml.bind</groupId>
+                    <artifactId>jaxb-api</artifactId>
+                </dependency>
+            </dependencies>
             <build>
                 <plugins>
                     <plugin>
