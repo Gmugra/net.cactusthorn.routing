@@ -31,14 +31,14 @@ public class StaticStringMethodConverterTest {
     public void invoke() throws Exception {
         StaticStringMethodConverter c = new StaticStringMethodConverter("valueOf");
         c.register(Integer.class);
-        assertEquals(123, c.convert(Integer.class, "123"));
+        assertEquals(123, c.convert(Integer.class, null, null, "123"));
     }
 
     @Test //
     public void wrong() throws Exception {
         StaticStringMethodConverter c = new StaticStringMethodConverter("valueOf");
         c.register(Integer.class);
-        Exception exception = assertThrows(InvocationTargetException.class, () -> c.convert(Integer.class, "12dd"));
+        Exception exception = assertThrows(InvocationTargetException.class, () -> c.convert(Integer.class, null, null, "12dd"));
         assertEquals(NumberFormatException.class, exception.getCause().getClass());
     }
 
@@ -46,14 +46,14 @@ public class StaticStringMethodConverterTest {
     public void nullValue() throws Exception {
         StaticStringMethodConverter c = new StaticStringMethodConverter("valueOf");
         c.register(Integer.class);
-        @SuppressWarnings("unused") Integer i = (Integer) c.convert(Integer.class, (String) null);
+        @SuppressWarnings("unused") Integer i = (Integer) c.convert(Integer.class, null, null, (String) null);
     }
 
     @Test //
     public void fromString() throws Exception {
         StaticStringMethodConverter c = new StaticStringMethodConverter("fromString");
         c.register(UUID.class);
-        UUID uuid = (UUID) c.convert(UUID.class, "46400000-8cc0-11bd-b43e-10d46e4ef14d");
+        UUID uuid = (UUID) c.convert(UUID.class, null, null, "46400000-8cc0-11bd-b43e-10d46e4ef14d");
         assertEquals("46400000-8cc0-11bd-b43e-10d46e4ef14d", uuid.toString());
     }
 }

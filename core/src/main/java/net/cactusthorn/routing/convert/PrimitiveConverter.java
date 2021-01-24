@@ -1,9 +1,12 @@
 package net.cactusthorn.routing.convert;
 
+import java.lang.annotation.Annotation;
+import java.lang.reflect.Type;
+
 public final class PrimitiveConverter implements Converter {
 
     @Override //
-    public Object convert(Class<?> type, String value) {
+    public Object convert(Class<?> type, Type genericType, Annotation[] annotations, String value) {
         if (Byte.TYPE == type) {
             return convertByte(value);
         }

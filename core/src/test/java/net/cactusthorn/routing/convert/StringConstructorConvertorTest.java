@@ -12,7 +12,7 @@ public class StringConstructorConvertorTest {
     public void simple() throws Exception {
         StringConstructorConverter c = new StringConstructorConverter();
         c.register(StringBuilder.class);
-        StringBuilder s = (StringBuilder) c.convert(StringBuilder.class, "test it");
+        StringBuilder s = (StringBuilder) c.convert(StringBuilder.class, null, null, "test it");
         assertEquals("test it", s.toString());
     }
 
@@ -26,7 +26,7 @@ public class StringConstructorConvertorTest {
     public void nullTest() throws Exception {
         StringConstructorConverter c = new StringConstructorConverter();
         c.register(StringBuilder.class);
-        StringBuilder s = (StringBuilder) c.convert(StringBuilder.class, (String) null);
+        StringBuilder s = (StringBuilder) c.convert(StringBuilder.class, null, null, (String) null);
         assertNull(s);
     }
 
@@ -34,7 +34,7 @@ public class StringConstructorConvertorTest {
     public void array() throws Exception {
         StringConstructorConverter c = new StringConstructorConverter();
         c.register(StringBuilder.class);
-        StringBuilder[] s = (StringBuilder[]) c.convert(StringBuilder.class, new String[] { "aaa", "bbb" });
+        StringBuilder[] s = (StringBuilder[]) c.convert(StringBuilder.class, null, null, new String[] { "aaa", "bbb" });
         StringBuilder[] expected = new StringBuilder[] { new StringBuilder("aaa"), new StringBuilder("bbb") };
         assertEquals(Arrays.toString(expected), Arrays.toString(s));
     }

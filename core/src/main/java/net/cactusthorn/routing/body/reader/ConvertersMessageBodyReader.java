@@ -27,14 +27,15 @@ public class ConvertersMessageBodyReader extends MessageBodyReaderAncestor imple
 
     @Override //
     public boolean isReadable(Class<?> type, Type genericType, Annotation[] annotations, MediaType mediaType) {
-        return convertersHolder.findConverter(type).isPresent();
+        return convertersHolder.findConverter(type, genericType, annotations).isPresent();
     }
 
     @Override //
     public Object readFrom(Class<Object> type, Type genericType, Annotation[] annotations, MediaType mediaType,
             MultivaluedMap<String, String> httpHeaders, InputStream entityStream) throws IOException {
         try {
-            return convertersHolder.findConverter(type).get().convert(type, streamToString(entityStream, mediaType));
+            return convertersHolder.findConverter(type, genericType, annotations).get().convert(type, genericType, annotations,
+                    streamToString(entityStream, mediaType));
         } catch (IOException e) {
             throw e;
         } catch (Exception e) {

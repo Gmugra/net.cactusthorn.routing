@@ -11,11 +11,11 @@ public class LongConverterTest {
     @Test //
     public void test() throws Exception {
         LongConverter c = new LongConverter();
-        Long result = (Long) c.convert(Long.class, "125");
+        Long result = (Long) c.convert(Long.class, null, null, "125");
         assertEquals(125L, result);
-        result = (Long) c.convert(null, (String) null);
+        result = (Long) c.convert(null, null, null, (String) null);
         assertNull(result);
-        result = (Long) c.convert(null, "  ");
+        result = (Long) c.convert(null, null, null, "  ");
         assertNull(result);
     }
 
@@ -24,14 +24,14 @@ public class LongConverterTest {
         LongConverter c = new LongConverter();
         String[] value = new String[] { "125", "  ", "16" };
         Long[] valuesAsLong = new Long[] { 125L, null, 16L };
-        Long[] result = (Long[]) c.convert(Long.class, value);
+        Long[] result = (Long[]) c.convert(Long.class, null, null, value);
         assertArrayEquals(valuesAsLong, result);
     }
 
     @Test //
     public void testNullArray() throws Exception {
         LongConverter c = new LongConverter();
-        Object result = (Object) c.convert(Long.class, (String[]) null);
+        Object result = (Object) c.convert(Long.class, null, null, (String[]) null);
         assertNull(result);
     }
 }

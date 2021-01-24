@@ -11,11 +11,11 @@ public class CharacterConvertorTest {
     @Test //
     public void test() throws Exception {
         CharacterConverter c = new CharacterConverter();
-        Character result = (Character) c.convert(Character.class, "125");
+        Character result = (Character) c.convert(Character.class, null, null, "125");
         assertEquals('1', result);
-        result = (Character) c.convert(null, (String) null);
+        result = (Character) c.convert(null, null, null, (String) null);
         assertNull(result);
-        result = (Character) c.convert(null, "");
+        result = (Character) c.convert(null, null, null, "");
         assertEquals(Character.MIN_VALUE, result);
     }
 
@@ -24,14 +24,14 @@ public class CharacterConvertorTest {
         CharacterConverter c = new CharacterConverter();
         String[] value = new String[] { "215", "  ", "61" };
         Character[] valuesAsCharacter = new Character[] { '2', ' ', '6' };
-        Character[] result = (Character[]) c.convert(Character.class, value);
+        Character[] result = (Character[]) c.convert(Character.class, null, null, value);
         assertArrayEquals(valuesAsCharacter, result);
     }
 
     @Test //
     public void testNullArray() throws Exception {
         CharacterConverter c = new CharacterConverter();
-        Object result = (Object) c.convert(Character.class, (String[]) null);
+        Object result = (Object) c.convert(Character.class, null, null, (String[]) null);
         assertNull(result);
     }
 }

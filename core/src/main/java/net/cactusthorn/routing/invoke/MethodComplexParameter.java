@@ -17,16 +17,16 @@ public abstract class MethodComplexParameter extends MethodParameter {
     protected static final String CANT_BE_ARRAY_MESSAGE = "%s can't be array; Method: %s";
     protected static final String CANT_BE_COLLECTION_MESSAGE = "%s can't be collection; Method: %s";
 
-    public MethodComplexParameter(Parameter parameter) {
-        super(parameter);
+    public MethodComplexParameter(Parameter parameter, Type parameterGenericType) {
+        super(parameter, parameterGenericType);
     }
 
     protected Converter findConverter(Method method, ConvertersHolder convertersHolder) {
         return findConverter(method, classType(), convertersHolder);
     }
 
-    protected static Converter findConverter(Method method, Class<?> converterType, ConvertersHolder convertersHolder) {
-        Optional<Converter> optional = convertersHolder.findConverter(converterType);
+    protected Converter findConverter(Method method, Class<?> converterType, ConvertersHolder convertersHolder) {
+        Optional<Converter> optional = convertersHolder.findConverter(converterType, parameterGenericType(), parameter().getAnnotations());
         if (optional.isPresent()) {
             return optional.get();
         }
@@ -85,7 +85,7 @@ public abstract class MethodComplexParameter extends MethodParameter {
         Constructor<? extends Collection<Object>> constructor = (Constructor<? extends Collection<Object>>) collectionType.getConstructor();
         Collection<Object> newCollection = constructor.newInstance();
         for (String value : values) {
-            newCollection.add(converter.convert(converterType, value));
+            newCollection.add(converter.convert(converterType, parameterGenericType(), parameter().getAnnotations(), value));
         }
         return newCollection;
     }

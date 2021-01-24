@@ -2,6 +2,7 @@ package net.cactusthorn.routing.invoke;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
+import java.lang.reflect.Type;
 import java.util.Optional;
 
 import net.cactusthorn.routing.RoutingInitializationException;
@@ -12,8 +13,8 @@ public abstract class MethodSingleValueParameter extends MethodComplexParameter 
 
     private Converter converter;
 
-    public MethodSingleValueParameter(Method method, Parameter parameter, ConvertersHolder convertersHolder) {
-        super(parameter);
+    public MethodSingleValueParameter(Method method, Parameter parameter, Type parameterGenericType, ConvertersHolder convertersHolder) {
+        super(parameter, parameterGenericType);
 
         Optional<Class<?>> optionalArray = arrayType(method);
         if (optionalArray.isPresent()) {

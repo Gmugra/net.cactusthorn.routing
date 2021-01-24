@@ -29,12 +29,14 @@ import net.cactusthorn.routing.annotation.FormPart;
 public abstract class MethodParameter {
 
     private Parameter parameter;
+    private Type parameterGenericType;
     private Class<?> classType;
     private String defaultValue;
     private String name;
 
-    MethodParameter(Parameter parameter) {
+    MethodParameter(Parameter parameter, Type parameterGenericType) {
         this.parameter = parameter;
+        this.parameterGenericType = parameterGenericType;
         classType = parameter.getType();
         name = findName();
         DefaultValue defaultValueAnnotation = parameter.getAnnotation(DefaultValue.class);
@@ -49,6 +51,10 @@ public abstract class MethodParameter {
 
     protected Class<?> classType() {
         return classType;
+    }
+
+    protected Type parameterGenericType() {
+        return parameterGenericType;
     }
 
     protected String name() {
@@ -73,35 +79,36 @@ public abstract class MethodParameter {
                 Set<MediaType> consumesMediaTypes) {
             Class<?> parameterClassType = parameter.getType();
             if (parameter.getAnnotation(PathParam.class) != null) {
-                return new PathParamParameter(method, parameter, routingConfig.convertersHolder());
+                return new PathParamParameter(method, parameter, parameterGenericType, routingConfig.convertersHolder());
             }
             if (parameter.getAnnotation(QueryParam.class) != null) {
-                return new QueryParamParameter(method, parameter, routingConfig.convertersHolder());
+                return new QueryParamParameter(method, parameter, parameterGenericType, routingConfig.convertersHolder());
             }
             if (parameter.getAnnotation(FormParam.class) != null) {
-                return new FormParamParameter(method, parameter, routingConfig.convertersHolder(), consumesMediaTypes);
+                return new FormParamParameter(method, parameter, parameterGenericType, routingConfig.convertersHolder(),
+                        consumesMediaTypes);
             }
             if (parameter.getAnnotation(FormPart.class) != null) {
-                return new FormPartParameter(method, parameter);
+                return new FormPartParameter(method, parameter, parameterGenericType);
             }
             if (parameter.getAnnotation(HeaderParam.class) != null) {
-                return new HeaderParamParameter(method, parameter, routingConfig.convertersHolder());
+                return new HeaderParamParameter(method, parameter, parameterGenericType, routingConfig.convertersHolder());
             }
             if (parameter.getAnnotation(CookieParam.class) != null) {
-                return new CookieParamParameter(method, parameter);
+                return new CookieParamParameter(method, parameter, parameterGenericType);
             }
             if (parameter.getAnnotation(Context.class) != null) {
                 if (HttpServletRequest.class.isAssignableFrom(parameterClassType)) {
-                    return new HttpServletRequestParameter(parameter);
+                    return new HttpServletRequestParameter(parameter, parameterGenericType);
                 }
                 if (HttpServletResponse.class.isAssignableFrom(parameterClassType)) {
-                    return new HttpServletResponseParameter(parameter);
+                    return new HttpServletResponseParameter(parameter, parameterGenericType);
                 }
                 if (ServletContext.class.isAssignableFrom(parameterClassType)) {
-                    return new ServletContextParameter(parameter);
+                    return new ServletContextParameter(parameter, parameterGenericType);
                 }
                 if (Principal.class.isAssignableFrom(parameterClassType)) {
-                    return new PrincipalParameter(parameter);
+                    return new PrincipalParameter(parameter, parameterGenericType);
                 }
             }
             if (method.getAnnotation(POST.class) != null || method.getAnnotation(PUT.class) != null

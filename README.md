@@ -3,7 +3,7 @@
 
 Lightweight [JAX-RS](https://www.oracle.com/technical-resources/articles/java/jax-rs.html) implementation.
 
-[![Build Status](https://travis-ci.com/Gmugra/net.cactusthorn.routing.svg?branch=main)](https://travis-ci.com/Gmugra/net.cactusthorn.routing) [![Coverage Status](https://coveralls.io/repos/github/Gmugra/net.cactusthorn.routing/badge.svg?branch=main)](https://coveralls.io/github/Gmugra/net.cactusthorn.routing?branch=main) [![GitHub release (latest by date)](https://img.shields.io/github/v/release/Gmugra/net.cactusthorn.routing)](https://github.com/Gmugra/net.cactusthorn.routing/releases/tag/v0.26) [![Maven Central with version prefix filter](https://img.shields.io/maven-central/v/net.cactusthorn.routing/core/0.26)](https://search.maven.org/search?q=g:net.cactusthorn.routing) [![GitHub](https://img.shields.io/github/license/Gmugra/net.cactusthorn.routing)](https://github.com/Gmugra/net.cactusthorn.routing/blob/main/LICENSE) [![Build by Maven](http://maven.apache.org/images/logos/maven-feather.png)](http://maven.apache.org)
+[![Build Status](https://travis-ci.com/Gmugra/net.cactusthorn.routing.svg?branch=main)](https://travis-ci.com/Gmugra/net.cactusthorn.routing) [![Coverage Status](https://coveralls.io/repos/github/Gmugra/net.cactusthorn.routing/badge.svg?branch=main)](https://coveralls.io/github/Gmugra/net.cactusthorn.routing?branch=main) [![GitHub release (latest by date)](https://img.shields.io/github/v/release/Gmugra/net.cactusthorn.routing)](https://github.com/Gmugra/net.cactusthorn.routing/releases/tag/v0.26) [![Maven Central with version prefix filter](https://img.shields.io/maven-central/v/net.cactusthorn.routing/core/0.27)](https://search.maven.org/search?q=g:net.cactusthorn.routing) [![GitHub](https://img.shields.io/github/license/Gmugra/net.cactusthorn.routing)](https://github.com/Gmugra/net.cactusthorn.routing/blob/main/LICENSE) [![Build by Maven](http://maven.apache.org/images/logos/maven-feather.png)](http://maven.apache.org)
 
 ## Introduction
 
@@ -77,12 +77,12 @@ public class Application {
 
         RoutingConfig config =
             RoutingConfig.builder(myComponentProvider)
-            .addEntryPoint(MyEntryPoint.class)
-            .addEntryPoint(entryPoints)
+            .addResource(MyEntryPoint.class)
+            .addResource(entryPoints)
             .addBodyWriter(new SimpleGsonBodyWriter<>())
             .addBodyReader(new SimpleGsonBodyReader<>())
             .addBodyWriter(new SimpleThymeleafBodyWriter("/thymeleaf/"))
-            .addConverter(LocalDate.class, new LocalDateConverter())
+            .addParamConverterProvider(new LocalDateParamConverterProvider())
             .setParametersValidator(new SimpleParametersValidator())
             .build();
 
@@ -120,11 +120,12 @@ public class Application {
 1. classes with _public static valeuOf(String arg)_ method.
 1. classes with a public constructor that accepts a single String argument.
 1. classes with _public static fromString(String arg)_ method.
-1. _Converter_ interface: to write custom converters.
 1. Arrays support for @QueryParam & @FormParam
 1. Collections support for @QueryParam & @FormParam
    * Interfaces List\<T\>, Set\<T\>, SortedSet\<T\>, Collection\<T\> where T is supported by type converting
    * any class which is not abstract and _Collections.class.isAssignableFrom( this class ) == true_
+1. _javax.ws.rs.ext.ParamConverterProvider_ interface: to write custom converters.
+   * ParamConverterProviders have highest priority. They are used before the "standard" сonverters
 
 ### JAX-RS
 
@@ -153,6 +154,46 @@ public class Application {
    1. Implemetation example exists in **demo-jetty** module
 1. @Template annotation, Templated-class and TemplatedMessageBodyWriter to implement message body writers for html-template-engines (e.g. FreeMarker, Thymeleaf)
    * Implemetation example is **thymeleaf** module
+
+### ParamConverterProvider
+
+Default(if the annotation is not present) priority is javax.ws.rs.Priorities.USER
+
+Example:
+```java
+@javax.annotation.Priority(3000)
+public class LocalDateParamConverterProvider implements javax.ws.rs.ext.ParamConverterProvider {
+
+    private static final DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("ddMMyyyy");
+
+    private static final javax.ws.rs.ext.ParamConverter<LocalDate> CONVERTER = new javax.ws.rs.ext.ParamConverter<LocalDate>() {
+
+        @Override
+        public LocalDate fromString(String value) {
+            if (value == null || value.trim().isEmpty()) {
+                return null;
+            }
+            return LocalDate.parse(value, FORMATTER);
+        }
+
+        @Override
+        public String toString(LocalDate value) {
+            if (value == null) {
+                return null;
+            }
+            return value.format(FORMATTER);
+        }
+    };
+
+    @Override @SuppressWarnings("unchecked")
+    public <T> ParamConverter<T> getConverter(Class<T> rawType, Type genericType, Annotation[] annotations) {
+        if (rawType == LocalDate.class) {
+            return (ParamConverter<T>) CONVERTER;
+        }
+        return null;
+    }
+}
+```
 
 ### MessageBodyReaders
 

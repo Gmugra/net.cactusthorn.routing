@@ -9,7 +9,6 @@ import net.cactusthorn.routing.demo.jetty.dagger.*;
 
 import java.io.IOException;
 import java.security.Principal;
-import java.time.LocalDate;
 import java.util.EnumSet;
 import java.util.logging.Level;
 
@@ -81,7 +80,7 @@ public class Application {
             .addBodyWriter(new SimpleGsonBodyWriter<>())
             .addBodyReader(new SimpleGsonBodyReader<>())
             .addBodyWriter(new SimpleThymeleafBodyWriter("/thymeleaf/"))
-            .addConverter(LocalDate.class, new LocalDateConverter())
+            .addParamConverterProvider(new LocalDateParamConverterProvider())
             .setParametersValidator(new SimpleParametersValidator())
             .build();
         // @formatter:on

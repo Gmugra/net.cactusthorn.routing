@@ -1,6 +1,7 @@
 package net.cactusthorn.routing.invoke;
 
 import java.lang.reflect.Parameter;
+import java.lang.reflect.Type;
 import java.security.Principal;
 
 import javax.servlet.ServletContext;
@@ -11,8 +12,8 @@ import net.cactusthorn.routing.PathTemplate.PathValues;
 
 public final class PrincipalParameter extends MethodParameter {
 
-    public PrincipalParameter(Parameter parameter) {
-        super(parameter);
+    public PrincipalParameter(Parameter parameter, Type parameterGenericType) {
+        super(parameter, parameterGenericType);
     }
 
     @Override //

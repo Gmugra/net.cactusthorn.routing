@@ -9,11 +9,11 @@ public class BooleanConverterTest {
     @Test //
     public void test() throws Exception {
         BooleanConverter c = new BooleanConverter();
-        Boolean result = (Boolean) c.convert(Boolean.class, "true");
+        Boolean result = (Boolean) c.convert(Boolean.class, null, null, "true");
         assertTrue(result);
-        result = (Boolean) c.convert(null, (String) null);
+        result = (Boolean) c.convert(null, null, null, (String) null);
         assertFalse(result);
-        result = (Boolean) c.convert(null, "  ");
+        result = (Boolean) c.convert(null, null, null, "  ");
         assertFalse(result);
     }
 
@@ -22,14 +22,14 @@ public class BooleanConverterTest {
         BooleanConverter c = new BooleanConverter();
         String[] value = new String[] { "true", null, "false" };
         Boolean[] valuesAsBoolean = new Boolean[] { true, false, false };
-        Boolean[] result = (Boolean[]) c.convert(Boolean.class, value);
+        Boolean[] result = (Boolean[]) c.convert(Boolean.class, null, null, value);
         assertArrayEquals(valuesAsBoolean, result);
     }
 
     @Test //
     public void testNullArray() throws Exception {
         BooleanConverter c = new BooleanConverter();
-        Boolean[] result = (Boolean[]) c.convert(Boolean.class, (String[]) null);
+        Boolean[] result = (Boolean[]) c.convert(Boolean.class, null, null, (String[]) null);
         assertNull(result);
     }
 }

@@ -6,6 +6,7 @@ import java.util.Optional;
 
 import javax.ws.rs.ext.MessageBodyReader;
 import javax.ws.rs.ext.MessageBodyWriter;
+import javax.ws.rs.ext.ParamConverterProvider;
 
 import net.cactusthorn.routing.body.BodyProcessor;
 import net.cactusthorn.routing.body.reader.BodyReader;
@@ -15,7 +16,6 @@ import net.cactusthorn.routing.body.reader.ConvertersMessageBodyReader;
 import net.cactusthorn.routing.body.writer.BodyWriter;
 import net.cactusthorn.routing.body.writer.ObjectMessageBodyWriter;
 import net.cactusthorn.routing.body.writer.StringMessageBodyWriter;
-import net.cactusthorn.routing.convert.Converter;
 import net.cactusthorn.routing.convert.ConvertersHolder;
 import net.cactusthorn.routing.validate.ParametersValidator;
 
@@ -123,6 +123,8 @@ public final class RoutingConfig {
 
         private final ConvertersHolder convertersHolder = new ConvertersHolder();
 
+        private final List<ParamConverterProvider> providers = new ArrayList<>();
+
         private final List<Class<?>> resourceClasses = new ArrayList<>();
 
         private final List<BodyWriter> bodyWriters = new ArrayList<>();
@@ -153,8 +155,11 @@ public final class RoutingConfig {
             addBodyWriter(new ObjectMessageBodyWriter());
         }
 
-        public Builder addConverter(Class<?> clazz, Converter converter) {
-            convertersHolder.register(clazz, converter);
+        public Builder addParamConverterProvider(ParamConverterProvider provider) {
+            if (provider == null) {
+                throw new IllegalArgumentException("ParamConverterProvider can not be null");
+            }
+            providers.add(provider);
             return this;
         }
 
@@ -216,6 +221,8 @@ public final class RoutingConfig {
             List<BodyReader> unmodifiableBodyReaders = Collections.unmodifiableList(bodyReaders);
 
             Map<ConfigProperty, Object> unmodifiableConfigProperties = Collections.unmodifiableMap(configProperties);
+
+            convertersHolder.addProviders(providers);
 
             return new RoutingConfig(componentProvider, convertersHolder, Collections.unmodifiableList(resourceClasses),
                     unmodifiableBodyWriters, unmodifiableBodyReaders, unmodifiableConfigProperties, validator, applicationPath);

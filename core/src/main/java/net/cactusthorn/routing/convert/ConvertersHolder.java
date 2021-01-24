@@ -1,15 +1,23 @@
 package net.cactusthorn.routing.convert;
 
+import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
+import java.util.List;
+import java.util.ArrayList;
+import java.util.Collections;
+
+import javax.ws.rs.ext.ParamConverterProvider;
 
 public class ConvertersHolder {
 
     private static final StaticStringMethodConverter VALUE_OF = new StaticStringMethodConverter("valueOf");
     private static final StaticStringMethodConverter FROM_STRING = new StaticStringMethodConverter("fromString");
     private static final StringConstructorConverter CONSTRUCTOR = new StringConstructorConverter();
+
+    private final List<ParamConverterProviderWrapper> providers = new ArrayList<>();;
 
     private final Map<Type, Converter> converters = new HashMap<>();
 
@@ -35,7 +43,14 @@ public class ConvertersHolder {
         converters.put(Boolean.class, new BooleanConverter());
     }
 
-    public Optional<Converter> findConverter(Class<?> clazz) {
+    public Optional<Converter> findConverter(Class<?> clazz, Type genericType, Annotation[] annotations) {
+
+        for (ParamConverterProviderWrapper wrapper : providers) {
+            if (wrapper.isConvertible(clazz, genericType, annotations)) {
+                return Optional.of(wrapper);
+            }
+        }
+
         Converter converter = converters.get(clazz);
         if (converter != null) {
             return Optional.of(converter);
@@ -55,7 +70,8 @@ public class ConvertersHolder {
         return Optional.empty();
     }
 
-    public void register(Class<?> clazz, Converter converter) {
-        converters.put(clazz, converter);
+    public void addProviders(List<ParamConverterProvider> paramConverterProviders) {
+        paramConverterProviders.forEach(p -> providers.add(new ParamConverterProviderWrapper(p)));
+        Collections.sort(providers, ParamConverterProviderWrapper.PRIORITY_COMPARATOR);
     }
 }

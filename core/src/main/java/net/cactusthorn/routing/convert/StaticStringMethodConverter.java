@@ -1,8 +1,10 @@
 package net.cactusthorn.routing.convert;
 
+import java.lang.annotation.Annotation;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.lang.reflect.Type;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -19,7 +21,7 @@ public final class StaticStringMethodConverter implements Converter {
     }
 
     @Override //
-    public Object convert(Class<?> type, String value)
+    public Object convert(Class<?> type, Type genericType, Annotation[] annotations, String value)
             throws IllegalAccessException, IllegalArgumentException, InvocationTargetException {
         if (value == null) {
             return null;

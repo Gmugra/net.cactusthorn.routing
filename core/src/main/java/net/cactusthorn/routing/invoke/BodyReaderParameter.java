@@ -27,18 +27,16 @@ public final class BodyReaderParameter extends MethodParameter {
 
     protected static final String BODY_READER_NOT_FOUND = "body reader for media-type %s not found; Method: %s";
 
-    private Type parameterGenericType;
     private Map<MediaType, MessageBodyReader<?>> messageBodyReaders = new HashMap<>();
 
     public BodyReaderParameter(Method method, Parameter parameter, Type parameterGenericType, Set<MediaType> consumesMediaTypes,
             List<BodyReader> bodyReaders) {
 
-        super(parameter);
-        this.parameterGenericType = parameterGenericType;
+        super(parameter, parameterGenericType);
 
         for (MediaType consumesMediaType : consumesMediaTypes) {
             for (BodyReader bodyReader : bodyReaders) {
-                if (bodyReader.isProcessable(classType(), parameterGenericType, parameter().getAnnotations(), consumesMediaType)) {
+                if (bodyReader.isProcessable(classType(), parameterGenericType(), parameter().getAnnotations(), consumesMediaType)) {
                     messageBodyReaders.put(consumesMediaType, bodyReader.messageBodyReader());
                     break;
                 }
@@ -54,7 +52,7 @@ public final class BodyReaderParameter extends MethodParameter {
         MediaType mediaType = contentType(req);
         MessageBodyReader bodyReader = findBodyReader(req);
         MediaType mediaTypeWithCharset = mediaType.withCharset(req.getCharacterEncoding());
-        return bodyReader.readFrom(classType(), parameterGenericType, parameter().getAnnotations(), mediaTypeWithCharset, getHeaders(req),
+        return bodyReader.readFrom(classType(), parameterGenericType(), parameter().getAnnotations(), mediaTypeWithCharset, getHeaders(req),
                 req.getInputStream());
     }
 

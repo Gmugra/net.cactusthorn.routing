@@ -11,11 +11,11 @@ public class DoubleConverterTest {
     @Test //
     public void test() throws Exception {
         DoubleConverter c = new DoubleConverter();
-        Double result = (Double) c.convert(Double.class, "125.5");
+        Double result = (Double) c.convert(Double.class, null, null, "125.5");
         assertEquals(125.5d, result);
-        result = (Double) c.convert(null, (String) null);
+        result = (Double) c.convert(null, null, null, (String) null);
         assertNull(result);
-        result = (Double) c.convert(null, "  ");
+        result = (Double) c.convert(null, null, null, "  ");
         assertNull(result);
     }
 
@@ -24,14 +24,14 @@ public class DoubleConverterTest {
         DoubleConverter c = new DoubleConverter();
         String[] value = new String[] { "125.5", "  ", "16.3" };
         Double[] valuesAsDouble = new Double[] { 125.5d, null, 16.3d };
-        Double[] result = (Double[]) c.convert(Double.class, value);
+        Double[] result = (Double[]) c.convert(Double.class, null, null, value);
         assertArrayEquals(valuesAsDouble, result);
     }
 
     @Test //
     public void testNullArray() throws Exception {
         DoubleConverter c = new DoubleConverter();
-        Object result = (Object) c.convert(Double.class, (String[]) null);
+        Object result = (Object) c.convert(Double.class, null, null, (String[]) null);
         assertNull(result);
     }
 }

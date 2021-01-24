@@ -2,6 +2,7 @@ package net.cactusthorn.routing.invoke;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
+import java.lang.reflect.Type;
 import java.util.Optional;
 
 import javax.servlet.ServletContext;
@@ -21,8 +22,8 @@ public abstract class MethodMultiValueParameter extends MethodComplexParameter {
     private boolean collection;
     private Class<?> collectionType;
 
-    public MethodMultiValueParameter(Method method, Parameter parameter, ConvertersHolder convertersHolder) {
-        super(parameter);
+    public MethodMultiValueParameter(Method method, Parameter parameter, Type parameterGenericType, ConvertersHolder convertersHolder) {
+        super(parameter, parameterGenericType);
 
         Optional<Class<?>> optionalArray = arrayType(method);
         if (optionalArray.isPresent()) {
@@ -48,7 +49,7 @@ public abstract class MethodMultiValueParameter extends MethodComplexParameter {
     @Override //
     Object findValue(HttpServletRequest req, HttpServletResponse res, ServletContext con, PathValues pathValues) throws Exception {
         if (array) {
-            return converter.convert(converterType, arrayValues(req));
+            return converter.convert(converterType, parameterGenericType(), parameter().getAnnotations(), arrayValues(req));
         }
         if (collection) {
             return createCollection(collectionType, converterType, converter, arrayValues(req));
@@ -57,7 +58,7 @@ public abstract class MethodMultiValueParameter extends MethodComplexParameter {
         if (defaultValue() != null && value == null) {
             value = defaultValue();
         }
-        return converter.convert(converterType, value);
+        return converter.convert(converterType, parameterGenericType(), parameter().getAnnotations(), value);
     }
 
     private String[] arrayValues(HttpServletRequest req) {

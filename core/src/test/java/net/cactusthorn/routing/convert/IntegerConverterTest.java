@@ -9,11 +9,11 @@ public class IntegerConverterTest {
     @Test //
     public void test() throws Exception {
         IntegerConverter c = new IntegerConverter();
-        Integer result = (Integer) c.convert(Integer.class, "125");
+        Integer result = (Integer) c.convert(Integer.class, null, null, "125");
         assertEquals(125, result);
-        result = (Integer) c.convert(null, (String) null);
+        result = (Integer) c.convert(null, null, null, (String) null);
         assertNull(result);
-        result = (Integer) c.convert(null, "  ");
+        result = (Integer) c.convert(null, null, null, "  ");
         assertNull(result);
     }
 
@@ -22,14 +22,14 @@ public class IntegerConverterTest {
         IntegerConverter c = new IntegerConverter();
         String[] value = new String[] { "125", "  ", "3456" };
         Integer[] valuesAsInt = new Integer[] { 125, null, 3456 };
-        Integer[] result = (Integer[]) c.convert(Integer.class, value);
+        Integer[] result = (Integer[]) c.convert(Integer.class, null, null, value);
         assertArrayEquals(valuesAsInt, result);
     }
 
     @Test //
     public void testNullArray() throws Exception {
         IntegerConverter c = new IntegerConverter();
-        Object result = (Object) c.convert(Integer.class, (String[]) null);
+        Object result = (Object) c.convert(Integer.class, null, null, (String[]) null);
         assertNull(result);
     }
 }

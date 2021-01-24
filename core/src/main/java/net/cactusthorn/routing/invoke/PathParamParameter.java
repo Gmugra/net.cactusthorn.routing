@@ -2,6 +2,7 @@ package net.cactusthorn.routing.invoke;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
+import java.lang.reflect.Type;
 
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
@@ -13,8 +14,8 @@ import net.cactusthorn.routing.convert.ConvertersHolder;
 
 public class PathParamParameter extends MethodSingleValueParameter {
 
-    public PathParamParameter(Method method, Parameter parameter, ConvertersHolder convertersHolder) {
-        super(method, parameter, convertersHolder);
+    public PathParamParameter(Method method, Parameter parameter, Type parameterGenericType, ConvertersHolder convertersHolder) {
+        super(method, parameter, parameterGenericType, convertersHolder);
     }
 
     @Override //
@@ -37,6 +38,6 @@ public class PathParamParameter extends MethodSingleValueParameter {
         if (defaultValue() != null && "".equals(value)) {
             value = defaultValue();
         }
-        return converter().convert(classType(), value);
+        return converter().convert(classType(), parameterGenericType(), parameter().getAnnotations(), value);
     }
 }

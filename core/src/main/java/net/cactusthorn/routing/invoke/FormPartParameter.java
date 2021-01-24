@@ -2,6 +2,7 @@ package net.cactusthorn.routing.invoke;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
+import java.lang.reflect.Type;
 import java.util.Collection;
 
 import javax.servlet.ServletContext;
@@ -17,8 +18,8 @@ public class FormPartParameter extends MethodParameter {
 
     protected static final String WRONG_TYPE = "@FormPart can be used only for javax.servlet.http.Part type; Method: %s";
 
-    public FormPartParameter(Method method, Parameter parameter) {
-        super(parameter);
+    public FormPartParameter(Method method, Parameter parameter, Type parameterGenericType) {
+        super(parameter, parameterGenericType);
         if (classType() != Part.class) {
             throw new RoutingInitializationException(WRONG_TYPE, method);
         }

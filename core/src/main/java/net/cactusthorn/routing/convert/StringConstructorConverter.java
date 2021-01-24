@@ -1,7 +1,9 @@
 package net.cactusthorn.routing.convert;
 
+import java.lang.annotation.Annotation;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Type;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -13,7 +15,7 @@ public class StringConstructorConverter implements Converter {
     private final Map<Class<?>, Constructor<?>> constructors = new HashMap<>();
 
     @Override //
-    public Object convert(Class<?> type, String value)
+    public Object convert(Class<?> type, Type genericType, Annotation[] annotations, String value)
             throws InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
         if (value == null) {
             return null;

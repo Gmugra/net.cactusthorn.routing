@@ -6,22 +6,23 @@ import java.util.Optional;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.GET;
+import javax.ws.rs.HttpMethod;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
+import javax.ws.rs.core.Response;
 
 import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
 
+import net.cactusthorn.routing.PathTemplate.PathValues;
 import net.cactusthorn.routing.RoutingConfig.ConfigProperty;
 import net.cactusthorn.routing.body.reader.ConvertersMessageBodyReader;
 import net.cactusthorn.routing.body.writer.ObjectMessageBodyWriter;
-import net.cactusthorn.routing.convert.Converter;
+import net.cactusthorn.routing.convert.ParamConverterProviderWrapperTest;
+import net.cactusthorn.routing.resource.ResourceScanner;
 import net.cactusthorn.routing.validate.ParametersValidator;
 
 public class RoutingConfigTest {
-
-    public static final Converter TEST_CONVERTER = (type, value) -> {
-        return new java.util.Date();
-    };
 
     private static final ParametersValidator TEST_VALIDATOR = (object, method, parameters) -> {
     };
@@ -29,8 +30,8 @@ public class RoutingConfigTest {
     public static class EntryPointDate {
 
         @GET @Path("/dddd{var}/") //
-        public java.util.Date m4(@PathParam("var") java.util.Date date) {
-            return date;
+        public String m4(@PathParam("var") String in) {
+            return in;
         }
     }
 
@@ -42,21 +43,28 @@ public class RoutingConfigTest {
         }
     }
 
-    // TODO FIX IT
-    /*
-     * @Test // public void converter() {
-     * 
-     * RoutingConfig config = RoutingConfig.builder(new
-     * EntryPointDateProvider()).addEntryPoint(EntryPointDate.class)
-     * .addConverter(java.util.Date.class, TEST_CONVERTER).build();
-     * 
-     * EntryPointScanner scanner = new EntryPointScanner(config); EntryPoint
-     * entryPoint = scanner.scan().get(HttpMethod.GET).get(0);
-     * 
-     * HttpServletRequest request = Mockito.mock(HttpServletRequest.class);
-     * java.util.Date date = (java.util.Date) entryPoint.invoke(request, null, null,
-     * PathValues.EMPTY); assertNotNull(date); }
-     */
+    @Test //
+    public void paramConverterProvider() {
+
+        RoutingConfig config = RoutingConfig.builder(new EntryPointDateProvider()).addResource(EntryPointDate.class)
+                .addParamConverterProvider(new ParamConverterProviderWrapperTest.DefaultPriority()).build();
+
+        ResourceScanner scanner = new ResourceScanner(config);
+        ResourceScanner.Resource resource = scanner.scan().get(HttpMethod.GET).get(0);
+
+        HttpServletRequest request = Mockito.mock(HttpServletRequest.class);
+
+        PathValues pathValues = new PathValues("var", "?");
+
+        Response response = resource.invoke(request, null, null, pathValues);
+        assertEquals("DefaultPriority", response.getEntity());
+    }
+
+    @Test //
+    public void paramConverterProviderNull() {
+        assertThrows(IllegalArgumentException.class,
+                () -> RoutingConfig.builder(new EntryPointDateProvider()).addParamConverterProvider(null));
+    }
 
     @Test //
     public void provider() {
@@ -72,15 +80,13 @@ public class RoutingConfigTest {
 
     @Test //
     public void bodyWriter() {
-        RoutingConfig config = RoutingConfig.builder(new EntryPointDateProvider())
-                .addBodyWriter(new ObjectMessageBodyWriter()).build();
+        RoutingConfig config = RoutingConfig.builder(new EntryPointDateProvider()).addBodyWriter(new ObjectMessageBodyWriter()).build();
         assertEquals(3, config.bodyWriters().size());
     }
 
     @Test //
     public void bodyReader() {
-        RoutingConfig config = RoutingConfig.builder(new EntryPointDateProvider()).addBodyReader(new ConvertersMessageBodyReader())
-                .build();
+        RoutingConfig config = RoutingConfig.builder(new EntryPointDateProvider()).addBodyReader(new ConvertersMessageBodyReader()).build();
         assertEquals(4, config.bodyReaders().size());
     }
 
