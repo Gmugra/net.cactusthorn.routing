@@ -34,7 +34,7 @@ public class CookieParamParameter extends MethodParameter {
     }
 
     @Override //
-    Object findValue(HttpServletRequest req, HttpServletResponse res, ServletContext con, PathValues pathValues) throws Exception {
+    Object findValue(HttpServletRequest req, HttpServletResponse res, ServletContext con, PathValues pathValues) {
         Cookie[] cookies = req.getCookies();
         if (cookies == null) {
             return null;

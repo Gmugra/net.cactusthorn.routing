@@ -8,57 +8,41 @@ import java.util.Optional;
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.ws.rs.NotFoundException;
 
 import net.cactusthorn.routing.PathTemplate.PathValues;
-import net.cactusthorn.routing.convert.Converter;
 import net.cactusthorn.routing.convert.ConvertersHolder;
 
 public abstract class MethodMultiValueParameter extends MethodComplexParameter {
 
-    private Class<?> converterType;
-    private Converter converter;
-
-    private boolean array;
     private boolean collection;
     private Class<?> collectionType;
 
     public MethodMultiValueParameter(Method method, Parameter parameter, Type parameterGenericType, ConvertersHolder convertersHolder) {
-        super(parameter, parameterGenericType);
-
-        Optional<Class<?>> optionalArray = arrayType(method);
-        if (optionalArray.isPresent()) {
-            array = true;
-            converterType = optionalArray.get();
-            converter = findConverter(method, converterType, convertersHolder);
-            return;
-        }
+        super(method, parameter, parameterGenericType, convertersHolder);
 
         Optional<Class<?>> optionalCollection = collectionType();
         if (optionalCollection.isPresent()) {
             collection = true;
             collectionType = optionalCollection.get();
-            converterType = collectionGenericType(method, parameter);
-            converter = findConverter(method, converterType, convertersHolder);
             return;
         }
-
-        converterType = classType();
-        converter = findConverter(method, convertersHolder);
     }
 
     @Override //
-    Object findValue(HttpServletRequest req, HttpServletResponse res, ServletContext con, PathValues pathValues) throws Exception {
-        if (array) {
-            return converter.convert(converterType, parameterGenericType(), parameter().getAnnotations(), arrayValues(req));
+    Object findValue(HttpServletRequest req, HttpServletResponse res, ServletContext con, PathValues pathValues) {
+        try {
+            if (collection) {
+                return createCollection(collectionType, arrayValues(req));
+            }
+            String value = req.getParameter(name());
+            if (defaultValue() != null && value == null) {
+                value = defaultValue();
+            }
+            return converter().convert(classType(), parameterGenericType(), parameter().getAnnotations(), value);
+        } catch (Exception e) {
+            throw new NotFoundException(e.getMessage(), e);
         }
-        if (collection) {
-            return createCollection(collectionType, converterType, converter, arrayValues(req));
-        }
-        String value = req.getParameter(name());
-        if (defaultValue() != null && value == null) {
-            value = defaultValue();
-        }
-        return converter.convert(converterType, parameterGenericType(), parameter().getAnnotations(), value);
     }
 
     private String[] arrayValues(HttpServletRequest req) {

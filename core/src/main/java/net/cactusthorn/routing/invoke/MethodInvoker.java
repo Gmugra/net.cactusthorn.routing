@@ -15,6 +15,7 @@ import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.ws.rs.BadRequestException;
+import javax.ws.rs.ClientErrorException;
 import javax.ws.rs.ServerErrorException;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
@@ -113,6 +114,8 @@ public final class MethodInvoker {
             MethodParameter parameter = parameters.get(i);
             try {
                 values[i] = parameter.findValue(req, res, con, pathValues);
+            } catch (ClientErrorException e) {
+                throw e;
             } catch (Exception e) {
                 throw new BadRequestException(String.format(MESSAGE, i + 1, parameter.getClass().getSimpleName(), e), e);
             }

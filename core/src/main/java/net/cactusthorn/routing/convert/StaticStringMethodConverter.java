@@ -11,9 +11,9 @@ import java.util.Optional;
 
 import net.cactusthorn.routing.RoutingInitializationException;
 
-public final class StaticStringMethodConverter implements Converter {
+public final class StaticStringMethodConverter implements Converter<Object> {
 
-    private final Map<Class<?>, Method> methods = new HashMap<>();
+    private final Map<Type, Method> methods = new HashMap<>();
     private String methodName;
 
     public StaticStringMethodConverter(String methodName) {

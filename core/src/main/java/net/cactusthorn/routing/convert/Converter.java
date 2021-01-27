@@ -1,22 +1,23 @@
 package net.cactusthorn.routing.convert;
 
 import java.lang.annotation.Annotation;
-import java.lang.reflect.Array;
 import java.lang.reflect.Type;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
-public interface Converter {
+public interface Converter<T> {
 
-    Object convert(Class<?> type, Type genericType, Annotation[] annotations, String value) throws Exception;
+    T convert(Class<?> type, Type genericType, Annotation[] annotations, String value) throws Exception;
 
-    default Object convert(Class<?> type, Type genericType, Annotation[] annotations, String[] value) throws Exception {
-        if (value == null) {
-            return null;
+    default List<T> convert(Class<?> type, Type genericType, Annotation[] annotations, String[] values) throws Exception {
+        if (values == null || values.length == 0) {
+            return Collections.emptyList();
         }
-
-        Object array = Array.newInstance(type, value.length);
-        for (int i = 0; i < value.length; i++) {
-            Array.set(array, i, convert(type, genericType, annotations, value[i]));
+        List<T> result = new ArrayList<>(values.length);
+        for (String value : values) {
+            result.add(convert(type, genericType, annotations, value));
         }
-        return array;
+        return result;
     }
 }

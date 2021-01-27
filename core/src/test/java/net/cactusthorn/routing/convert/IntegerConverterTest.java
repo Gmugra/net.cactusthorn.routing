@@ -2,6 +2,8 @@ package net.cactusthorn.routing.convert;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+import java.util.List;
+
 import org.junit.jupiter.api.Test;
 
 public class IntegerConverterTest {
@@ -9,11 +11,11 @@ public class IntegerConverterTest {
     @Test //
     public void test() throws Exception {
         IntegerConverter c = new IntegerConverter();
-        Integer result = (Integer) c.convert(Integer.class, null, null, "125");
+        Integer result = c.convert(Integer.class, null, null, "125");
         assertEquals(125, result);
-        result = (Integer) c.convert(null, null, null, (String) null);
+        result = c.convert(null, null, null, (String) null);
         assertNull(result);
-        result = (Integer) c.convert(null, null, null, "  ");
+        result = c.convert(null, null, null, "  ");
         assertNull(result);
     }
 
@@ -22,14 +24,21 @@ public class IntegerConverterTest {
         IntegerConverter c = new IntegerConverter();
         String[] value = new String[] { "125", "  ", "3456" };
         Integer[] valuesAsInt = new Integer[] { 125, null, 3456 };
-        Integer[] result = (Integer[]) c.convert(Integer.class, null, null, value);
-        assertArrayEquals(valuesAsInt, result);
+        List<Integer> result = c.convert(Integer.class, null, null, value);
+        assertArrayEquals(valuesAsInt, result.toArray());
     }
 
     @Test //
     public void testNullArray() throws Exception {
         IntegerConverter c = new IntegerConverter();
-        Object result = (Object) c.convert(Integer.class, null, null, (String[]) null);
-        assertNull(result);
+        List<Integer> result = c.convert(Integer.class, null, null, (String[]) null);
+        assertTrue(result.isEmpty());
+    }
+
+    @Test //
+    public void testEmptyArray() throws Exception {
+        IntegerConverter c = new IntegerConverter();
+        List<Integer> result = c.convert(Integer.class, null, null, new String[0]);
+        assertTrue(result.isEmpty());
     }
 }

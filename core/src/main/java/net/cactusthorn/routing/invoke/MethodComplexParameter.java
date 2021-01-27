@@ -14,78 +14,45 @@ public abstract class MethodComplexParameter extends MethodParameter {
     protected static final String CLASS_NOT_FOUND_MESSAGE = "ClassNotFound; Method: %s";
     protected static final String WRONG_COLLECTION_MESSAGE = "Wrong collection??; Method: %s";
     protected static final String COLLECTION_NO_GENERIC_MESSAGE = "Collections without generic type are not supported; Method: %s";
-    protected static final String CANT_BE_ARRAY_MESSAGE = "%s can't be array; Method: %s";
     protected static final String CANT_BE_COLLECTION_MESSAGE = "%s can't be collection; Method: %s";
 
-    public MethodComplexParameter(Parameter parameter, Type parameterGenericType) {
+    private Converter<?> converter;
+
+    public MethodComplexParameter(Method method, Parameter parameter, Type parameterGenericType, ConvertersHolder convertersHolder) {
         super(parameter, parameterGenericType);
-    }
-
-    protected Converter findConverter(Method method, ConvertersHolder convertersHolder) {
-        return findConverter(method, classType(), convertersHolder);
-    }
-
-    protected Converter findConverter(Method method, Class<?> converterType, ConvertersHolder convertersHolder) {
-        Optional<Converter> optional = convertersHolder.findConverter(converterType, parameterGenericType(), parameter().getAnnotations());
+        Optional<Converter<?>> optional = convertersHolder.findConverter(classType(), parameterGenericType(),
+                parameter().getAnnotations());
         if (optional.isPresent()) {
-            return optional.get();
+            converter = optional.get();
+        } else {
+            throw new RoutingInitializationException(WRONG_TYPE_MESSAGE, classType().getSimpleName(), method);
         }
-        throw new RoutingInitializationException(WRONG_TYPE_MESSAGE, converterType.getTypeName(), method);
     }
 
-    protected final Optional<Class<?>> arrayType(Method method) {
-        if (classType().isArray()) {
-            Class<?> arrayType = classType().getComponentType();
-            if (arrayType.isArray()) {
-                throw new RoutingInitializationException(WRONG_ARRAY_MESSAGE, method);
-            }
-            return Optional.of(arrayType);
-        }
-        return Optional.empty();
+    public Converter<?> converter() {
+        return converter;
     }
 
-    protected Class<?> collectionGenericType(Method method, Parameter parameter) {
-        Type type = parameter.getParameterizedType();
-        if (type instanceof ParameterizedType) {
-            ParameterizedType parameterizedType = (ParameterizedType) type;
-            Type[] genericTypes = parameterizedType.getActualTypeArguments();
-            Type genericType = genericTypes[0];
-            try {
-                return Class.forName(genericType.getTypeName());
-            } catch (ClassNotFoundException e) {
-                throw new RoutingInitializationException(CLASS_NOT_FOUND_MESSAGE, e, method);
-            }
-        }
-        throw new RoutingInitializationException(COLLECTION_NO_GENERIC_MESSAGE, method);
-    }
-
+    /**
+     * According to JSR-339 supported only List<T>, Set<T>, or SortedSet<T>
+     */
     protected Optional<Class<?>> collectionType() {
-        if (classType().isInterface()) {
-            if (List.class.isAssignableFrom(classType())) {
-                return Optional.of(ArrayList.class);
-            } else if (SortedSet.class.isAssignableFrom(classType())) {
-                return Optional.of(TreeSet.class);
-            } else if (Set.class.isAssignableFrom(classType())) {
-                return Optional.of(HashSet.class);
-            } else if (Collection.class.isAssignableFrom(classType())) {
-                return Optional.of(ArrayList.class);
-            }
-        } else if (!Modifier.isAbstract(classType().getModifiers()) && Collection.class.isAssignableFrom(classType())) {
-            return Optional.of(classType());
+        if (List.class.isAssignableFrom(classType())) {
+            return Optional.of(ArrayList.class);
+        } else if (SortedSet.class.isAssignableFrom(classType())) {
+            return Optional.of(TreeSet.class);
+        } else if (Set.class.isAssignableFrom(classType())) {
+            return Optional.of(HashSet.class);
         }
         return Optional.empty();
     }
 
     @SuppressWarnings("unchecked") //
-    protected Object createCollection(Class<?> collectionType, Class<?> converterType, Converter converter, String[] values)
-            throws Exception {
-        if (values == null) {
-            return null;
-        }
+    protected Object createCollection(Class<?> collectionType, String[] values) throws Exception {
         Constructor<? extends Collection<Object>> constructor = (Constructor<? extends Collection<Object>>) collectionType.getConstructor();
         Collection<Object> newCollection = constructor.newInstance();
         for (String value : values) {
-            newCollection.add(converter.convert(converterType, parameterGenericType(), parameter().getAnnotations(), value));
+            newCollection.add(converter().convert(parameter().getType(), parameterGenericType(), parameter().getAnnotations(), value));
         }
         return newCollection;
     }

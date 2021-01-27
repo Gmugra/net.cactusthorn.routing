@@ -11,9 +11,12 @@ import java.util.logging.Level;
 import java.util.stream.Stream;
 
 import javax.servlet.ServletContext;
+import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.ws.rs.BadRequestException;
 import javax.ws.rs.Consumes;
+import javax.ws.rs.CookieParam;
 import javax.ws.rs.POST;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.QueryParam;
@@ -74,6 +77,9 @@ public class MethodInvokerTest extends InvokeTestAncestor {
         public void m8(@Context HttpServletResponse response) throws Exception {
             throw new Exception("test exception");
         }
+
+        public void m9(@CookieParam("abc") Cookie cookie) throws Exception {
+        }
     }
 
     public static class EntryPoint1Provider implements ComponentProvider {
@@ -88,8 +94,7 @@ public class MethodInvokerTest extends InvokeTestAncestor {
 
     ServletContext context;
 
-    @BeforeAll
-    public static void loggingOff() {
+    @BeforeAll public static void loggingOff() {
         java.util.logging.Logger.getLogger("").setLevel(Level.OFF);
     }
 
@@ -141,7 +146,7 @@ public class MethodInvokerTest extends InvokeTestAncestor {
 
         assertEquals("TO HAVE BODY", result);
     }
-    
+
     @Test //
     public void invokeM8() throws IOException {
         RoutingConfig config = RoutingConfig.builder(new EntryPoint1Provider()).addResource(EntryPoint1.class)
@@ -156,6 +161,19 @@ public class MethodInvokerTest extends InvokeTestAncestor {
         assertEquals(0, returnObjectInfo.annotations().length);
 
         assertThrows(ServerErrorException.class, () -> caller.invoke(request, response, context, null));
+    }
+
+    @Test //
+    public void invokeM9() throws IOException {
+        RoutingConfig config = RoutingConfig.builder(new EntryPoint1Provider()).addResource(EntryPoint1.class)
+                .setParametersValidator(VALIDATOR).build();
+
+        Method method = findMethod(EntryPoint1.class, "m9");
+        MethodInvoker caller = new MethodInvoker(config, EntryPoint1.class, method, DEFAULT_CONTENT_TYPES);
+
+        Mockito.when(request.getCookies()).thenThrow(new RuntimeException());
+
+        assertThrows(BadRequestException.class, () -> caller.invoke(request, null, context, null));
     }
 
     private static Stream<Arguments> provideArguments() {

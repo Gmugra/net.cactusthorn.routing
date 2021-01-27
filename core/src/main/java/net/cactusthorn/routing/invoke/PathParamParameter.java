@@ -7,6 +7,7 @@ import java.lang.reflect.Type;
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.ws.rs.NotFoundException;
 import javax.ws.rs.PathParam;
 
 import net.cactusthorn.routing.PathTemplate.PathValues;
@@ -33,11 +34,15 @@ public class PathParamParameter extends MethodSingleValueParameter {
     }
 
     @Override //
-    Object findValue(HttpServletRequest req, HttpServletResponse res, ServletContext con, PathValues pathValues) throws Exception {
-        String value = pathValues.value(name());
-        if (defaultValue() != null && "".equals(value)) {
-            value = defaultValue();
+    Object findValue(HttpServletRequest req, HttpServletResponse res, ServletContext con, PathValues pathValues) {
+        try {
+            String value = pathValues.value(name());
+            if (defaultValue() != null && "".equals(value)) {
+                value = defaultValue();
+            }
+            return converter().convert(classType(), parameterGenericType(), parameter().getAnnotations(), value);
+        } catch (Exception e) {
+            throw new NotFoundException(e.getMessage(), e);
         }
-        return converter().convert(classType(), parameterGenericType(), parameter().getAnnotations(), value);
     }
 }

@@ -1,8 +1,8 @@
 package net.cactusthorn.routing.convert;
 
-import static org.junit.jupiter.api.Assertions.assertArrayEquals;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.*;
+
+import java.util.List;
 
 import org.junit.jupiter.api.Test;
 
@@ -11,11 +11,11 @@ public class CharacterConvertorTest {
     @Test //
     public void test() throws Exception {
         CharacterConverter c = new CharacterConverter();
-        Character result = (Character) c.convert(Character.class, null, null, "125");
+        Character result = c.convert(Character.class, null, null, "125");
         assertEquals('1', result);
-        result = (Character) c.convert(null, null, null, (String) null);
+        result = c.convert(null, null, null, (String) null);
         assertNull(result);
-        result = (Character) c.convert(null, null, null, "");
+        result = c.convert(null, null, null, "");
         assertEquals(Character.MIN_VALUE, result);
     }
 
@@ -24,14 +24,21 @@ public class CharacterConvertorTest {
         CharacterConverter c = new CharacterConverter();
         String[] value = new String[] { "215", "  ", "61" };
         Character[] valuesAsCharacter = new Character[] { '2', ' ', '6' };
-        Character[] result = (Character[]) c.convert(Character.class, null, null, value);
-        assertArrayEquals(valuesAsCharacter, result);
+        List<Character> result = c.convert(Character.class, null, null, value);
+        assertArrayEquals(valuesAsCharacter, result.toArray());
     }
 
     @Test //
     public void testNullArray() throws Exception {
         CharacterConverter c = new CharacterConverter();
-        Object result = (Object) c.convert(Character.class, null, null, (String[]) null);
-        assertNull(result);
+        List<Character> result = c.convert(Character.class, null, null, (String[]) null);
+        assertTrue(result.isEmpty());
+    }
+
+    @Test //
+    public void testEmptyArray() throws Exception {
+        CharacterConverter c = new CharacterConverter();
+        List<Character> result = c.convert(Character.class, null, null, new String[0]);
+        assertTrue(result.isEmpty());
     }
 }

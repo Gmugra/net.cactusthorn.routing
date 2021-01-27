@@ -2,7 +2,7 @@ package net.cactusthorn.routing.convert;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-import java.util.Arrays;
+import java.util.List;
 
 import org.junit.jupiter.api.Test;
 
@@ -34,8 +34,10 @@ public class StringConstructorConvertorTest {
     public void array() throws Exception {
         StringConstructorConverter c = new StringConstructorConverter();
         c.register(StringBuilder.class);
-        StringBuilder[] s = (StringBuilder[]) c.convert(StringBuilder.class, null, null, new String[] { "aaa", "bbb" });
+        List<?> result = c.convert(StringBuilder.class, null, null, new String[] { "aaa", "bbb" });
         StringBuilder[] expected = new StringBuilder[] { new StringBuilder("aaa"), new StringBuilder("bbb") };
-        assertEquals(Arrays.toString(expected), Arrays.toString(s));
+        for (int i = 0; i < expected.length; i++) {
+            assertEquals(expected[i].toString(), result.get(i).toString());
+        }
     }
 }

@@ -219,7 +219,7 @@ public class RoutingServletTest {
 
         ArgumentCaptor<Integer> code = ArgumentCaptor.forClass(Integer.class);
         Mockito.verify(resp).sendError(code.capture(), Mockito.any());
-        assertEquals(HttpServletResponse.SC_BAD_REQUEST, code.getValue());
+        assertEquals(HttpServletResponse.SC_NOT_FOUND, code.getValue());
     }
 
     @Test //

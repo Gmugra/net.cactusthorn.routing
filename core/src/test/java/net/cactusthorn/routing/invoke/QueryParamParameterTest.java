@@ -8,6 +8,7 @@ import java.util.*;
 import java.util.stream.Stream;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.ws.rs.NotFoundException;
 import javax.ws.rs.QueryParam;
 
 import org.junit.jupiter.api.Test;
@@ -25,19 +26,10 @@ public class QueryParamParameterTest extends InvokeTestAncestor {
 
     public static class EntryPoint1 {
 
-        public void array(@QueryParam("val") Integer[] values) {
-        }
-
-        public void arrayByName(@QueryParam("") Integer[] val) {
-        }
-
-        public void multiArray(@QueryParam("val") int[][] values) {
-        }
-
         public void wrong(@QueryParam("val") int values) {
         }
 
-        public void collection(@QueryParam("val") Queue<Integer> values) {
+        public void queue(@QueryParam("val") Queue<Integer> values) {
         }
 
         public void list(@QueryParam("val") List<Integer> values) {
@@ -47,9 +39,6 @@ public class QueryParamParameterTest extends InvokeTestAncestor {
         }
 
         public void set(@QueryParam("val") Set<Integer> values) {
-        }
-
-        public void linkedList(@QueryParam("val") LinkedList<Integer> values) {
         }
 
         @SuppressWarnings("rawtypes") //
@@ -71,28 +60,20 @@ public class QueryParamParameterTest extends InvokeTestAncestor {
     public void collections(String methodName, String[] requestValues, Integer[] expected) throws Exception {
         Method m = findMethod(EntryPoint1.class, methodName);
         Parameter p = m.getParameters()[0];
-        MethodParameter mp = MethodParameter.Factory.create(m, p, null, CONFIG, DEFAULT_CONTENT_TYPES);
+        MethodParameter mp = MethodParameter.Factory.create(m, p, m.getGenericParameterTypes()[0], CONFIG, DEFAULT_CONTENT_TYPES);
 
         Mockito.when(request.getParameterValues("val")).thenReturn(requestValues);
 
         Object result = mp.findValue(request, null, null, null);
 
-        if (result.getClass().isArray()) {
-            assertArrayEquals(expected, (Integer[]) result);
-        } else {
-            assertArrayEquals(expected, ((Collection<?>) result).toArray());
-        }
+        assertArrayEquals(expected, ((Collection<?>) result).toArray());
     }
 
     private static Stream<Arguments> collectionArguments() {
         // @formatter:off
         return Stream.of(
-            Arguments.of("linkedList", new String[] {"10", "20", "30"}, new Integer[] {10, 20, 30}),
             Arguments.of("sortedSet", new String[] {"10", "20", "20"}, new Integer[] {10, 20}),
-            Arguments.of("list", new String[] {"10", "20", "30"}, new Integer[] {10, 20, 30}),
-            Arguments.of("collection", new String[] {"10", "20", "30"}, new Integer[] {10, 20, 30}),
-            Arguments.of("array", new String[] {"100", "200"}, new Integer[] {100, 200}),
-            Arguments.of("arrayByName", new String[] {"100", "200"}, new Integer[] {100, 200}));
+            Arguments.of("list", new String[] {"10", "20", "30"}, new Integer[] {10, 20, 30}));
         // @formatter:on
     }
 
@@ -100,7 +81,7 @@ public class QueryParamParameterTest extends InvokeTestAncestor {
     public void set() throws Exception {
         Method m = findMethod(EntryPoint1.class, "set");
         Parameter p = m.getParameters()[0];
-        MethodParameter mp = MethodParameter.Factory.create(m, p, null, CONFIG, DEFAULT_CONTENT_TYPES);
+        MethodParameter mp = MethodParameter.Factory.create(m, p, m.getGenericParameterTypes()[0], CONFIG, DEFAULT_CONTENT_TYPES);
 
         Mockito.when(request.getParameterValues("val")).thenReturn(new String[] {"10", "20", "20"});
 
@@ -109,25 +90,21 @@ public class QueryParamParameterTest extends InvokeTestAncestor {
         assertEquals(2, result.size());
     }
 
-    @ParameterizedTest @ValueSource(strings = { "collectionNoGeneric", "multiArray" }) //
+    @ParameterizedTest @ValueSource(strings = { "collectionNoGeneric"}) //
     public void testThrows(String method) {
         Method m = findMethod(EntryPoint1.class, method);
         Parameter p = m.getParameters()[0];
         assertThrows(RoutingInitializationException.class, () -> MethodParameter.Factory.create(m, p, null, CONFIG, DEFAULT_CONTENT_TYPES));
     }
 
+    /**
+     * According to JSR-339 supported only List<T>, Set<T>, or SortedSet<T>
+     */
     @Test //
-    public void nullCollection() throws Exception {
-        Method m = findMethod(EntryPoint1.class, "collection");
+    public void collectionWrongType() throws Exception {
+        Method m = findMethod(EntryPoint1.class, "queue");
         Parameter p = m.getParameters()[0];
-        MethodParameter mp = MethodParameter.Factory.create(m, p, null, CONFIG, DEFAULT_CONTENT_TYPES);
-
-        Mockito.when(request.getParameterValues("val")).thenReturn(null);
-
-        @SuppressWarnings("unchecked") //
-        Collection<Integer> collection = (Collection<Integer>) mp.findValue(request, null, null, null);
-
-        assertNull(collection);
+        assertThrows(RoutingInitializationException.class, () -> MethodParameter.Factory.create(m, p, null, CONFIG, DEFAULT_CONTENT_TYPES));
     }
 
     @Test //
@@ -138,6 +115,6 @@ public class QueryParamParameterTest extends InvokeTestAncestor {
 
         Mockito.when(request.getParameter("val")).thenReturn("abc");
 
-        assertThrows(NumberFormatException.class, () -> mp.findValue(request, null, null, null));
+        assertThrows(NotFoundException.class, () -> mp.findValue(request, null, null, null));
     }
 }

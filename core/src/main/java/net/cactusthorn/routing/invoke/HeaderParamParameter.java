@@ -7,6 +7,7 @@ import java.lang.reflect.Type;
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.ws.rs.BadRequestException;
 import javax.ws.rs.HeaderParam;
 
 import net.cactusthorn.routing.PathTemplate.PathValues;
@@ -33,12 +34,16 @@ public class HeaderParamParameter extends MethodSingleValueParameter {
     }
 
     @Override //
-    Object findValue(HttpServletRequest req, HttpServletResponse res, ServletContext con, PathValues pathValues) throws Exception {
-        String value = req.getHeader(name());
-        if (defaultValue() != null && value == null) {
-            value = defaultValue();
+    Object findValue(HttpServletRequest req, HttpServletResponse res, ServletContext con, PathValues pathValues) {
+        try {
+            String value = req.getHeader(name());
+            if (defaultValue() != null && value == null) {
+                value = defaultValue();
+            }
+            return converter().convert(classType(), parameterGenericType(), parameter().getAnnotations(), value);
+        } catch (Exception e) {
+            throw new BadRequestException(e.getMessage(), e);
         }
-        return converter().convert(classType(), parameterGenericType(), parameter().getAnnotations(), value);
     }
 
 }

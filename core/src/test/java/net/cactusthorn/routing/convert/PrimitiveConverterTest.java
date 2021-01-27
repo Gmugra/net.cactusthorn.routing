@@ -7,6 +7,12 @@ import org.junit.jupiter.api.Test;
 public class PrimitiveConverterTest {
 
     @Test //
+    public void array() throws Exception {
+        PrimitiveConverter c = new PrimitiveConverter();
+        assertThrows(UnsupportedOperationException.class, () -> c.convert(Byte.TYPE, null, null, new String[0]));
+    }
+
+    @Test //
     public void byteTest() throws Exception {
         PrimitiveConverter c = new PrimitiveConverter();
         byte v = (byte) c.convert(Byte.TYPE, null, null, "1");
@@ -15,22 +21,6 @@ public class PrimitiveConverterTest {
         assertEquals((byte) 0, v);
         v = (byte) c.convert(Byte.TYPE, null, null, " ");
         assertEquals((byte) 0, v);
-    }
-
-    @Test //
-    public void byteArrayTest() throws Exception {
-        PrimitiveConverter c = new PrimitiveConverter();
-        String[] value = new String[] { "125", "34" };
-        byte[] valuesAsByte = new byte[] { (byte) 125, (byte) 34 };
-        byte[] result = (byte[]) c.convert(Byte.TYPE, null, null, value);
-        assertArrayEquals(valuesAsByte, result);
-    }
-
-    @Test //
-    public void byteNullArrayTest() throws Exception {
-        PrimitiveConverter c = new PrimitiveConverter();
-        Object result = c.convert(Byte.TYPE, null, null, (String[]) null);
-        assertNull(result);
     }
 
     @Test //

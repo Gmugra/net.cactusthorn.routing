@@ -10,9 +10,9 @@ import java.util.Optional;
 
 import net.cactusthorn.routing.RoutingInitializationException;
 
-public class StringConstructorConverter implements Converter {
+public class StringConstructorConverter implements Converter<Object> {
 
-    private final Map<Class<?>, Constructor<?>> constructors = new HashMap<>();
+    private final Map<Type, Constructor<?>> constructors = new HashMap<>();
 
     @Override //
     public Object convert(Class<?> type, Type genericType, Annotation[] annotations, String value)

@@ -8,7 +8,7 @@ import javax.annotation.Priority;
 import javax.ws.rs.Priorities;
 import javax.ws.rs.ext.ParamConverterProvider;
 
-public class ParamConverterProviderWrapper implements Converter {
+public class ParamConverterProviderWrapper implements Converter<Object> {
 
     public static final Comparator<ParamConverterProviderWrapper> PRIORITY_COMPARATOR = (w1, w2) -> {
         if (w1 == null && w2 == null) {

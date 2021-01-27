@@ -5,9 +5,11 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
+import java.util.List;
 import java.util.stream.Stream;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.ws.rs.BadRequestException;
 import javax.ws.rs.DefaultValue;
 import javax.ws.rs.HeaderParam;
 
@@ -34,10 +36,13 @@ public class HeaderParamParameterTest extends InvokeTestAncestor {
         public void simpleArray(@HeaderParam("val") String[] values) {
         }
 
+        public void list(@HeaderParam("val") List<String> values) {
+        }
+
         public void defaultValue(@HeaderParam("val") @DefaultValue("D") String value) {
         }
 
-        public void nullValue(@HeaderParam("val") String value) {
+        public void intValue(@HeaderParam("val") Integer value) {
         }
     }
 
@@ -58,6 +63,14 @@ public class HeaderParamParameterTest extends InvokeTestAncestor {
         assertThrows(RoutingInitializationException.class, () -> MethodParameter.Factory.create(m, p, null, CONFIG, DEFAULT_CONTENT_TYPES));
     }
 
+    @Test //
+    public void list() {
+        Method m = findMethod(EntryPoint1.class, "list");
+        Parameter p = m.getParameters()[0];
+        assertThrows(RoutingInitializationException.class, 
+                () -> MethodParameter.Factory.create(m, p, m.getGenericParameterTypes()[0], CONFIG, DEFAULT_CONTENT_TYPES));
+    }
+
     @ParameterizedTest @MethodSource("provideArguments") //
     public void headerValue(String methodName, String requestValue, String expectedValue) throws Exception {
         Method m = findMethod(EntryPoint1.class, methodName);
@@ -69,6 +82,16 @@ public class HeaderParamParameterTest extends InvokeTestAncestor {
         assertEquals(expectedValue, header);
     }
 
+    @Test //
+    public void convertingException() throws Exception {
+        Method m = findMethod(EntryPoint1.class, "intValue");
+        Parameter p = m.getParameters()[0];
+        MethodParameter mp = MethodParameter.Factory.create(m, p, m.getGenericParameterTypes()[0], CONFIG, DEFAULT_CONTENT_TYPES);
+
+        Mockito.when(request.getHeader("val")).thenReturn("aaa");
+        assertThrows(BadRequestException.class, () -> mp.findValue(request, null, null, null));
+    }
+
     private static Stream<Arguments> provideArguments() {
         // @formatter:off
         return Stream.of(
@@ -76,7 +99,7 @@ public class HeaderParamParameterTest extends InvokeTestAncestor {
             Arguments.of("byName", "xyz", "xyz"),
             Arguments.of("defaultValue", null, "D"),
             Arguments.of("defaultValue", "xyz", "xyz"),
-            Arguments.of("nullValue", null, null));
+            Arguments.of("intValue", null, null));
         // @formatter:on
     }
 }
