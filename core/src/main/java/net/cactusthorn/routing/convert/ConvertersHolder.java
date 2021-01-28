@@ -20,20 +20,27 @@ public class ConvertersHolder {
     private static final StaticStringMethodConverter FROM_STRING = new StaticStringMethodConverter("fromString");
     private static final StringConstructorConverter CONSTRUCTOR = new StringConstructorConverter();
 
-    private final List<ParamConverterProviderWrapper> providers = new ArrayList<>();;
+    private final List<ParamConverterProviderWrapper> providers = new ArrayList<>();
 
     private final Map<Type, Converter<?>> converters = new HashMap<>();
 
+    public ConvertersHolder(List<ParamConverterProvider> paramConverterProviders) {
+        this();
+        paramConverterProviders.forEach(p -> providers.add(new ParamConverterProviderWrapper(p)));
+        Collections.sort(providers, ParamConverterProviderWrapper.PRIORITY_COMPARATOR);
+    }
+
     public ConvertersHolder() {
 
-        converters.put(Byte.TYPE, new PrimitiveConverter());
-        converters.put(Short.TYPE, new PrimitiveConverter());
-        converters.put(Integer.TYPE, new PrimitiveConverter());
-        converters.put(Long.TYPE, new PrimitiveConverter());
-        converters.put(Float.TYPE, new PrimitiveConverter());
-        converters.put(Double.TYPE, new PrimitiveConverter());
-        converters.put(Character.TYPE, new PrimitiveConverter());
-        converters.put(Boolean.TYPE, new PrimitiveConverter());
+        PrimitiveConverter primitiveConverter = new PrimitiveConverter();
+        converters.put(Byte.TYPE, primitiveConverter);
+        converters.put(Short.TYPE, primitiveConverter);
+        converters.put(Integer.TYPE, primitiveConverter);
+        converters.put(Long.TYPE, primitiveConverter);
+        converters.put(Float.TYPE, primitiveConverter);
+        converters.put(Double.TYPE, primitiveConverter);
+        converters.put(Character.TYPE, primitiveConverter);
+        converters.put(Boolean.TYPE, primitiveConverter);
 
         converters.put(String.class, new StringConverter());
         converters.put(Byte.class, new ByteConverter());
@@ -48,17 +55,19 @@ public class ConvertersHolder {
 
     public Optional<Converter<?>> findConverter(Class<?> clazz, Type genericType, Annotation[] annotations) {
 
-        for (ParamConverterProviderWrapper wrapper : providers) {
-            if (wrapper.isConvertible(clazz, genericType, annotations)) {
-                return Optional.of(wrapper);
-            }
-        }
-
         Class<?> type = clazz;
+        Type generic = genericType;
         if (genericType != null && collectionClass(clazz)) {
             Class<?> collectionGenericType = collectionGenericType(genericType);
             if (collectionGenericType != null) {
                 type = collectionGenericType;
+                generic = collectionGenericType;
+            }
+        }
+
+        for (ParamConverterProviderWrapper wrapper : providers) {
+            if (wrapper.isConvertible(type, generic, annotations)) {
+                return Optional.of(wrapper);
             }
         }
 
@@ -82,7 +91,7 @@ public class ConvertersHolder {
                 converters.put(type, FROM_STRING);
                 return Optional.of(FROM_STRING);
             }
-            VALUE_OF.register(type); //enumeration always has valueOf method
+            VALUE_OF.register(type); // enumeration always has valueOf method
             converters.put(type, VALUE_OF);
             return Optional.of(VALUE_OF);
         } else {
@@ -112,10 +121,5 @@ public class ConvertersHolder {
             return (Class<?>) genericTypes[0];
         }
         return null;
-    }
-
-    public void addProviders(List<ParamConverterProvider> paramConverterProviders) {
-        paramConverterProviders.forEach(p -> providers.add(new ParamConverterProviderWrapper(p)));
-        Collections.sort(providers, ParamConverterProviderWrapper.PRIORITY_COMPARATOR);
     }
 }

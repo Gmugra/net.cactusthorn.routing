@@ -21,12 +21,15 @@ import javax.ws.rs.ext.ParamConverterProvider;
 
 public class ConvertersHolderTest {
 
+    @SuppressWarnings("deprecation") //
+    private static final java.util.Date DATE = new java.util.Date(70, 10, 10);
+
     public static class DateParamConverterProvider implements ParamConverterProvider {
 
         public static class DateParamConverter implements ParamConverter<java.util.Date> {
 
-            @Override @SuppressWarnings("deprecation") public Date fromString(String value) {
-                return new java.util.Date(70, 10, 10);
+            @Override public Date fromString(String value) {
+                return DATE;
             }
 
             @Override public String toString(Date value) {
@@ -46,12 +49,29 @@ public class ConvertersHolderTest {
     public static DateParamConverterProvider TEST_CONVERTER = new DateParamConverterProvider();
 
     @Test //
-    public void register() throws Exception {
-        ConvertersHolder holder = new ConvertersHolder();
-        holder.addProviders(Arrays.asList(new ParamConverterProvider[] { TEST_CONVERTER }));
+    public void paramConverter() throws Exception {
+        ConvertersHolder holder = new ConvertersHolder(Arrays.asList(new ParamConverterProvider[] { TEST_CONVERTER }));
         Converter<?> converter = holder.findConverter(java.util.Date.class, null, null).get();
         java.util.Date date = (java.util.Date) converter.convert(java.util.Date.class, null, null, (String) null);
-        assertNotNull(date);
+        assertEquals(DATE, date);
+    }
+
+    @Test //
+    public void paramConverterNotUsed() throws Exception {
+        ConvertersHolder holder = new ConvertersHolder(Arrays.asList(new ParamConverterProvider[] { TEST_CONVERTER }));
+        Converter<?> converter = holder.findConverter(String.class, null, null).get();
+        String result = (String) converter.convert(java.util.Date.class, null, null, "AAA");
+        assertEquals("AAA", result);
+    }
+
+    @Test //
+    public void paramConverterArray() throws Exception {
+        ConvertersHolder holder = new ConvertersHolder(Arrays.asList(new ParamConverterProvider[] { TEST_CONVERTER }));
+        Converter<?> converter = holder.findConverter(java.util.Date.class, null, null).get();
+        List<?> dates = converter.convert(java.util.Date.class, null, null, new String[] { "A", "B" });
+        assertEquals(2, dates.size());
+        assertEquals(DATE, dates.get(0));
+        assertEquals(DATE, dates.get(1));
     }
 
     public static enum TestEnum {
@@ -65,7 +85,7 @@ public class ConvertersHolderTest {
             return AAAA;
         }
     }
-    
+
     public static class TestValueOf {
 
         private String value;

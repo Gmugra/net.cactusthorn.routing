@@ -121,8 +121,6 @@ public final class RoutingConfig {
 
         private ComponentProvider componentProvider;
 
-        private final ConvertersHolder convertersHolder = new ConvertersHolder();
-
         private final List<ParamConverterProvider> providers = new ArrayList<>();
 
         private final List<Class<?>> resourceClasses = new ArrayList<>();
@@ -222,7 +220,7 @@ public final class RoutingConfig {
 
             Map<ConfigProperty, Object> unmodifiableConfigProperties = Collections.unmodifiableMap(configProperties);
 
-            convertersHolder.addProviders(providers);
+            ConvertersHolder convertersHolder = new ConvertersHolder(providers);
 
             return new RoutingConfig(componentProvider, convertersHolder, Collections.unmodifiableList(resourceClasses),
                     unmodifiableBodyWriters, unmodifiableBodyReaders, unmodifiableConfigProperties, validator, applicationPath);

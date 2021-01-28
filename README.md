@@ -111,53 +111,49 @@ public class Application {
 
 1. URI template matched to request URI according JAX-RS rules
 1. If no one resource found then HTTP response with status 404 send back to client.
-1. If some resources was found, but @Consumes-annotation of no one of them fit Content-Type request-header: HTTP response with status 415 send back to client.
-1. If some resources was found, but @Produces-annotation of no one of them fit Accept request-header: HTTP response with status 406 send back to client.
+1. If some resources was found, but `@Consumes`-annotation of no one of them fit Content-Type request-header: HTTP response with status 415 send back to client.
+1. If some resources was found, but `@Produces`-annotation of no one of them fit Accept request-header: HTTP response with status 406 send back to client.
 
 ### Method parameter types converting
-
-1. all primitive types
-1. classes with _public static valeuOf(String arg)_ method.
-1. classes with a public constructor that accepts a single String argument.
-1. classes with _public static fromString(String arg)_ method.
-1. Arrays support for @QueryParam & @FormParam
-1. Collections support for @QueryParam & @FormParam
-   * Interfaces List\<T\>, Set\<T\>, SortedSet\<T\>, Collection\<T\> where T is supported by type converting
-   * any class which is not abstract and _Collections.class.isAssignableFrom( this class ) == true_
-1. _javax.ws.rs.ext.ParamConverterProvider_ interface: to write custom converters.
-   * ParamConverterProviders have highest priority. They are used before the "standard" сonverters
+The type of the annotated parameter must either:
+1. Be a primitive type
+1. Have a constructor that accepts a single String argument
+1. Have a static method named `valueOf` or `fromString` that accepts a single String argument (see, for example, `Integer.valueOf(String)`)
+   1. If both methods are present then `valueOf` used unless the type is an enum in which case `fromString` used.
+1. Have a registered implementation of ParamConverterProvider JAX-RS extension SPI that returns a ParamConverter instance capable of a "from string" conversion for the type.
+1. Be List\<T\>, Set\<T\> or SortedSet\<T\>, where T satisfies 2, 3 or 4 above. The resulting collection is read-only.
 
 ### JAX-RS
 
-1. @Path for class and/or method
+1. `@Path` for class and/or method
    * path-parameters (with regular expressions support)
-1. @GET @POST @DELETE @HEAD @OPTIONS @PATCH @PUT for method
-1. @PathParam, @QueryParam, @FormParam, @CookieParam, @HeaderParam, @FormPart for method parameters.
-1. @DefaultValue for @PathParam, @QueryParam, @FormParam, @HeaderParam
-1. @Consumes for class and/or method
+1. `@GET` `@POST` `@DELETE` `@HEAD` `@OPTIONS` `@PATCH` `@PUT` for method
+1. `@PathParam`, `@QueryParam`, `@FormParam`, `@CookieParam`, `@HeaderParam`, `@FormPart` for method parameters.
+1. `@DefaultValue`
+1. `@Consumes` for class and/or method
    * default(if not present) is "\*/\*"
-1. @Produces for class and/or method
+1. `@Produces` for class and/or method
    * default(if not present) is "text/plain"
-1. @Context for method parameters. At the moment suport next types:
+1. `@Context` for method parameters. At the moment suport next types:
    * HttpServletRequest
    * HttpServletResponse
    * ServletContext
    * java.security.Principal
-1. javax.ws.rs.core.Response
+1. `javax.ws.rs.core.Response`
 
 ### Extensions
 
 1. ParametersValidator interface to integrate additional validations e.g. _javax.validation_
    * Implemetation example is **validation-javax** module
-1. @UserRoles method annotation
+1. `@UserRoles` method annotation
    1. to check entry point against request.isUserInRole(...)
    1. Implemetation example exists in **demo-jetty** module
-1. @Template annotation, Templated-class and TemplatedMessageBodyWriter to implement message body writers for html-template-engines (e.g. FreeMarker, Thymeleaf)
+1. `@Template` annotation, `Templated`-class and `TemplatedMessageBodyWriter` to implement message body writers for html-template-engines (e.g. FreeMarker, Thymeleaf)
    * Implemetation example is **thymeleaf** module
 
 ### ParamConverterProvider
 
-Default(if the annotation is not present) priority is javax.ws.rs.Priorities.USER
+Default(if the annotation is not present) priority is `javax.ws.rs.Priorities.USER`
 
 Example:
 ```java
@@ -197,7 +193,7 @@ public class LocalDateParamConverterProvider implements javax.ws.rs.ext.ParamCon
 
 ### MessageBodyReaders
 
-Default(if the annotation is not present) priority is javax.ws.rs.Priorities.USER
+Default(if the annotation is not present) priority is `javax.ws.rs.Priorities.USER`
 
 Default(if the annotation is not present) consumes is "\*/*\"
 
@@ -255,7 +251,7 @@ public class MyClassMessageBodyReader implements net.cactusthorn.routing.body.re
 
 ### MessageBodyWriters
 
-Default(if the annotation is not present) priority is javax.ws.rs.Priorities.USER
+Default(if the annotation is not present) priority is `javax.ws.rs.Priorities.USER`
 
 Default(if the annotation is not present) produces is "\*/*\"
 
