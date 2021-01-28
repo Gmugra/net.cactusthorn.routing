@@ -30,7 +30,8 @@ public final class RoutingConfig {
 
         // @formatter:off
         RESPONSE_CHARACTER_ENCODING("UTF-8"),
-        DEFAULT_REQUEST_CHARACTER_ENCODING("UTF-8");
+        DEFAULT_REQUEST_CHARACTER_ENCODING("UTF-8"),
+        IO_BUFFER_SIZE(1024);
         // @formatter:on
 
         private final Object ddefault;
@@ -188,6 +189,11 @@ public final class RoutingConfig {
 
         public Builder setDefaultRequestCharacterEncoding(String encoding) {
             configProperties.put(ConfigProperty.DEFAULT_REQUEST_CHARACTER_ENCODING, encoding);
+            return this;
+        }
+
+        public Builder setIOBufferSize(int bufferSize) {
+            configProperties.put(ConfigProperty.IO_BUFFER_SIZE, bufferSize);
             return this;
         }
 

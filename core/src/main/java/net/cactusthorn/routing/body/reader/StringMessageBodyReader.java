@@ -14,7 +14,7 @@ import javax.ws.rs.core.MultivaluedMap;
 import net.cactusthorn.routing.body.BodyProcessor;
 
 @Priority(BodyProcessor.PRIORITY_HIGHEST) //
-public class StringMessageBodyReader extends MessageBodyReaderAncestor implements InitializableMessageBodyReader<String> {
+public class StringMessageBodyReader extends MessageBodyReaderAncestor<String> {
 
     @Override //
     public boolean isReadable(Class<?> type, Type genericType, Annotation[] annotations, MediaType mediaType) {

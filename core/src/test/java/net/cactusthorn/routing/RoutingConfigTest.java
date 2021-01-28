@@ -98,6 +98,20 @@ public class RoutingConfigTest {
     }
 
     @Test //
+    public void ioBufferSize() {
+        RoutingConfig config = RoutingConfig.builder(new EntryPointDateProvider()).setIOBufferSize(512).build();
+        int bufferSize = (int) config.properties().get(ConfigProperty.IO_BUFFER_SIZE);
+        assertEquals(512, bufferSize);
+    }
+
+    @Test //
+    public void defaultIOBufferSize() {
+        RoutingConfig config = RoutingConfig.builder(new EntryPointDateProvider()).build();
+        int bufferSize = (int) config.properties().get(ConfigProperty.IO_BUFFER_SIZE);
+        assertEquals(1024, bufferSize);
+    }
+
+    @Test //
     public void defaultRequestCharacterEncoding() {
         RoutingConfig config = RoutingConfig.builder(new EntryPointDateProvider()).setDefaultRequestCharacterEncoding("KOI8-R").build();
         String value = (String) config.properties().get(ConfigProperty.DEFAULT_REQUEST_CHARACTER_ENCODING);

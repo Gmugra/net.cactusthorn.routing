@@ -16,12 +16,13 @@ import net.cactusthorn.routing.body.BodyProcessor;
 import net.cactusthorn.routing.convert.ConvertersHolder;
 
 @Priority(BodyProcessor.LOWEST_PRIORITY) //
-public class ConvertersMessageBodyReader extends MessageBodyReaderAncestor implements InitializableMessageBodyReader<Object> {
+public class ConvertersMessageBodyReader extends MessageBodyReaderAncestor<Object> {
 
     private ConvertersHolder convertersHolder;
 
     @Override //
     public void init(ServletContext servletContext, RoutingConfig routingConfig) {
+        super.init(servletContext, routingConfig);
         this.convertersHolder = routingConfig.convertersHolder();
     }
 
