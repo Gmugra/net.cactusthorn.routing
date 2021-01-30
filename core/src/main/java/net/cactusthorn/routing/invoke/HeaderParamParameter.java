@@ -1,9 +1,5 @@
 package net.cactusthorn.routing.invoke;
 
-import java.lang.reflect.Method;
-import java.lang.reflect.Parameter;
-import java.lang.reflect.Type;
-
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -11,38 +7,33 @@ import javax.ws.rs.BadRequestException;
 import javax.ws.rs.HeaderParam;
 
 import net.cactusthorn.routing.PathTemplate.PathValues;
-import net.cactusthorn.routing.convert.ConvertersHolder;
 
-public class HeaderParamParameter extends MethodSingleValueParameter {
+public class HeaderParamParameter implements MethodParameter {
 
-    public HeaderParamParameter(Method method, Parameter parameter, Type parameterGenericType, ConvertersHolder convertersHolder) {
-        super(method, parameter, parameterGenericType, convertersHolder);
-    }
+    private ParameterInfo paramInfo;
+    private String name;
 
-    @Override //
-    protected String annotationName() {
-        return HeaderParam.class.getSimpleName();
-    }
+    public HeaderParamParameter(ParameterInfo paramInfo) {
+        this.paramInfo = paramInfo;
 
-    @Override //
-    protected String findName() {
-        String name = parameter().getAnnotation(HeaderParam.class).value();
+        name = paramInfo.annotation(HeaderParam.class).value();
         if ("".equals(name)) {
-            return super.findName();
+            name = paramInfo.name();
         }
+    }
+
+    @Override //
+    public String name() {
         return name;
     }
 
     @Override //
-    Object findValue(HttpServletRequest req, HttpServletResponse res, ServletContext con, PathValues pathValues) {
+    public Object findValue(HttpServletRequest req, HttpServletResponse res, ServletContext con, PathValues pathValues) {
         try {
-            String value = req.getHeader(name());
-            if (defaultValue() != null && value == null) {
-                value = defaultValue();
-            }
-            return converter().convert(classType(), parameterGenericType(), parameter().getAnnotations(), value);
+            return paramInfo.convert(req.getHeader(name()));
         } catch (Exception e) {
-            throw new BadRequestException(e.getMessage(), e);
+            throw new BadRequestException(
+                    String.format(CONVERSION_ERROR_MESSAGE, paramInfo.position(), paramInfo.type().getSimpleName(), e), e);
         }
     }
 

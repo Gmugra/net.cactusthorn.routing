@@ -1,25 +1,42 @@
 package net.cactusthorn.routing.invoke;
 
-import java.lang.reflect.Method;
-import java.lang.reflect.Parameter;
-import java.lang.reflect.Type;
-
+import javax.servlet.ServletContext;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.ws.rs.NotFoundException;
 import javax.ws.rs.QueryParam;
 
-import net.cactusthorn.routing.convert.ConvertersHolder;
+import net.cactusthorn.routing.PathTemplate.PathValues;
 
-public class QueryParamParameter extends MethodMultiValueParameter {
+public class QueryParamParameter implements MethodParameter {
 
-    public QueryParamParameter(Method method, Parameter parameter, Type parameterGenericType, ConvertersHolder convertersHolder) {
-        super(method, parameter, parameterGenericType, convertersHolder);
+    private ParameterInfo paramInfo;
+    private String name;
+
+    public QueryParamParameter(ParameterInfo paramInfo) {
+        this.paramInfo = paramInfo;
+
+        name = paramInfo.annotation(QueryParam.class).value();
+        if ("".equals(name)) {
+            name = paramInfo.name();
+        }
     }
 
     @Override //
-    protected String findName() {
-        String name = parameter().getAnnotation(QueryParam.class).value();
-        if ("".equals(name)) {
-            return super.findName();
-        }
+    public String name() {
         return name;
+    }
+
+    @Override //
+    public Object findValue(HttpServletRequest req, HttpServletResponse res, ServletContext con, PathValues pathValues) {
+        try {
+            if (paramInfo.collection()) {
+                return paramInfo.convert(req.getParameterValues(name()));
+            }
+            return paramInfo.convert(req.getParameter(name()));
+        } catch (Exception e) {
+            throw new NotFoundException(
+                    String.format(CONVERSION_ERROR_MESSAGE, paramInfo.position(), paramInfo.type().getSimpleName(), e), e);
+        }
     }
 }

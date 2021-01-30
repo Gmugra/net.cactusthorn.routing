@@ -91,10 +91,8 @@ public final class MethodInvoker {
         Parameter[] params = method.getParameters();
         Type[] types = method.getGenericParameterTypes();
         for (int i = 0; i < params.length; i++) {
-            if (params[i].isSynthetic()) {
-                continue;
-            }
-            parameters.add(MethodParameter.Factory.create(method, params[i], types[i], routingConfig, consumesMediaTypes));
+            ParameterInfo paraInfo = new ParameterInfo(method, params[i], types[i], i, routingConfig.convertersHolder());
+            parameters.add(MethodParameter.Factory.create(paraInfo, routingConfig, consumesMediaTypes));
         }
     }
 

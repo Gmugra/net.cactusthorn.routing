@@ -3,8 +3,6 @@ package net.cactusthorn.routing.invoke;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-import java.lang.reflect.Method;
-import java.lang.reflect.Parameter;
 import java.util.List;
 import java.util.stream.Stream;
 
@@ -58,24 +56,18 @@ public class HeaderParamParameterTest extends InvokeTestAncestor {
 
     @Test //
     public void simpleArray() {
-        Method m = findMethod(EntryPoint1.class, "simpleArray");
-        Parameter p = m.getParameters()[0];
-        assertThrows(RoutingInitializationException.class, () -> MethodParameter.Factory.create(m, p, null, CONFIG, DEFAULT_CONTENT_TYPES));
+        assertThrows(RoutingInitializationException.class, () -> parameterInfo(EntryPoint1.class, "simpleArray", CONFIG));
     }
 
     @Test //
     public void list() {
-        Method m = findMethod(EntryPoint1.class, "list");
-        Parameter p = m.getParameters()[0];
-        assertThrows(RoutingInitializationException.class, 
-                () -> MethodParameter.Factory.create(m, p, m.getGenericParameterTypes()[0], CONFIG, DEFAULT_CONTENT_TYPES));
+        assertThrows(RoutingInitializationException.class, () -> parameterInfo(EntryPoint1.class, "list", CONFIG));
     }
 
     @ParameterizedTest @MethodSource("provideArguments") //
     public void headerValue(String methodName, String requestValue, String expectedValue) throws Exception {
-        Method m = findMethod(EntryPoint1.class, methodName);
-        Parameter p = m.getParameters()[0];
-        MethodParameter mp = MethodParameter.Factory.create(m, p, null, CONFIG, DEFAULT_CONTENT_TYPES);
+        ParameterInfo paramInfo = parameterInfo(EntryPoint1.class, methodName, CONFIG);
+        MethodParameter mp = MethodParameter.Factory.create(paramInfo, CONFIG, DEFAULT_CONTENT_TYPES);
 
         Mockito.when(request.getHeader("val")).thenReturn(requestValue);
         String header = (String) mp.findValue(request, null, null, null);
@@ -84,9 +76,8 @@ public class HeaderParamParameterTest extends InvokeTestAncestor {
 
     @Test //
     public void convertingException() throws Exception {
-        Method m = findMethod(EntryPoint1.class, "intValue");
-        Parameter p = m.getParameters()[0];
-        MethodParameter mp = MethodParameter.Factory.create(m, p, m.getGenericParameterTypes()[0], CONFIG, DEFAULT_CONTENT_TYPES);
+        ParameterInfo paramInfo = parameterInfo(EntryPoint1.class, "intValue", CONFIG);
+        MethodParameter mp = MethodParameter.Factory.create(paramInfo, CONFIG, DEFAULT_CONTENT_TYPES);
 
         Mockito.when(request.getHeader("val")).thenReturn("aaa");
         assertThrows(BadRequestException.class, () -> mp.findValue(request, null, null, null));

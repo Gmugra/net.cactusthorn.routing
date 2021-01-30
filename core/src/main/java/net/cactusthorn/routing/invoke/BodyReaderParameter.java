@@ -1,8 +1,5 @@
 package net.cactusthorn.routing.invoke;
 
-import java.lang.reflect.Method;
-import java.lang.reflect.Parameter;
-import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.HashMap;
@@ -23,37 +20,37 @@ import net.cactusthorn.routing.RoutingInitializationException;
 import net.cactusthorn.routing.PathTemplate.PathValues;
 import net.cactusthorn.routing.body.reader.BodyReader;
 
-public final class BodyReaderParameter extends MethodParameter {
+public final class BodyReaderParameter implements MethodParameter {
 
     protected static final String BODY_READER_NOT_FOUND = "body reader for media-type %s not found; Method: %s";
 
     private Map<MediaType, MessageBodyReader<?>> messageBodyReaders = new HashMap<>();
 
-    public BodyReaderParameter(Method method, Parameter parameter, Type parameterGenericType, Set<MediaType> consumesMediaTypes,
-            List<BodyReader> bodyReaders) {
+    private ParameterInfo paramInfo;
 
-        super(parameter, parameterGenericType);
+    public BodyReaderParameter(ParameterInfo paramInfo, Set<MediaType> consumesMediaTypes, List<BodyReader> bodyReaders) {
+        this.paramInfo = paramInfo;
 
         for (MediaType consumesMediaType : consumesMediaTypes) {
             for (BodyReader bodyReader : bodyReaders) {
-                if (bodyReader.isProcessable(classType(), parameterGenericType(), parameter().getAnnotations(), consumesMediaType)) {
+                if (bodyReader.isProcessable(paramInfo.type(), paramInfo.genericType(), paramInfo.annotations(), consumesMediaType)) {
                     messageBodyReaders.put(consumesMediaType, bodyReader.messageBodyReader());
                     break;
                 }
             }
             if (!messageBodyReaders.containsKey(consumesMediaType)) {
-                throw new RoutingInitializationException(BODY_READER_NOT_FOUND, consumesMediaType, method);
+                throw new RoutingInitializationException(BODY_READER_NOT_FOUND, consumesMediaType, paramInfo.method());
             }
         }
     }
 
     @SuppressWarnings({ "rawtypes", "unchecked" }) @Override //
-    Object findValue(HttpServletRequest req, HttpServletResponse res, ServletContext con, PathValues pathValues) throws Exception {
+    public Object findValue(HttpServletRequest req, HttpServletResponse res, ServletContext con, PathValues pathValues) throws Exception {
         MediaType mediaType = contentType(req);
         MessageBodyReader bodyReader = findBodyReader(req);
         MediaType mediaTypeWithCharset = mediaType.withCharset(req.getCharacterEncoding());
-        return bodyReader.readFrom(classType(), parameterGenericType(), parameter().getAnnotations(), mediaTypeWithCharset, getHeaders(req),
-                req.getInputStream());
+        return bodyReader.readFrom(paramInfo.type(), paramInfo.genericType(), paramInfo.annotations(),
+                mediaTypeWithCharset, getHeaders(req), req.getInputStream());
     }
 
     private MessageBodyReader<?> findBodyReader(HttpServletRequest req) {

@@ -1,8 +1,5 @@
 package net.cactusthorn.routing.invoke;
 
-import java.lang.reflect.Method;
-import java.lang.reflect.Parameter;
-import java.lang.reflect.Type;
 import java.util.Collection;
 
 import javax.servlet.ServletContext;
@@ -14,28 +11,31 @@ import net.cactusthorn.routing.RoutingInitializationException;
 import net.cactusthorn.routing.PathTemplate.PathValues;
 import net.cactusthorn.routing.annotation.FormPart;
 
-public class FormPartParameter extends MethodParameter {
+public class FormPartParameter implements MethodParameter {
 
-    protected static final String WRONG_TYPE = "@FormPart can be used only for javax.servlet.http.Part type; Method: %s";
+    private static final String WRONG_TYPE = "@FormPart can be used only for javax.servlet.http.Part type; Method: %s";
 
-    public FormPartParameter(Method method, Parameter parameter, Type parameterGenericType) {
-        super(parameter, parameterGenericType);
-        if (classType() != Part.class) {
-            throw new RoutingInitializationException(WRONG_TYPE, method);
+    private String name;
+
+    public FormPartParameter(ParameterInfo paramInfo) {
+
+        if (paramInfo.type() != Part.class) {
+            throw new RoutingInitializationException(WRONG_TYPE, paramInfo.method());
+        }
+
+        name = paramInfo.annotation(FormPart.class).value();
+        if ("".equals(name)) {
+            name = paramInfo.name();
         }
     }
 
     @Override //
-    protected String findName() {
-        String name = parameter().getAnnotation(FormPart.class).value();
-        if ("".equals(name)) {
-            return super.findName();
-        }
+    public String name() {
         return name;
     }
 
     @Override //
-    Object findValue(HttpServletRequest req, HttpServletResponse res, ServletContext con, PathValues pathValues) throws Exception {
+    public Object findValue(HttpServletRequest req, HttpServletResponse res, ServletContext con, PathValues pathValues) throws Exception {
         Collection<Part> parts = req.getParts();
         if (parts == null) {
             return null;

@@ -1,13 +1,10 @@
 package net.cactusthorn.routing.convert;
 
 import java.lang.annotation.Annotation;
-import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
-import java.util.Set;
-import java.util.SortedSet;
 import java.util.List;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -55,29 +52,19 @@ public class ConvertersHolder {
 
     public Optional<Converter<?>> findConverter(Class<?> clazz, Type genericType, Annotation[] annotations) {
 
-        Class<?> type = clazz;
-        Type generic = genericType;
-        if (genericType != null && collectionClass(clazz)) {
-            Class<?> collectionGenericType = collectionGenericType(genericType);
-            if (collectionGenericType != null) {
-                type = collectionGenericType;
-                generic = collectionGenericType;
-            }
-        }
-
         for (ParamConverterProviderWrapper wrapper : providers) {
-            if (wrapper.isConvertible(type, generic, annotations)) {
+            if (wrapper.isConvertible(clazz, genericType, annotations)) {
                 return Optional.of(wrapper);
             }
         }
 
-        Converter<?> converter = converters.get(type);
+        Converter<?> converter = converters.get(clazz);
         if (converter != null) {
             return Optional.of(converter);
         }
 
-        if (CONSTRUCTOR.register(type)) {
-            converters.put(type, CONSTRUCTOR);
+        if (CONSTRUCTOR.register(clazz)) {
+            converters.put(clazz, CONSTRUCTOR);
             return Optional.of(CONSTRUCTOR);
         }
 
@@ -86,40 +73,24 @@ public class ConvertersHolder {
          * MUST be used unless the type is an enum in which case fromString MUST be
          * used.
          */
-        if (Enum.class.isAssignableFrom(type)) {
-            if (FROM_STRING.register(type)) {
-                converters.put(type, FROM_STRING);
+        if (Enum.class.isAssignableFrom(clazz)) {
+            if (FROM_STRING.register(clazz)) {
+                converters.put(clazz, FROM_STRING);
                 return Optional.of(FROM_STRING);
             }
-            VALUE_OF.register(type); // enumeration always has valueOf method
-            converters.put(type, VALUE_OF);
+            VALUE_OF.register(clazz); // enumeration always has valueOf method
+            converters.put(clazz, VALUE_OF);
             return Optional.of(VALUE_OF);
         } else {
-            if (VALUE_OF.register(type)) {
-                converters.put(type, VALUE_OF);
+            if (VALUE_OF.register(clazz)) {
+                converters.put(clazz, VALUE_OF);
                 return Optional.of(VALUE_OF);
             }
-            if (FROM_STRING.register(type)) {
-                converters.put(type, FROM_STRING);
+            if (FROM_STRING.register(clazz)) {
+                converters.put(clazz, FROM_STRING);
                 return Optional.of(FROM_STRING);
             }
         }
         return Optional.empty();
-    }
-
-    /**
-     * According to JSR-339 supported only List<T>, Set<T>, or SortedSet<T>
-     */
-    private boolean collectionClass(Class<?> clazz) {
-        return List.class == clazz || SortedSet.class == clazz || Set.class == clazz;
-    }
-
-    private Class<?> collectionGenericType(Type parameterGenericType) {
-        if (parameterGenericType instanceof ParameterizedType) {
-            ParameterizedType parameterizedType = (ParameterizedType) parameterGenericType;
-            Type[] genericTypes = parameterizedType.getActualTypeArguments();
-            return (Class<?>) genericTypes[0];
-        }
-        return null;
     }
 }

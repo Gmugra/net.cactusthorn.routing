@@ -1,7 +1,5 @@
 package net.cactusthorn.routing.invoke;
 
-import java.lang.reflect.Parameter;
-import java.lang.reflect.Type;
 import java.security.Principal;
 
 import javax.servlet.ServletContext;
@@ -10,14 +8,11 @@ import javax.servlet.http.HttpServletResponse;
 
 import net.cactusthorn.routing.PathTemplate.PathValues;
 
-public final class PrincipalParameter extends MethodParameter {
-
-    public PrincipalParameter(Parameter parameter, Type parameterGenericType) {
-        super(parameter, parameterGenericType);
-    }
+public final class PrincipalParameter implements MethodParameter {
 
     @Override //
-    Principal findValue(HttpServletRequest req, HttpServletResponse res, ServletContext con, PathValues pathValues) throws Exception {
+    public Principal findValue(HttpServletRequest req, HttpServletResponse res, ServletContext con, PathValues pathValues)
+            throws Exception {
         return req.getUserPrincipal();
     }
 }

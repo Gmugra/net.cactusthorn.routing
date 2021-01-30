@@ -1,9 +1,5 @@
 package net.cactusthorn.routing.invoke;
 
-import java.lang.reflect.Method;
-import java.lang.reflect.Parameter;
-import java.lang.reflect.Type;
-
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -11,38 +7,35 @@ import javax.ws.rs.NotFoundException;
 import javax.ws.rs.PathParam;
 
 import net.cactusthorn.routing.PathTemplate.PathValues;
-import net.cactusthorn.routing.convert.ConvertersHolder;
 
-public class PathParamParameter extends MethodSingleValueParameter {
+public class PathParamParameter implements MethodParameter {
 
-    public PathParamParameter(Method method, Parameter parameter, Type parameterGenericType, ConvertersHolder convertersHolder) {
-        super(method, parameter, parameterGenericType, convertersHolder);
-    }
+    private ParameterInfo paramInfo;
+    private String name;
 
-    @Override //
-    protected String annotationName() {
-        return PathParam.class.getSimpleName();
-    }
+    public PathParamParameter(ParameterInfo paramInfo) {
+        this.paramInfo = paramInfo;
 
-    @Override //
-    protected String findName() {
-        String name = parameter().getAnnotation(PathParam.class).value();
+        name = paramInfo.annotation(PathParam.class).value();
         if ("".equals(name)) {
-            return super.findName();
+            name = paramInfo.name();
         }
+    }
+
+    @Override //
+    public String name() {
         return name;
     }
 
     @Override //
-    Object findValue(HttpServletRequest req, HttpServletResponse res, ServletContext con, PathValues pathValues) {
+    public Object findValue(HttpServletRequest req, HttpServletResponse res, ServletContext con, PathValues pathValues) {
         try {
             String value = pathValues.value(name());
-            if (defaultValue() != null && "".equals(value)) {
-                value = defaultValue();
-            }
-            return converter().convert(classType(), parameterGenericType(), parameter().getAnnotations(), value);
+            value = "".equals(value) ? null : value;
+            return paramInfo.convert(value);
         } catch (Exception e) {
-            throw new NotFoundException(e.getMessage(), e);
+            throw new NotFoundException(
+                    String.format(CONVERSION_ERROR_MESSAGE, paramInfo.position(), paramInfo.type().getSimpleName(), e), e);
         }
     }
 }

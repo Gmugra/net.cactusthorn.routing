@@ -10,6 +10,7 @@ import javax.ws.rs.core.MediaType;
 import org.junit.jupiter.api.BeforeEach;
 import org.mockito.Mockito;
 
+import net.cactusthorn.routing.RoutingConfig;
 import net.cactusthorn.routing.convert.ConvertersHolder;
 
 public class InvokeTestAncestor {
@@ -36,6 +37,11 @@ public class InvokeTestAncestor {
             }
         }
         return null;
+    }
+
+    protected ParameterInfo parameterInfo(Class<?> clazz, String methodName, RoutingConfig config) {
+        Method m = findMethod(clazz, methodName);
+        return new ParameterInfo(m, m.getParameters()[0], m.getGenericParameterTypes()[0], 0, config.convertersHolder());
     }
 
     protected static Set<MediaType> mediaTypes(String type, String subtype) {

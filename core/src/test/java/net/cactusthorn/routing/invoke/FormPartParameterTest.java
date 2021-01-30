@@ -6,8 +6,6 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.lang.reflect.Method;
-import java.lang.reflect.Parameter;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
@@ -100,16 +98,14 @@ public class FormPartParameterTest extends InvokeTestAncestor {
 
     @Test //
     public void wrongType() {
-        Method m = findMethod(EntryPoint1.class, "wrongType");
-        Parameter p = m.getParameters()[0];
-        assertThrows(RoutingInitializationException.class, () -> MethodParameter.Factory.create(m, p, null, CONFIG, DEFAULT_CONTENT_TYPES));
+        ParameterInfo paramInfo = parameterInfo(EntryPoint1.class, "wrongType", CONFIG); 
+        assertThrows(RoutingInitializationException.class, () -> MethodParameter.Factory.create(paramInfo, CONFIG, DEFAULT_CONTENT_TYPES));
     }
 
     @ParameterizedTest @MethodSource("provideArguments") //
     public void getParts(String methodName, List<Part> requestParts, boolean expectedNull) throws Exception {
-        Method m = findMethod(EntryPoint1.class, methodName);
-        Parameter p = m.getParameters()[0];
-        MethodParameter mp = MethodParameter.Factory.create(m, p, null, CONFIG, DEFAULT_CONTENT_TYPES);
+        ParameterInfo paramInfo = parameterInfo(EntryPoint1.class, methodName, CONFIG);
+        MethodParameter mp = MethodParameter.Factory.create(paramInfo, CONFIG, DEFAULT_CONTENT_TYPES);
 
         Mockito.when(request.getParts()).thenReturn(requestParts);
         Part part = (Part) mp.findValue(request, null, null, null);

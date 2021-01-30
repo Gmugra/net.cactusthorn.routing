@@ -73,7 +73,6 @@ public class Application {
 
         ComponentProvider myComponentProvider = new MyComponentProvider(...);
         Collection<Class<?>> entryPoints = ...
-        Converter converter = new MyLocalDateConverter(...);
 
         RoutingConfig config =
             RoutingConfig.builder(myComponentProvider)
@@ -150,6 +149,10 @@ The type of the annotated parameter must either:
    1. Implemetation example exists in **demo-jetty** module
 1. `@Template` annotation, `Templated`-class and `TemplatedMessageBodyWriter` to implement message body writers for html-template-engines (e.g. FreeMarker, Thymeleaf)
    * Implemetation example is **thymeleaf** module
+1. Default parameter name
+   1. Only when project compiled with `javac -parameters`
+   1. Parameters annotation can be used with empty-string as name, e.g: `@QueryParam("") List<Integer> qval`. In this case paramener name will be used to match parameter in request.
+
 
 ### ParamConverterProvider
 

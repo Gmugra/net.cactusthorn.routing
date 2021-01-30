@@ -2,8 +2,6 @@ package net.cactusthorn.routing.invoke;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-import java.lang.reflect.Method;
-import java.lang.reflect.Parameter;
 import java.util.stream.Stream;
 
 import javax.servlet.http.Cookie;
@@ -46,16 +44,14 @@ public class CookieParamParameterTest extends InvokeTestAncestor {
 
     @Test //
     public void wrongType() throws Exception {
-        Method m = findMethod(EntryPoint1.class, "wrongType");
-        Parameter p = m.getParameters()[0];
-        assertThrows(RoutingInitializationException.class, () -> MethodParameter.Factory.create(m, p, null, CONFIG, DEFAULT_CONTENT_TYPES));
+        ParameterInfo paramInfo = parameterInfo(EntryPoint1.class, "wrongType", CONFIG);
+        assertThrows(RoutingInitializationException.class, () -> MethodParameter.Factory.create(paramInfo, CONFIG, DEFAULT_CONTENT_TYPES));
     }
 
     @ParameterizedTest @MethodSource("provideArguments") //
     public void findCookieValue(String methodName, Cookie[] expectedCookie, boolean expectedNull) throws Exception {
-        Method m = findMethod(EntryPoint1.class, methodName);
-        Parameter p = m.getParameters()[0];
-        MethodParameter mp = MethodParameter.Factory.create(m, p, null, CONFIG, DEFAULT_CONTENT_TYPES);
+        ParameterInfo paramInfo = parameterInfo(EntryPoint1.class, methodName, CONFIG);
+        MethodParameter mp = MethodParameter.Factory.create(paramInfo, CONFIG, DEFAULT_CONTENT_TYPES);
 
         Mockito.when(request.getCookies()).thenReturn(expectedCookie);
         Cookie cookie = (Cookie) mp.findValue(request, null, null, null);

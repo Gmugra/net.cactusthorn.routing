@@ -1,8 +1,5 @@
 package net.cactusthorn.routing.invoke;
 
-import java.lang.reflect.Method;
-import java.lang.reflect.Parameter;
-import java.lang.reflect.Type;
 import java.security.Principal;
 import java.util.Set;
 
@@ -11,7 +8,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.CookieParam;
-import javax.ws.rs.DefaultValue;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.HeaderParam;
 import javax.ws.rs.PathParam;
@@ -26,96 +22,58 @@ import net.cactusthorn.routing.RoutingInitializationException;
 import net.cactusthorn.routing.PathTemplate.PathValues;
 import net.cactusthorn.routing.annotation.FormPart;
 
-public abstract class MethodParameter {
+public interface MethodParameter {
 
-    private Parameter parameter;
-    private Type parameterGenericType;
-    private Class<?> classType;
-    private String defaultValue;
-    private String name;
+    String CONVERSION_ERROR_MESSAGE = "Parameter position: %s; Parameter type: %s; %s";
 
-    MethodParameter(Parameter parameter, Type parameterGenericType) {
-        this.parameter = parameter;
-        this.parameterGenericType = parameterGenericType;
-        classType = parameter.getType();
-        name = findName();
-        DefaultValue defaultValueAnnotation = parameter.getAnnotation(DefaultValue.class);
-        if (defaultValueAnnotation != null) {
-            defaultValue = defaultValueAnnotation.value();
-        }
+    default String name() {
+        return null;
     }
 
-    protected String defaultValue() {
-        return defaultValue;
-    }
+    Object findValue(HttpServletRequest req, HttpServletResponse res, ServletContext con, PathValues pathValues) throws Exception;
 
-    protected Class<?> classType() {
-        return classType;
-    }
-
-    protected Type parameterGenericType() {
-        return parameterGenericType;
-    }
-
-    protected String name() {
-        return name;
-    }
-
-    protected Parameter parameter() {
-        return parameter;
-    }
-
-    protected String findName() {
-        return parameter.getName();
-    }
-
-    abstract Object findValue(HttpServletRequest req, HttpServletResponse res, ServletContext con, PathValues pathValues) throws Exception;
-
-    static final class Factory {
+    class Factory {
 
         protected static final String ONLY_POST_PUT_PATCH = "entity parameter supported only for POST, PUT and PATCH; Method: %s";
 
-        static MethodParameter create(Method method, Parameter parameter, Type parameterGenericType, RoutingConfig routingConfig,
-                Set<MediaType> consumesMediaTypes) {
-            Class<?> parameterClassType = parameter.getType();
-            if (parameter.getAnnotation(PathParam.class) != null) {
-                return new PathParamParameter(method, parameter, parameterGenericType, routingConfig.convertersHolder());
+        static MethodParameter create(ParameterInfo parameterInfo, RoutingConfig routingConfig, Set<MediaType> consumesMediaTypes) {
+            if (parameterInfo.annotation(PathParam.class) != null) {
+                return new PathParamParameter(parameterInfo);
             }
-            if (parameter.getAnnotation(QueryParam.class) != null) {
-                return new QueryParamParameter(method, parameter, parameterGenericType, routingConfig.convertersHolder());
+            if (parameterInfo.annotation(QueryParam.class) != null) {
+                return new QueryParamParameter(parameterInfo);
             }
-            if (parameter.getAnnotation(FormParam.class) != null) {
-                return new FormParamParameter(method, parameter, parameterGenericType, routingConfig.convertersHolder(),
-                        consumesMediaTypes);
+            if (parameterInfo.annotation(FormParam.class) != null) {
+                return new FormParamParameter(parameterInfo, consumesMediaTypes);
             }
-            if (parameter.getAnnotation(FormPart.class) != null) {
-                return new FormPartParameter(method, parameter, parameterGenericType);
+            if (parameterInfo.annotation(FormPart.class) != null) {
+                return new FormPartParameter(parameterInfo);
             }
-            if (parameter.getAnnotation(HeaderParam.class) != null) {
-                return new HeaderParamParameter(method, parameter, parameterGenericType, routingConfig.convertersHolder());
+            if (parameterInfo.annotation(HeaderParam.class) != null) {
+                return new HeaderParamParameter(parameterInfo);
             }
-            if (parameter.getAnnotation(CookieParam.class) != null) {
-                return new CookieParamParameter(method, parameter, parameterGenericType);
+            if (parameterInfo.annotation(CookieParam.class) != null) {
+                return new CookieParamParameter(parameterInfo);
             }
-            if (parameter.getAnnotation(Context.class) != null) {
-                if (HttpServletRequest.class.isAssignableFrom(parameterClassType)) {
-                    return new HttpServletRequestParameter(parameter, parameterGenericType);
+            if (parameterInfo.annotation(Context.class) != null) {
+                if (HttpServletRequest.class.isAssignableFrom(parameterInfo.type())) {
+                    return new HttpServletRequestParameter();
                 }
-                if (HttpServletResponse.class.isAssignableFrom(parameterClassType)) {
-                    return new HttpServletResponseParameter(parameter, parameterGenericType);
+                if (HttpServletResponse.class.isAssignableFrom(parameterInfo.type())) {
+                    return new HttpServletResponseParameter();
                 }
-                if (ServletContext.class.isAssignableFrom(parameterClassType)) {
-                    return new ServletContextParameter(parameter, parameterGenericType);
+                if (ServletContext.class.isAssignableFrom(parameterInfo.type())) {
+                    return new ServletContextParameter();
                 }
-                if (Principal.class.isAssignableFrom(parameterClassType)) {
-                    return new PrincipalParameter(parameter, parameterGenericType);
+                if (Principal.class == parameterInfo.type()) {
+                    return new PrincipalParameter();
                 }
             }
-            if (method.getAnnotation(POST.class) != null || method.getAnnotation(PUT.class) != null
-                    || method.getAnnotation(PATCH.class) != null) {
-                return new BodyReaderParameter(method, parameter, parameterGenericType, consumesMediaTypes, routingConfig.bodyReaders());
+            if (parameterInfo.method().getAnnotation(POST.class) != null || parameterInfo.method().getAnnotation(PUT.class) != null
+                    || parameterInfo.method().getAnnotation(PATCH.class) != null) {
+                return new BodyReaderParameter(parameterInfo, consumesMediaTypes, routingConfig.bodyReaders());
             }
-            throw new RoutingInitializationException(ONLY_POST_PUT_PATCH, method);
+            throw new RoutingInitializationException(ONLY_POST_PUT_PATCH, parameterInfo.method());
         }
     }
 }

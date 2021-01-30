@@ -3,8 +3,6 @@ package net.cactusthorn.routing.invoke;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-import java.lang.reflect.Method;
-import java.lang.reflect.Parameter;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -13,6 +11,8 @@ import java.util.stream.Stream;
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.DefaultValue;
 import javax.ws.rs.FormParam;
+import javax.ws.rs.NotFoundException;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 
 import org.junit.jupiter.api.Test;
@@ -24,6 +24,7 @@ import org.mockito.Mockito;
 import net.cactusthorn.routing.ComponentProvider;
 import net.cactusthorn.routing.RoutingConfig;
 import net.cactusthorn.routing.RoutingInitializationException;
+import net.cactusthorn.routing.invoke.QueryParamParameterTest.EntryPoint1;
 
 public class FormParamParameterTest extends InvokeTestAncestor {
 
@@ -40,6 +41,9 @@ public class FormParamParameterTest extends InvokeTestAncestor {
 
         public void byName(@FormParam("") String val) {
         }
+
+        public void wrong(@FormParam("val") int values) {
+        }
     }
 
     public static class EntryPoint1Provider implements ComponentProvider {
@@ -54,18 +58,27 @@ public class FormParamParameterTest extends InvokeTestAncestor {
 
     @Test //
     public void wrongContentType() {
-        Method m = findMethod(EntryPoint1.class, "simple");
-        Parameter p = m.getParameters()[0];
-        assertThrows(RoutingInitializationException.class, () -> MethodParameter.Factory.create(m, p, null, CONFIG, DEFAULT_CONTENT_TYPES));
+        ParameterInfo paramInfo = parameterInfo(EntryPoint1.class, "simple", CONFIG); 
+        assertThrows(RoutingInitializationException.class, () -> MethodParameter.Factory.create(paramInfo, CONFIG, DEFAULT_CONTENT_TYPES));
+    }
+
+    @Test //
+    public void wrong() {
+        ParameterInfo paramInfo = parameterInfo(EntryPoint1.class, "wrong", CONFIG);
+        Set<MediaType> consumesMediaTypes = new HashSet<>();
+        consumesMediaTypes.add(MediaType.APPLICATION_FORM_URLENCODED_TYPE);
+        MethodParameter mp = MethodParameter.Factory.create(paramInfo, CONFIG, consumesMediaTypes);
+        Mockito.when(request.getParameter("val")).thenReturn("abc");
+
+        assertThrows(NotFoundException.class, () -> mp.findValue(request, null, null, null));
     }
 
     @ParameterizedTest @MethodSource("provideArguments") //
     public void findFormValue(String methodName, String requestValue, Object expectedValue) throws Exception {
-        Method m = findMethod(EntryPoint1.class, methodName);
-        Parameter p = m.getParameters()[0];
+        ParameterInfo paramInfo = parameterInfo(EntryPoint1.class, methodName, CONFIG);
         Set<MediaType> consumesMediaTypes = new HashSet<>();
         consumesMediaTypes.add(MediaType.APPLICATION_FORM_URLENCODED_TYPE);
-        MethodParameter mp = MethodParameter.Factory.create(m, p, m.getGenericParameterTypes()[0], CONFIG, consumesMediaTypes);
+        MethodParameter mp = MethodParameter.Factory.create(paramInfo, CONFIG, consumesMediaTypes);
 
         Mockito.when(request.getParameter("val")).thenReturn(requestValue);
         if (requestValue != null) {
@@ -84,8 +97,8 @@ public class FormParamParameterTest extends InvokeTestAncestor {
     private static Stream<Arguments> provideArguments() {
         // @formatter:off
         return Stream.of(
-            //Arguments.of("simple", "xyz", "xyz"),
-            //Arguments.of("byName", "xyz", "xyz"),
+            Arguments.of("simple", "xyz", "xyz"),
+            Arguments.of("byName", "xyz", "xyz"),
             Arguments.of("defaultList", null, "A"),
             Arguments.of("defaultValue", null, "D"),
             Arguments.of("defaultValue", "xyz", "xyz"),

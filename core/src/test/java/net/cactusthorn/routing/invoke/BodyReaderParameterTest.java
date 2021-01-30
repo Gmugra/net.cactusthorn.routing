@@ -3,8 +3,6 @@ package net.cactusthorn.routing.invoke;
 import static org.junit.jupiter.api.Assertions.*;
 
 import java.io.InputStream;
-import java.lang.reflect.Method;
-import java.lang.reflect.Parameter;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -65,7 +63,7 @@ public class BodyReaderParameterTest extends InvokeTestAncestor {
         }
     }
 
-    private static RoutingConfig CONFIG = RoutingConfig.builder(new EntryPoint1Provider()).addResource(EntryPoint1.class).build();
+    private static final RoutingConfig CONFIG = RoutingConfig.builder(new EntryPoint1Provider()).addResource(EntryPoint1.class).build();
 
     @BeforeAll //
     protected static void beforeAll() throws Exception {
@@ -86,9 +84,8 @@ public class BodyReaderParameterTest extends InvokeTestAncestor {
 
     @Test //
     public void ok() throws Exception {
-        Method m = findMethod(EntryPoint1.class, "context");
-        Parameter p = m.getParameters()[0];
-        MethodParameter body = MethodParameter.Factory.create(m, p, null, CONFIG, mediaTypes(MediaType.TEXT_PLAIN_TYPE));
+        ParameterInfo paramInfo = parameterInfo(EntryPoint1.class, "context", CONFIG);
+        MethodParameter body = MethodParameter.Factory.create(paramInfo, CONFIG, mediaTypes(MediaType.TEXT_PLAIN_TYPE));
         StringBuilder result = (StringBuilder) body.findValue(request, null, null, null);
         assertEquals("THIS IS IT", result.toString());
     }
@@ -99,28 +96,25 @@ public class BodyReaderParameterTest extends InvokeTestAncestor {
         headers.put("aaaaa", "bbbb");
         Mockito.when(request.getHeaderNames()).thenReturn(Collections.enumeration(headers.keySet()));
         Mockito.when(request.getHeaders("aaaaa")).thenReturn(Collections.enumeration(headers.values()));
-        
-        Method m = findMethod(EntryPoint1.class, "context");
-        Parameter p = m.getParameters()[0];
-        MethodParameter body = MethodParameter.Factory.create(m, p, null, CONFIG, mediaTypes(MediaType.TEXT_PLAIN_TYPE));
+
+        ParameterInfo paramInfo = parameterInfo(EntryPoint1.class, "context", CONFIG);
+        MethodParameter body = MethodParameter.Factory.create(paramInfo, CONFIG, mediaTypes(MediaType.TEXT_PLAIN_TYPE));
         StringBuilder result = (StringBuilder) body.findValue(request, null, null, null);
         assertEquals("THIS IS IT", result.toString());
     }
 
     @Test //
     public void stream() throws Exception {
-        Method m = findMethod(EntryPoint1.class, "stream");
-        Parameter p = m.getParameters()[0];
-        MethodParameter body = MethodParameter.Factory.create(m, p, null, CONFIG, mediaTypes(MediaType.TEXT_PLAIN_TYPE));
+        ParameterInfo paramInfo = parameterInfo(EntryPoint1.class, "stream", CONFIG);
+        MethodParameter body = MethodParameter.Factory.create(paramInfo, CONFIG, mediaTypes(MediaType.TEXT_PLAIN_TYPE));
         InputStream result = (InputStream) body.findValue(request, null, null, null);
         assertNotNull(result);
     }
 
     @Test //
     public void string() throws Exception {
-        Method m = findMethod(EntryPoint1.class, "string");
-        Parameter p = m.getParameters()[0];
-        MethodParameter body = MethodParameter.Factory.create(m, p, null, CONFIG, mediaTypes(MediaType.WILDCARD_TYPE));
+        ParameterInfo paramInfo = parameterInfo(EntryPoint1.class, "string", CONFIG);
+        MethodParameter body = MethodParameter.Factory.create(paramInfo, CONFIG, mediaTypes(MediaType.WILDCARD_TYPE));
         String result = (String) body.findValue(request, null, null, null);
         assertEquals("THIS IS IT", result);
     }
@@ -128,18 +122,16 @@ public class BodyReaderParameterTest extends InvokeTestAncestor {
     @Test //
     public void noConsumes() throws Exception {
         Mockito.when(request.getContentType()).thenReturn(MediaType.WILDCARD);
-        Method m = findMethod(EntryPoint1.class, "noConsumes");
-        Parameter p = m.getParameters()[0];
-        MethodParameter body = MethodParameter.Factory.create(m, p, null, CONFIG, mediaTypes(MediaType.WILDCARD_TYPE));
+        ParameterInfo paramInfo = parameterInfo(EntryPoint1.class, "noConsumes", CONFIG);
+        MethodParameter body = MethodParameter.Factory.create(paramInfo, CONFIG, mediaTypes(MediaType.WILDCARD_TYPE));
         InputStream result = (InputStream) body.findValue(request, null, null, null);
         assertNotNull(result);
     }
 
     @ParameterizedTest @MethodSource("provideArguments") //
     public void testException(String method, MediaType mediaType) throws Exception {
-        Method m = findMethod(EntryPoint1.class, method);
-        Parameter p = m.getParameters()[0];
-        assertThrows(RoutingInitializationException.class, () -> MethodParameter.Factory.create(m, p, null, CONFIG, mediaTypes(mediaType)));
+        ParameterInfo paramInfo = parameterInfo(EntryPoint1.class, method, CONFIG);
+        assertThrows(RoutingInitializationException.class, () -> MethodParameter.Factory.create(paramInfo, CONFIG, mediaTypes(mediaType)));
     }
 
     @Test //
@@ -149,9 +141,8 @@ public class BodyReaderParameterTest extends InvokeTestAncestor {
         Mockito.when(request.getHeaderNames()).thenReturn(Collections.enumeration(headers.keySet()));
         Mockito.when(request.getHeaders("aaaaa")).thenReturn(Collections.enumeration(headers.values()));
 
-        Method m = findMethod(EntryPoint1.class, "stream");
-        Parameter p = m.getParameters()[0];
-        MethodParameter.Factory.create(m, p, null, CONFIG, mediaTypes(MediaType.TEXT_PLAIN_TYPE));
+        ParameterInfo paramInfo = parameterInfo(EntryPoint1.class, "stream", CONFIG);
+        MethodParameter.Factory.create(paramInfo, CONFIG, mediaTypes(MediaType.TEXT_PLAIN_TYPE));
     }
 
     private static Stream<Arguments> provideArguments() {

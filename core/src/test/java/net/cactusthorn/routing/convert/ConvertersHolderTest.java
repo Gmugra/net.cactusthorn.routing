@@ -5,15 +5,11 @@ import static org.junit.jupiter.api.Assertions.*;
 import org.junit.jupiter.api.Test;
 
 import java.lang.annotation.Annotation;
-import java.lang.reflect.Method;
 import java.lang.reflect.Type;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
-import java.util.SortedSet;
 import java.util.UUID;
 
 import javax.ws.rs.ext.ParamConverter;
@@ -165,92 +161,4 @@ public class ConvertersHolderTest {
         assertFalse(converter.isPresent());
     }
 
-    public static class TestIt {
-
-        public void set(Set<Integer> input) {
-        }
-
-        public void withoutGeneric(@SuppressWarnings("rawtypes") Set input) {
-        }
-
-        public void list(List<Double> input) {
-        }
-
-        public void sortedSet(SortedSet<UUID> input) {
-        }
-
-        public void collection(Collection<String> input) {
-        }
-    }
-
-    @Test //
-    public void set() {
-        Method method = findMethod(TestIt.class, "set");
-        Class<?> type = method.getParameters()[0].getType();
-        Type genericType = method.getGenericParameterTypes()[0];
-
-        ConvertersHolder holder = new ConvertersHolder();
-        Optional<Converter<?>> converter = holder.findConverter(type, genericType, null);
-        assertEquals("IntegerConverter", converter.get().getClass().getSimpleName());
-    }
-
-    /**
-     * According to JSR-339 collections without generic are not supported
-     */
-    @Test //
-    public void withoutGeneric() {
-        Method method = findMethod(TestIt.class, "withoutGeneric");
-        Class<?> type = method.getParameters()[0].getType();
-        Type genericType = method.getGenericParameterTypes()[0];
-
-        ConvertersHolder holder = new ConvertersHolder();
-        Optional<Converter<?>> converter = holder.findConverter(type, genericType, null);
-        assertFalse(converter.isPresent());
-    }
-
-    @Test //
-    public void list() {
-        Method method = findMethod(TestIt.class, "list");
-        Class<?> type = method.getParameters()[0].getType();
-        Type genericType = method.getGenericParameterTypes()[0];
-
-        ConvertersHolder holder = new ConvertersHolder();
-        Optional<Converter<?>> converter = holder.findConverter(type, genericType, null);
-        assertEquals("DoubleConverter", converter.get().getClass().getSimpleName());
-    }
-
-    @Test //
-    public void sortedSet() {
-        Method method = findMethod(TestIt.class, "sortedSet");
-        Class<?> type = method.getParameters()[0].getType();
-        Type genericType = method.getGenericParameterTypes()[0];
-
-        ConvertersHolder holder = new ConvertersHolder();
-        Optional<Converter<?>> converter = holder.findConverter(type, genericType, null);
-        assertEquals("StaticStringMethodConverter", converter.get().getClass().getSimpleName());
-    }
-
-    /**
-     * According to JSR-339 supported only List<T>, Set<T>, or SortedSet<T>; nothing
-     * else
-     */
-    @Test //
-    public void collection() {
-        Method method = findMethod(TestIt.class, "collection");
-        Class<?> type = method.getParameters()[0].getType();
-        Type genericType = method.getGenericParameterTypes()[0];
-
-        ConvertersHolder holder = new ConvertersHolder();
-        Optional<Converter<?>> converter = holder.findConverter(type, genericType, null);
-        assertFalse(converter.isPresent());
-    }
-
-    protected Method findMethod(Class<?> clazz, String methodName) {
-        for (Method method : clazz.getMethods()) {
-            if (methodName.equals(method.getName())) {
-                return method;
-            }
-        }
-        return null;
-    }
 }

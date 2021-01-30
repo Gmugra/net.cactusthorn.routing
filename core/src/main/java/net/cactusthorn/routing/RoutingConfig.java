@@ -22,7 +22,7 @@ import net.cactusthorn.routing.validate.ParametersValidator;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashMap;
+import java.util.EnumMap;
 
 public final class RoutingConfig {
 
@@ -130,7 +130,7 @@ public final class RoutingConfig {
 
         private final List<BodyReader> bodyReaders = new ArrayList<>();
 
-        private final Map<ConfigProperty, Object> configProperties = new HashMap<>();
+        private final Map<ConfigProperty, Object> configProperties = new EnumMap<>(ConfigProperty.class);
 
         private ParametersValidator validator;
 

@@ -179,7 +179,7 @@ public class MethodInvokerTest extends InvokeTestAncestor {
     private static Stream<Arguments> provideArguments() {
         // @formatter:off
         return Stream.of(
-            Arguments.of("m0", PathValues.EMPTY, "OK"),
+            //Arguments.of("m0", PathValues.EMPTY, "OK"),
             Arguments.of("m1", new PathValues("in", "123"), 123),
             Arguments.of("m3", new PathValues("in", "123"), "EVE123"),
             Arguments.of("m4", null, "120.5"),

@@ -3,8 +3,6 @@ package net.cactusthorn.routing.invoke;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-import java.lang.reflect.Method;
-import java.lang.reflect.Parameter;
 import java.util.List;
 import java.util.stream.Stream;
 
@@ -60,16 +58,13 @@ public class PathParamParameterTest extends InvokeTestAncestor {
 
     @ParameterizedTest @ValueSource(strings = { "array", "collection", "math" }) //
     public void testThrows(String method) {
-        Method m = findMethod(EntryPoint1.class, method);
-        Parameter p = m.getParameters()[0];
-        assertThrows(RoutingInitializationException.class, () -> MethodParameter.Factory.create(m, p, null, CONFIG, DEFAULT_CONTENT_TYPES));
+        assertThrows(RoutingInitializationException.class, () -> parameterInfo(EntryPoint1.class, method, CONFIG));
     }
 
     @ParameterizedTest @MethodSource("provideArguments") //
     public void findValue(String methodName, PathValues pathValues, Object expected) throws Exception {
-        Method m = findMethod(EntryPoint1.class, methodName);
-        Parameter p = m.getParameters()[0];
-        MethodParameter mp = MethodParameter.Factory.create(m, p, null, CONFIG, DEFAULT_CONTENT_TYPES);
+        ParameterInfo paramInfo = parameterInfo(EntryPoint1.class, methodName, CONFIG);
+        MethodParameter mp = MethodParameter.Factory.create(paramInfo, CONFIG, DEFAULT_CONTENT_TYPES);
 
         Object result = mp.findValue(null, null, null, pathValues);
 
