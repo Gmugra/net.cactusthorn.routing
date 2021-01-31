@@ -2,9 +2,9 @@ package net.cactusthorn.routing.demo.jetty.entrypoint;
 
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.security.Principal;
 import java.time.LocalDate;
 
+import javax.annotation.security.RolesAllowed;
 import javax.inject.Inject;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
@@ -17,9 +17,9 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
+import javax.ws.rs.core.SecurityContext;
 
 import net.cactusthorn.routing.annotation.Template;
-import net.cactusthorn.routing.annotation.UserRoles;
 import net.cactusthorn.routing.demo.jetty.dagger.EntryPoint;
 
 public class SimpleEntryPoint implements EntryPoint {
@@ -61,12 +61,12 @@ public class SimpleEntryPoint implements EntryPoint {
         return date.toString();
     }
 
-    @GET @UserRoles({ "TestRole" }) @Path("/principal") //
-    public String principal(@Context Principal principal) {
-        return principal.getName();
+    @GET @RolesAllowed({ "TestRole" }) @Path("/principal") //
+    public String principal(@Context SecurityContext securityContext) {
+        return securityContext.getUserPrincipal().getName();
     }
 
-    @GET @UserRoles({ "WrongRole" }) @Path("/wrongrole") //
+    @GET @RolesAllowed({ "WrongRole" }) @Path("/wrongrole") //
     public void wrongRole() {
     }
 }

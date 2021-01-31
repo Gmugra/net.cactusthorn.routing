@@ -134,17 +134,17 @@ The type of the annotated parameter must either:
 1. `@Produces` for class and/or method
    * default(if not present) is "text/plain"
 1. `@Context` for method parameters. At the moment suport next types:
-   * HttpServletRequest
-   * HttpServletResponse
-   * ServletContext
-   * java.security.Principal
+   * javax.servlet.http.HttpServletRequest
+   * javax.servlet.http.HttpServletResponse
+   * javax.servlet.ServletContext
+   * javax.ws.rs.core.SecurityContext
 1. `javax.ws.rs.core.Response`
 
 ### Extensions
 
 1. ParametersValidator interface to integrate additional validations e.g. _javax.validation_
    * Implemetation example is **validation-javax** module
-1. `@UserRoles` method annotation
+1. `javax.annotation.security.RolesAllowed` method annotation
    1. to check entry point against request.isUserInRole(...)
    1. Implemetation example exists in **demo-jetty** module
 1. `@Template` annotation, `Templated`-class and `TemplatedMessageBodyWriter` to implement message body writers for html-template-engines (e.g. FreeMarker, Thymeleaf)

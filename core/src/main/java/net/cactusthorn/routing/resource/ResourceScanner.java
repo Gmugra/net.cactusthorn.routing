@@ -14,9 +14,9 @@ import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.BadRequestException;
 import javax.ws.rs.HttpMethod;
 import javax.ws.rs.Path;
+import javax.annotation.security.RolesAllowed;
 
 import net.cactusthorn.routing.annotation.Template;
-import net.cactusthorn.routing.annotation.UserRoles;
 import net.cactusthorn.routing.PathTemplate;
 import net.cactusthorn.routing.RoutingConfig;
 import net.cactusthorn.routing.Templated;
@@ -40,16 +40,16 @@ public class ResourceScanner {
         private List<MediaType> producesMediaTypes;
         private Set<MediaType> consumesMediaTypes;
         private String template;
-        private Set<String> userRoles;
+        private Set<String> rolesAllowed;
 
         private Resource(PathTemplate pathTemplate, String template, List<MediaType> producesMediaTypes,
-                Set<MediaType> consumesMediaTypes, MethodInvoker methodInvoker, Set<String> userRoles) {
+                Set<MediaType> consumesMediaTypes, MethodInvoker methodInvoker, Set<String> rolesAllowed) {
             this.pathTemplate = pathTemplate;
             this.producesMediaTypes = producesMediaTypes;
             this.template = template;
             this.consumesMediaTypes = consumesMediaTypes;
             this.methodInvoker = methodInvoker;
-            this.userRoles = userRoles;
+            this.rolesAllowed = rolesAllowed;
         }
 
         public Response invoke(HttpServletRequest req, HttpServletResponse res, ServletContext con, PathValues pathValues) {
@@ -98,11 +98,11 @@ public class ResourceScanner {
             return Optional.empty();
         }
 
-        public boolean matchUserRole(HttpServletRequest req) {
-            if (userRoles.isEmpty()) {
+        public boolean matchRolesAllowed(HttpServletRequest req) {
+            if (rolesAllowed.isEmpty()) {
                 return true;
             }
-            return userRoles.stream().filter(r -> req.isUserInRole(r)).findAny().isPresent();
+            return rolesAllowed.stream().filter(r -> req.isUserInRole(r)).findAny().isPresent();
         }
 
         public boolean matchContentType(String contenttype) {
@@ -154,10 +154,10 @@ public class ResourceScanner {
 
                         MethodInvoker methodInvoker = new MethodInvoker(routingConfig, clazz, method, consumesMediaTypes);
 
-                        Set<String> userRoles = findUserRoles(method);
+                        Set<String> rolesAllowed = findRolesAllowed(method);
 
                         Resource resource = new Resource(pathTemplate, template, producesMediaTypes, consumesMediaTypes,
-                                methodInvoker, userRoles);
+                                methodInvoker, rolesAllowed);
                         resources.get(httpMethod).add(resource);
                     }
                 }
@@ -179,10 +179,10 @@ public class ResourceScanner {
         return null;
     }
 
-    private Set<String> findUserRoles(Method method) {
-        UserRoles userRoles = method.getAnnotation(UserRoles.class);
-        if (userRoles != null) {
-            return new HashSet<>(Arrays.asList(userRoles.value()));
+    private Set<String> findRolesAllowed(Method method) {
+        RolesAllowed rolesAllowed = method.getAnnotation(RolesAllowed.class);
+        if (rolesAllowed != null) {
+            return new HashSet<>(Arrays.asList(rolesAllowed.value()));
         }
         return Collections.emptySet();
     }

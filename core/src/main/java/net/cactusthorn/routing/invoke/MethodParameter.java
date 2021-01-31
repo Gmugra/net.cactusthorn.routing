@@ -1,12 +1,12 @@
 package net.cactusthorn.routing.invoke;
 
-import java.security.Principal;
 import java.util.Set;
 
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.SecurityContext;
 import javax.ws.rs.CookieParam;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.HeaderParam;
@@ -65,8 +65,8 @@ public interface MethodParameter {
                 if (ServletContext.class.isAssignableFrom(parameterInfo.type())) {
                     return new ServletContextParameter();
                 }
-                if (Principal.class == parameterInfo.type()) {
-                    return new PrincipalParameter();
+                if (SecurityContext.class == parameterInfo.type()) {
+                    return new SecurityContextParameter();
                 }
             }
             if (parameterInfo.method().getAnnotation(POST.class) != null || parameterInfo.method().getAnnotation(PUT.class) != null

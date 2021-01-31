@@ -1,11 +1,12 @@
 package net.cactusthorn.routing.invoke;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.*;
 
 import java.security.Principal;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.core.Context;
+import javax.ws.rs.core.SecurityContext;
 
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
@@ -13,7 +14,7 @@ import org.mockito.Mockito;
 import net.cactusthorn.routing.ComponentProvider;
 import net.cactusthorn.routing.RoutingConfig;
 
-public class PrincipalParameterTest extends InvokeTestAncestor {
+public class SecurityContextParameterTest extends InvokeTestAncestor {
 
     static final Principal PRINCIPAL = () -> {
         return "NAME";
@@ -21,7 +22,7 @@ public class PrincipalParameterTest extends InvokeTestAncestor {
 
     public static class EntryPoint1 {
 
-        public void simple(@Context Principal principal) {
+        public void simple(@Context SecurityContext securityContext) {
         }
     }
 
@@ -41,7 +42,14 @@ public class PrincipalParameterTest extends InvokeTestAncestor {
         MethodParameter mp = MethodParameter.Factory.create(paramInfo, CONFIG, DEFAULT_CONTENT_TYPES);
 
         Mockito.when(request.getUserPrincipal()).thenReturn(PRINCIPAL);
-        Principal value = (Principal) mp.findValue(request, null, null, null);
-        assertEquals("NAME", value.getName());
+        Mockito.when(request.isSecure()).thenReturn(true);
+        Mockito.when(request.getAuthType()).thenReturn("?");
+        Mockito.when(request.isUserInRole(Mockito.any())).thenReturn(true);
+
+        SecurityContext value = (SecurityContext) mp.findValue(request, null, null, null);
+        assertEquals("NAME", value.getUserPrincipal().getName());
+        assertEquals("?", value.getAuthenticationScheme());
+        assertTrue(value.isSecure());
+        assertTrue(value.isUserInRole("?"));
     }
 }

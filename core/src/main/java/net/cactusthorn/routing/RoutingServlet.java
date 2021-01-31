@@ -117,7 +117,7 @@ public class RoutingServlet extends HttpServlet {
         for (Resource resource : resources) {
             PathValues pathValues = resource.parse(path);
             if (pathValues != null) {
-                if (!resource.matchUserRole(req)) {
+                if (!resource.matchRolesAllowed(req)) {
                     resp.sendError(HttpServletResponse.SC_FORBIDDEN, "Forbidden");
                     return;
                 }

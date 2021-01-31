@@ -15,6 +15,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import javax.annotation.security.RolesAllowed;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -152,7 +153,7 @@ public class RoutingServletTest {
             return Response.status(Status.SEE_OTHER).location(new URI("/xyz")).build();
         }
 
-        @GET @UserRoles({ "somerole" }) @Path("api/role") //
+        @GET @RolesAllowed({ "somerole" }) @Path("api/role") //
         public Response role() throws URISyntaxException {
             return Response.status(Status.SEE_OTHER).location(new URI("/xyz")).build();
         }
