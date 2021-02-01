@@ -5,7 +5,7 @@ import java.util.Date;
 import javax.ws.rs.core.NewCookie;
 import javax.ws.rs.ext.RuntimeDelegate.HeaderDelegate;
 
-public final class NewCookieHeaderDelegate implements HeaderDelegate<NewCookie> {
+public final class NewCookieHeaderDelegate extends HeaderDelegateAncestor implements HeaderDelegate<NewCookie> {
 
     private static final DateHeaderDelegate DATE_HEADER_DELEGATE = new DateHeaderDelegate();
 
@@ -103,21 +103,5 @@ public final class NewCookieHeaderDelegate implements HeaderDelegate<NewCookie> 
             result += ";Expires=" + DATE_HEADER_DELEGATE.toString(cookie.getExpiry());
         }
         return result;
-    }
-
-    private boolean containsWhiteSpace(String str) {
-        for (char c : str.toCharArray()) {
-            if (Character.isWhitespace(c)) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    private String addQuotesIfContainsWhitespace(String str) {
-        if (containsWhiteSpace(str)) {
-            return '"' + str + '"';
-        }
-        return str;
     }
 }

@@ -8,6 +8,7 @@ import java.util.Map;
 
 import javax.ws.rs.core.Application;
 import javax.ws.rs.core.CacheControl;
+import javax.ws.rs.core.Cookie;
 import javax.ws.rs.core.EntityTag;
 import javax.ws.rs.core.Link.Builder;
 import javax.ws.rs.core.MediaType;
@@ -30,6 +31,7 @@ public class RuntimeDelegateImpl extends RuntimeDelegate {
         headerDelegates.put(EntityTag.class, new EntityTagHeaderDelegate());
         headerDelegates.put(NewCookie.class, new NewCookieHeaderDelegate());
         headerDelegates.put(CacheControl.class, new CacheControlHeaderDelegate());
+        headerDelegates.put(Cookie.class, new CookieHeaderDelegate());
     }
 
     @Override //

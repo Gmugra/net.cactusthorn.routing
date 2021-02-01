@@ -8,6 +8,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.ws.rs.core.Cookie;
 import javax.ws.rs.core.MediaType;
 
 import org.junit.jupiter.api.Test;
@@ -75,5 +76,30 @@ public class HttpTest {
     public void parseEmptyAccept() {
         List<MediaType> mediaTypes = Http.parseAccept(Collections.emptyEnumeration());
         assertEquals(MediaType.WILDCARD, mediaTypes.get(0).toString());
+    }
+
+    @Test //
+    public void parseCookieSimple() {
+        String cookieHeader = "aa=bb; cc=dd";
+        List<Cookie> cookies = Http.parseCookies(cookieHeader);
+        assertEquals(2, cookies.size());
+        assertEquals("$Version=0;aa=bb", cookies.get(0).toString());
+        assertEquals("$Version=0;cc=dd", cookies.get(1).toString());
+    }
+
+    @Test //
+    public void parseCookieVersion() {
+        String cookieHeader = "$Version=\"1\"; Customer=\"WILE_E_COYOTE\"; $Path=\"/acme\"";
+        List<Cookie> cookies = Http.parseCookies(cookieHeader);
+        assertEquals("$Version=1;Customer=WILE_E_COYOTE;$Path=/acme", cookies.get(0).toString());
+    }
+
+    @Test //
+    public void parseMultipleCompelxCookie() {
+        String cookieHeader = "$Version=\"1\"; aa=\"WILE E COYOTE\"; $Path=\"/acme\", cc=dd, tt=mm, $Domain=\"DO MAIN\"";
+        List<Cookie> cookies = Http.parseCookies(cookieHeader);
+        assertEquals("$Version=1;aa=\"WILE E COYOTE\";$Path=/acme", cookies.get(0).toString());
+        assertEquals("$Version=1;cc=dd", cookies.get(1).toString());
+        assertEquals("$Version=1;tt=mm;$Domain=\"DO MAIN\"", cookies.get(2).toString());
     }
 }

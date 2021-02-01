@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Map;
 
 import javax.servlet.http.HttpServletResponse;
+import javax.ws.rs.core.Cookie;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.ext.RuntimeDelegate;
@@ -95,5 +96,54 @@ public class Http {
             Collections.sort(mediaTypes, ACCEPT_COMPARATOR);
         }
         return mediaTypes;
+    }
+
+    //RFC 2109
+    public static List<Cookie> parseCookies(String cookieHeader) {
+        List<Cookie> result = new ArrayList<>();
+
+        int version = 0;
+        String cookieName = null;
+        String cookieValue = null;
+        String domain = null;
+        String path = null;
+
+        String[] parts = cookieHeader.split("[;,]");
+        for (String part : parts) {
+
+            String[] subPart = getSubParts(part);
+            String name = subPart[0];
+            String value = subPart[1];
+
+            if (!name.startsWith("$")) {
+                if (cookieName != null) {
+                    result.add(new Cookie(cookieName, cookieValue, path, domain, version));
+                }
+                cookieName = name;
+                cookieValue = value;
+                domain = null;
+                path = null;
+            } else if (name.startsWith("$Version")) {
+                version = Integer.parseInt(value);
+            } else if (name.startsWith("$Path")) {
+                path = value;
+            } else if (name.startsWith("$Domain")) {
+                domain = value;
+            }
+        }
+        result.add(new Cookie(cookieName, cookieValue, path, domain, version));
+        return result;
+    }
+
+    private static String[] getSubParts(String str) {
+        int valueStart = str.indexOf('=');
+        if (valueStart == -1) {
+            throw new IllegalArgumentException("Wrong: '=' is missing");
+        }
+        String value = str.substring(valueStart + 1).trim();
+        if (value.charAt(0) == '"') {
+            value = value.substring(1, value.length() - 1).trim();
+        }
+        return new String[] {str.substring(0, valueStart).trim(), value};
     }
 }

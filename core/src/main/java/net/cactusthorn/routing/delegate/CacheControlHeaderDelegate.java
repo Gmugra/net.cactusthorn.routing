@@ -7,7 +7,7 @@ import java.util.StringJoiner;
 import javax.ws.rs.core.CacheControl;
 import javax.ws.rs.ext.RuntimeDelegate.HeaderDelegate;
 
-public class CacheControlHeaderDelegate implements HeaderDelegate<CacheControl> {
+public class CacheControlHeaderDelegate extends HeaderDelegateAncestor implements HeaderDelegate<CacheControl> {
 
     @Override
     public CacheControl fromString(String header) {
@@ -63,21 +63,4 @@ public class CacheControlHeaderDelegate implements HeaderDelegate<CacheControl> 
         }
         return name + "=\"" + fieldsAsString + '\"';
     }
-
-    private boolean containsWhiteSpace(String str) {
-        for (char c : str.toCharArray()) {
-            if (Character.isWhitespace(c)) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    private String addQuotesIfContainsWhitespace(String str) {
-        if (containsWhiteSpace(str)) {
-            return '"' + str + '"';
-        }
-        return str;
-    }
-
 }
