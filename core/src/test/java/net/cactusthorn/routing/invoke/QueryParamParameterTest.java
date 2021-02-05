@@ -56,8 +56,7 @@ public class QueryParamParameterTest extends InvokeTestAncestor {
 
     @ParameterizedTest @MethodSource("collectionArguments") //
     public void collections(String methodName, String[] requestValues, Integer[] expected) throws Exception {
-        ParameterInfo paramInfo = parameterInfo(EntryPoint1.class, methodName, CONFIG);
-        MethodParameter mp = MethodParameter.Factory.create(paramInfo, CONFIG, DEFAULT_CONTENT_TYPES);
+        MethodParameter mp = parameterInfo(EntryPoint1.class, methodName, CONFIG);
 
         Mockito.when(request.getParameterValues("val")).thenReturn(requestValues);
 
@@ -76,8 +75,7 @@ public class QueryParamParameterTest extends InvokeTestAncestor {
 
     @Test
     public void set() throws Exception {
-        ParameterInfo paramInfo = parameterInfo(EntryPoint1.class, "set", CONFIG);
-        MethodParameter mp = MethodParameter.Factory.create(paramInfo, CONFIG, DEFAULT_CONTENT_TYPES);
+        MethodParameter mp = parameterInfo(EntryPoint1.class, "set", CONFIG);
 
         Mockito.when(request.getParameterValues("val")).thenReturn(new String[] {"10", "20", "20"});
 
@@ -96,8 +94,7 @@ public class QueryParamParameterTest extends InvokeTestAncestor {
 
     @Test //
     public void wrong() {
-        ParameterInfo paramInfo = parameterInfo(EntryPoint1.class, "wrong", CONFIG);
-        MethodParameter mp = MethodParameter.Factory.create(paramInfo, CONFIG, DEFAULT_CONTENT_TYPES);
+        MethodParameter mp = parameterInfo(EntryPoint1.class, "wrong", CONFIG);
 
         Mockito.when(request.getParameter("val")).thenReturn("abc");
 

@@ -3,9 +3,7 @@ package net.cactusthorn.routing.invoke;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.lang.reflect.Parameter;
 import java.lang.reflect.Type;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import java.util.logging.Level;
@@ -78,7 +76,7 @@ public final class MethodInvoker {
 
     private Method method;
 
-    private final List<MethodParameter> parameters = new ArrayList<>();
+    private List<MethodParameter> parameters;
 
     private ReturnObjectInfo returnObjectInfo;
 
@@ -88,12 +86,8 @@ public final class MethodInvoker {
         this.method = method;
 
         returnObjectInfo = new ReturnObjectInfo(method);
-        Parameter[] params = method.getParameters();
-        Type[] types = method.getGenericParameterTypes();
-        for (int i = 0; i < params.length; i++) {
-            ParameterInfo paraInfo = new ParameterInfo(method, params[i], types[i], i, routingConfig.convertersHolder());
-            parameters.add(MethodParameter.Factory.create(paraInfo, routingConfig, consumesMediaTypes));
-        }
+
+        parameters = MethodParameterFactory.create(method, routingConfig, consumesMediaTypes);
     }
 
     private static final String MESSAGE = "Parameter position: %s; Parameter type: %s; %s";

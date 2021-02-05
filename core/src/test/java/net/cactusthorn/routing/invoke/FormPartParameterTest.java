@@ -98,14 +98,12 @@ public class FormPartParameterTest extends InvokeTestAncestor {
 
     @Test //
     public void wrongType() {
-        ParameterInfo paramInfo = parameterInfo(EntryPoint1.class, "wrongType", CONFIG); 
-        assertThrows(RoutingInitializationException.class, () -> MethodParameter.Factory.create(paramInfo, CONFIG, DEFAULT_CONTENT_TYPES));
+        assertThrows(RoutingInitializationException.class, () -> parameterInfo(EntryPoint1.class, "wrongType", CONFIG));
     }
 
     @ParameterizedTest @MethodSource("provideArguments") //
     public void getParts(String methodName, List<Part> requestParts, boolean expectedNull) throws Exception {
-        ParameterInfo paramInfo = parameterInfo(EntryPoint1.class, methodName, CONFIG);
-        MethodParameter mp = MethodParameter.Factory.create(paramInfo, CONFIG, DEFAULT_CONTENT_TYPES);
+        MethodParameter mp = parameterInfo(EntryPoint1.class, methodName, CONFIG);
 
         Mockito.when(request.getParts()).thenReturn(requestParts);
         Part part = (Part) mp.findValue(request, null, null, null);

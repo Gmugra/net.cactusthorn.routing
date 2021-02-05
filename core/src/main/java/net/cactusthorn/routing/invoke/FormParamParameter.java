@@ -1,5 +1,8 @@
 package net.cactusthorn.routing.invoke;
 
+import java.lang.reflect.Method;
+import java.lang.reflect.Parameter;
+import java.lang.reflect.Type;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
@@ -14,8 +17,9 @@ import javax.ws.rs.core.MediaType;
 
 import net.cactusthorn.routing.RoutingInitializationException;
 import net.cactusthorn.routing.PathTemplate.PathValues;
+import net.cactusthorn.routing.convert.ConvertersHolder;
 
-public class FormParamParameter implements MethodParameter {
+public class FormParamParameter extends MethodParameter {
 
     // @formatter:off
     private static final Set<MediaType> CONTENT_TYPE = Collections
@@ -25,39 +29,36 @@ public class FormParamParameter implements MethodParameter {
 
     private static final String WRONG_CONTENT_TYPE = "@FormParam can be used only with @Consumes content types: %s; Method: %s";
 
-    private ParameterInfo paramInfo;
-    private String name;
-
-    public FormParamParameter(ParameterInfo paramInfo, Set<MediaType> consumesMediaTypes) {
-        this.paramInfo = paramInfo;
+    public FormParamParameter(Method method, Parameter parameter, Type genericType, int position, ConvertersHolder convertersHolder,
+            Set<MediaType> consumesMediaTypes) {
+        super(method, parameter, genericType, position, convertersHolder);
 
         for (MediaType contentType : consumesMediaTypes) {
             if (!CONTENT_TYPE.contains(contentType)) {
-                throw new RoutingInitializationException(WRONG_CONTENT_TYPE, CONTENT_TYPE, paramInfo.method());
+                throw new RoutingInitializationException(WRONG_CONTENT_TYPE, CONTENT_TYPE, method());
             }
-        }
-
-        name = paramInfo.annotation(FormParam.class).value();
-        if ("".equals(name)) {
-            name = paramInfo.name();
         }
     }
 
     @Override //
     public String name() {
+        String name = annotation(FormParam.class).value();
+        if ("".equals(name)) {
+            return super.name();
+        }
         return name;
     }
 
     @Override //
     public Object findValue(HttpServletRequest req, HttpServletResponse res, ServletContext con, PathValues pathValues) {
         try {
-            if (paramInfo.collection()) {
-                return paramInfo.convert(req.getParameterValues(name()));
+            if (collection()) {
+                return convert(req.getParameterValues(name()));
             }
-            return paramInfo.convert(req.getParameter(name()));
+            return convert(req.getParameter(name()));
         } catch (Exception e) {
             throw new NotFoundException(
-                    String.format(CONVERSION_ERROR_MESSAGE, paramInfo.position(), paramInfo.type().getSimpleName(), e), e);
+                    String.format(CONVERSION_ERROR_MESSAGE, position(), type().getSimpleName(), e), e);
         }
     }
 }

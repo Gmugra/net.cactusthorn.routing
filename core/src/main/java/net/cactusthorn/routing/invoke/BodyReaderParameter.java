@@ -1,5 +1,8 @@
 package net.cactusthorn.routing.invoke;
 
+import java.lang.reflect.Method;
+import java.lang.reflect.Parameter;
+import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.HashMap;
@@ -20,26 +23,25 @@ import net.cactusthorn.routing.RoutingInitializationException;
 import net.cactusthorn.routing.PathTemplate.PathValues;
 import net.cactusthorn.routing.body.reader.BodyReader;
 
-public final class BodyReaderParameter implements MethodParameter {
+public final class BodyReaderParameter extends MethodParameter {
 
     protected static final String BODY_READER_NOT_FOUND = "body reader for media-type %s not found; Method: %s";
 
     private Map<MediaType, MessageBodyReader<?>> messageBodyReaders = new HashMap<>();
 
-    private ParameterInfo paramInfo;
-
-    public BodyReaderParameter(ParameterInfo paramInfo, Set<MediaType> consumesMediaTypes, List<BodyReader> bodyReaders) {
-        this.paramInfo = paramInfo;
+    public BodyReaderParameter(Method method, Parameter parameter, Type genericType, int position, Set<MediaType> consumesMediaTypes,
+            List<BodyReader> bodyReaders) {
+        super(method, parameter, genericType, position);
 
         for (MediaType consumesMediaType : consumesMediaTypes) {
             for (BodyReader bodyReader : bodyReaders) {
-                if (bodyReader.isProcessable(paramInfo.type(), paramInfo.genericType(), paramInfo.annotations(), consumesMediaType)) {
+                if (bodyReader.isProcessable(type(), genericType(), annotations(), consumesMediaType)) {
                     messageBodyReaders.put(consumesMediaType, bodyReader.messageBodyReader());
                     break;
                 }
             }
             if (!messageBodyReaders.containsKey(consumesMediaType)) {
-                throw new RoutingInitializationException(BODY_READER_NOT_FOUND, consumesMediaType, paramInfo.method());
+                throw new RoutingInitializationException(BODY_READER_NOT_FOUND, consumesMediaType, method());
             }
         }
     }
@@ -49,8 +51,7 @@ public final class BodyReaderParameter implements MethodParameter {
         MediaType mediaType = contentType(req);
         MessageBodyReader bodyReader = findBodyReader(req);
         MediaType mediaTypeWithCharset = mediaType.withCharset(req.getCharacterEncoding());
-        return bodyReader.readFrom(paramInfo.type(), paramInfo.genericType(), paramInfo.annotations(),
-                mediaTypeWithCharset, getHeaders(req), req.getInputStream());
+        return bodyReader.readFrom(type(), genericType(), annotations(), mediaTypeWithCharset, getHeaders(req), req.getInputStream());
     }
 
     private MessageBodyReader<?> findBodyReader(HttpServletRequest req) {

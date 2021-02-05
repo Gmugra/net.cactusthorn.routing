@@ -9,7 +9,7 @@ import javax.ws.rs.Consumes;
 
 public final class ConsumesParser {
 
-    Set<MediaType> consumes(Class<?> clazz) {
+    public Set<MediaType> consumes(Class<?> clazz) {
         Consumes consumes = clazz.getAnnotation(Consumes.class);
         if (consumes != null) {
             return parseConsumes(consumes.value());
@@ -19,7 +19,7 @@ public final class ConsumesParser {
         return Collections.unmodifiableSet(mediaTypes);
     }
 
-    Set<MediaType> consumes(Method method, Set<MediaType> classMediaTypes) {
+    public Set<MediaType> consumes(Method method, Set<MediaType> classMediaTypes) {
         Consumes consumes = method.getAnnotation(Consumes.class);
         if (consumes != null) {
             return parseConsumes(consumes.value());

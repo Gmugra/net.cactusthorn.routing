@@ -12,10 +12,13 @@ import org.mockito.Mockito;
 
 import net.cactusthorn.routing.RoutingConfig;
 import net.cactusthorn.routing.convert.ConvertersHolder;
+import net.cactusthorn.routing.resource.ConsumesParser;
 
 public class InvokeTestAncestor {
 
     protected final static ConvertersHolder HOLDER = new ConvertersHolder();
+
+    protected static final ConsumesParser CONSUMES_PARSER = new ConsumesParser();
 
     protected static final Set<MediaType> DEFAULT_CONTENT_TYPES;
     static {
@@ -39,9 +42,10 @@ public class InvokeTestAncestor {
         return null;
     }
 
-    protected ParameterInfo parameterInfo(Class<?> clazz, String methodName, RoutingConfig config) {
+    protected MethodParameter parameterInfo(Class<?> clazz, String methodName, RoutingConfig config) {
         Method m = findMethod(clazz, methodName);
-        return new ParameterInfo(m, m.getParameters()[0], m.getGenericParameterTypes()[0], 0, config.convertersHolder());
+        Set<MediaType> consumes = CONSUMES_PARSER.consumes(m, CONSUMES_PARSER.consumes(clazz));
+        return MethodParameterFactory.create(m, m.getParameters()[0], m.getGenericParameterTypes()[0], 0, config, consumes);
     }
 
     protected static Set<MediaType> mediaTypes(String type, String subtype) {

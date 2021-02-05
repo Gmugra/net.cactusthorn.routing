@@ -66,8 +66,7 @@ public class HeaderParamParameterTest extends InvokeTestAncestor {
 
     @ParameterizedTest @MethodSource("provideArguments") //
     public void headerValue(String methodName, String requestValue, String expectedValue) throws Exception {
-        ParameterInfo paramInfo = parameterInfo(EntryPoint1.class, methodName, CONFIG);
-        MethodParameter mp = MethodParameter.Factory.create(paramInfo, CONFIG, DEFAULT_CONTENT_TYPES);
+        MethodParameter mp = parameterInfo(EntryPoint1.class, methodName, CONFIG);
 
         Mockito.when(request.getHeader("val")).thenReturn(requestValue);
         String header = (String) mp.findValue(request, null, null, null);
@@ -76,8 +75,7 @@ public class HeaderParamParameterTest extends InvokeTestAncestor {
 
     @Test //
     public void convertingException() throws Exception {
-        ParameterInfo paramInfo = parameterInfo(EntryPoint1.class, "intValue", CONFIG);
-        MethodParameter mp = MethodParameter.Factory.create(paramInfo, CONFIG, DEFAULT_CONTENT_TYPES);
+        MethodParameter mp = parameterInfo(EntryPoint1.class, "intValue", CONFIG);
 
         Mockito.when(request.getHeader("val")).thenReturn("aaa");
         assertThrows(BadRequestException.class, () -> mp.findValue(request, null, null, null));

@@ -1,5 +1,8 @@
 package net.cactusthorn.routing.invoke;
 
+import java.lang.reflect.Method;
+import java.lang.reflect.Parameter;
+import java.lang.reflect.Type;
 import java.util.Collection;
 
 import javax.servlet.ServletContext;
@@ -11,26 +14,26 @@ import net.cactusthorn.routing.RoutingInitializationException;
 import net.cactusthorn.routing.PathTemplate.PathValues;
 import net.cactusthorn.routing.annotation.FormPart;
 
-public class FormPartParameter implements MethodParameter {
+public class FormPartParameter extends MethodParameter {
 
     private static final String WRONG_TYPE = "@FormPart can be used only for javax.servlet.http.Part type; Method: %s";
 
-    private String name;
+    public FormPartParameter(Method method, Parameter parameter, Type genericType, int position) {
+        super(method, parameter, genericType, position);
 
-    public FormPartParameter(ParameterInfo paramInfo) {
+        //TODO MULTIPART_FORM_DATA_TYPE check
 
-        if (paramInfo.type() != Part.class) {
-            throw new RoutingInitializationException(WRONG_TYPE, paramInfo.method());
-        }
-
-        name = paramInfo.annotation(FormPart.class).value();
-        if ("".equals(name)) {
-            name = paramInfo.name();
+        if (type() != Part.class) {
+            throw new RoutingInitializationException(WRONG_TYPE, method());
         }
     }
 
     @Override //
     public String name() {
+        String name = annotation(FormPart.class).value();
+        if ("".equals(name)) {
+            return super.name();
+        }
         return name;
     }
 

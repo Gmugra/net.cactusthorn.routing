@@ -38,8 +38,7 @@ public class SecurityContextParameterTest extends InvokeTestAncestor {
 
     @Test //
     public void simple() throws Exception {
-        ParameterInfo paramInfo = parameterInfo(EntryPoint1.class, "simple", CONFIG);
-        MethodParameter mp = MethodParameter.Factory.create(paramInfo, CONFIG, DEFAULT_CONTENT_TYPES);
+        MethodParameter mp = parameterInfo(EntryPoint1.class, "simple", CONFIG);
 
         Mockito.when(request.getUserPrincipal()).thenReturn(PRINCIPAL);
         Mockito.when(request.isSecure()).thenReturn(true);

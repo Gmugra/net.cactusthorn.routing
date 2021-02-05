@@ -63,8 +63,7 @@ public class PathParamParameterTest extends InvokeTestAncestor {
 
     @ParameterizedTest @MethodSource("provideArguments") //
     public void findValue(String methodName, PathValues pathValues, Object expected) throws Exception {
-        ParameterInfo paramInfo = parameterInfo(EntryPoint1.class, methodName, CONFIG);
-        MethodParameter mp = MethodParameter.Factory.create(paramInfo, CONFIG, DEFAULT_CONTENT_TYPES);
+        MethodParameter mp = parameterInfo(EntryPoint1.class, methodName, CONFIG);
 
         Object result = mp.findValue(null, null, null, pathValues);
 

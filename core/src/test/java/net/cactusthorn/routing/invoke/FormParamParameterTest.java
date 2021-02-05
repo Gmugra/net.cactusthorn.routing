@@ -3,12 +3,11 @@ package net.cactusthorn.routing.invoke;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 import java.util.stream.Stream;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.ws.rs.Consumes;
 import javax.ws.rs.DefaultValue;
 import javax.ws.rs.FormParam;
 import javax.ws.rs.NotFoundException;
@@ -28,18 +27,26 @@ public class FormParamParameterTest extends InvokeTestAncestor {
 
     public static class EntryPoint1 {
 
+        public void wrongConsumes(@FormParam("val") String value) {
+        }
+
+        @Consumes(MediaType.APPLICATION_FORM_URLENCODED) //
         public void simple(@FormParam("val") String value) {
         }
 
+        @Consumes(MediaType.APPLICATION_FORM_URLENCODED) //
         public void defaultValue(@FormParam("val") @DefaultValue("D") String value) {
         }
 
+        @Consumes(MediaType.APPLICATION_FORM_URLENCODED) //
         public void defaultList(@FormParam("val") @DefaultValue("A") List<String> value) {
         }
 
+        @Consumes(MediaType.APPLICATION_FORM_URLENCODED) //
         public void byName(@FormParam("") String val) {
         }
 
+        @Consumes(MediaType.APPLICATION_FORM_URLENCODED) //
         public void wrong(@FormParam("val") int values) {
         }
     }
@@ -56,34 +63,26 @@ public class FormParamParameterTest extends InvokeTestAncestor {
 
     @Test //
     public void wrongContentType() {
-        ParameterInfo paramInfo = parameterInfo(EntryPoint1.class, "simple", CONFIG); 
-        assertThrows(RoutingInitializationException.class, () -> MethodParameter.Factory.create(paramInfo, CONFIG, DEFAULT_CONTENT_TYPES));
+        assertThrows(RoutingInitializationException.class, () -> parameterInfo(EntryPoint1.class, "wrongConsumes", CONFIG));
     }
 
     @Test //
     public void wrong() {
-        ParameterInfo paramInfo = parameterInfo(EntryPoint1.class, "wrong", CONFIG);
-        Set<MediaType> consumesMediaTypes = new HashSet<>();
-        consumesMediaTypes.add(MediaType.APPLICATION_FORM_URLENCODED_TYPE);
-        MethodParameter mp = MethodParameter.Factory.create(paramInfo, CONFIG, consumesMediaTypes);
+        MethodParameter mp = parameterInfo(EntryPoint1.class, "wrong", CONFIG);
         Mockito.when(request.getParameter("val")).thenReturn("abc");
-
         assertThrows(NotFoundException.class, () -> mp.findValue(request, null, null, null));
     }
 
     @ParameterizedTest @MethodSource("provideArguments") //
     public void findFormValue(String methodName, String requestValue, Object expectedValue) throws Exception {
-        ParameterInfo paramInfo = parameterInfo(EntryPoint1.class, methodName, CONFIG);
-        Set<MediaType> consumesMediaTypes = new HashSet<>();
-        consumesMediaTypes.add(MediaType.APPLICATION_FORM_URLENCODED_TYPE);
-        MethodParameter mp = MethodParameter.Factory.create(paramInfo, CONFIG, consumesMediaTypes);
+        MethodParameter mp = parameterInfo(EntryPoint1.class, methodName, CONFIG);
 
         Mockito.when(request.getParameter("val")).thenReturn(requestValue);
         if (requestValue != null) {
             Mockito.when(request.getParameterValues("val")).thenReturn(new String[] { requestValue });
         }
         Object value = mp.findValue(request, null, null, null);
-        
+
         if (List.class.isAssignableFrom(value.getClass())) {
             @SuppressWarnings("unchecked") List<String> list = (List<String>) value;
             assertEquals(expectedValue, list.get(0));

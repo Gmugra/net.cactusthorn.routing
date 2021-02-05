@@ -37,7 +37,7 @@ public class Application {
 
     public static void main(String... args) {
 
-        // java.util.loggingg -> SLF4j
+        // java.util.logging -> SLF4j
         SLF4JBridgeHandler.removeHandlersForRootLogger();
         SLF4JBridgeHandler.install();
         java.util.logging.Logger.getLogger("").setLevel(Level.FINEST);
