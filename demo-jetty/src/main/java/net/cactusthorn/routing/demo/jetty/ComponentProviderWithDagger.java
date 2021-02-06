@@ -16,35 +16,35 @@ public final class ComponentProviderWithDagger implements ComponentProvider {
 
     private Main main;
 
-    private final Map<Class<?>, Function<HttpServletRequest, EntryPoint>> entryPoints = new HashMap<>();
+    private final Map<Class<?>, Function<HttpServletRequest, Resource>> resources = new HashMap<>();
 
     public ComponentProviderWithDagger(Main main) {
         this.main = main;
-        main.entryPoints().entrySet().forEach(e -> entryPoints.put(e.getKey(), new RequestScopeProvider(e.getValue())));
-        main.sessionBuilder().build().entryPoints().entrySet()
-                .forEach(e -> entryPoints.put(e.getKey(), new SessionScopeProvider(e.getKey())));
+        main.resources().entrySet().forEach(e -> resources.put(e.getKey(), new RequestScopeProvider(e.getValue())));
+        main.sessionBuilder().build().resources().entrySet()
+                .forEach(e -> resources.put(e.getKey(), new SessionScopeProvider(e.getKey())));
     }
 
     @Override //
     public Object provide(Class<?> clazz, HttpServletRequest request) {
-        return entryPoints.get(clazz).apply(request);
+        return resources.get(clazz).apply(request);
     }
 
-    private class RequestScopeProvider implements Function<HttpServletRequest, EntryPoint> {
+    private class RequestScopeProvider implements Function<HttpServletRequest, Resource> {
 
-        private Provider<EntryPoint> entryPoint;
+        private Provider<Resource> resource;
 
-        private RequestScopeProvider(Provider<EntryPoint> entryPoint) {
-            this.entryPoint = entryPoint;
+        private RequestScopeProvider(Provider<Resource> entryPoint) {
+            this.resource = entryPoint;
         }
 
         @Override //
-        public EntryPoint apply(HttpServletRequest request) {
-            return entryPoint.get();
+        public Resource apply(HttpServletRequest request) {
+            return resource.get();
         }
     }
 
-    private class SessionScopeProvider implements Function<HttpServletRequest, EntryPoint> {
+    private class SessionScopeProvider implements Function<HttpServletRequest, Resource> {
 
         private Class<?> clazz;
 
@@ -53,7 +53,7 @@ public final class ComponentProviderWithDagger implements ComponentProvider {
         }
 
         @Override //
-        public EntryPoint apply(HttpServletRequest request) {
+        public Resource apply(HttpServletRequest request) {
             Session component;
             HttpSession session = request.getSession(false);
             if (session == null) {
@@ -63,7 +63,7 @@ public final class ComponentProviderWithDagger implements ComponentProvider {
             } else {
                 component = (Session) session.getAttribute(Session.class.getName());
             }
-            return component.entryPoints().get(clazz).get();
+            return component.resources().get(clazz).get();
         }
     }
 }

@@ -90,7 +90,7 @@ public abstract class MethodParameter {
                 return createCollection(new String[] {annotation.value()});
             }
             return converter.convert(coverterType, coverterGenericType, annotations(), annotation.value());
-        } catch (Exception e) {
+        } catch (Throwable e) {
             throw new RoutingInitializationException(WRONG_DEFAULT_MESSAGE, e, method);
         }
     }
@@ -131,7 +131,7 @@ public abstract class MethodParameter {
     }
 
     @SuppressWarnings("unchecked") //
-    protected <T> T convert(String value) throws Exception {
+    protected <T> T convert(String value) throws Throwable {
         if (value == null) {
             return (T) defaultValue;
         }
@@ -139,7 +139,7 @@ public abstract class MethodParameter {
     }
 
     @SuppressWarnings("unchecked") //
-    protected <T> Collection<T> convert(String[] values) throws Exception {
+    protected <T> Collection<T> convert(String[] values) throws Throwable {
         if (values == null) {
             return (Collection<T>) defaultValue;
         }
@@ -167,7 +167,7 @@ public abstract class MethodParameter {
     }
 
     @SuppressWarnings("unchecked") //
-    private <T> Collection<T> createCollection(String[] values) throws Exception {
+    private <T> Collection<T> createCollection(String[] values) throws Throwable {
         if (List.class == collection.get()) {
             List<T> result = new ArrayList<>();
             for (String value : values) {

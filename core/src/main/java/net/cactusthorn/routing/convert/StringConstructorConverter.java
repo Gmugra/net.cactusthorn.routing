@@ -1,48 +1,34 @@
 package net.cactusthorn.routing.convert;
 
 import java.lang.annotation.Annotation;
-import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
+import java.lang.invoke.MethodHandle;
+import java.lang.invoke.MethodHandles;
+import java.lang.invoke.MethodType;
 import java.lang.reflect.Type;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Optional;
-
-import net.cactusthorn.routing.RoutingInitializationException;
 
 public class StringConstructorConverter implements Converter<Object> {
 
-    private final Map<Type, Constructor<?>> constructors = new HashMap<>();
+    private static final MethodType METHOD_TYPE = MethodType.methodType(void.class, String.class);
+
+    private final Map<Type, MethodHandle> constructors = new HashMap<>();
 
     @Override //
-    public Object convert(Class<?> type, Type genericType, Annotation[] annotations, String value)
-            throws InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
+    public Object convert(Class<?> type, Type genericType, Annotation[] annotations, String value) throws Throwable {
         if (value == null) {
             return null;
         }
-        return constructors.get(type).newInstance(value);
+        return constructors.get(type).invoke(value);
     }
 
     boolean register(Class<?> type) {
-        Optional<Constructor<?>> constructor = findConstructor(type);
-        if (constructor.isPresent()) {
-            constructors.put(type, constructor.get());
-            return true;
-        }
-        return false;
-    }
-
-    private static Optional<Constructor<?>> findConstructor(Class<?> clazz) {
         try {
-            for (Constructor<?> ctor : clazz.getConstructors()) {
-                Class<?>[] pType = ctor.getParameterTypes();
-                if (pType != null && pType.length == 1 && pType[0] == String.class) {
-                    return Optional.of(ctor);
-                }
-            }
-            return Optional.empty();
-        } catch (SecurityException e) {
-            throw new RoutingInitializationException("The problem with method invocation", e);
+            MethodHandle methodHandle = MethodHandles.publicLookup().findConstructor(type, METHOD_TYPE);
+            constructors.put(type, methodHandle);
+            return true;
+        } catch (Exception e) {
+            return false;
         }
     }
 }

@@ -1,4 +1,4 @@
-package net.cactusthorn.routing.demo.jetty.entrypoint;
+package net.cactusthorn.routing.demo.jetty.resource;
 
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -20,12 +20,12 @@ import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.SecurityContext;
 
 import net.cactusthorn.routing.annotation.Template;
-import net.cactusthorn.routing.demo.jetty.dagger.EntryPoint;
+import net.cactusthorn.routing.demo.jetty.dagger.Resource;
 
-public class SimpleEntryPoint implements EntryPoint {
+public class SimpleResource implements Resource {
 
     @Inject //
-    public SimpleEntryPoint() {
+    public SimpleResource() {
     }
 
     @GET @Produces("text/html") @Template("/index.html") //

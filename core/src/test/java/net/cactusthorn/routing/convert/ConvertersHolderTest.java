@@ -45,7 +45,7 @@ public class ConvertersHolderTest {
     public static DateParamConverterProvider TEST_CONVERTER = new DateParamConverterProvider();
 
     @Test //
-    public void paramConverter() throws Exception {
+    public void paramConverter() throws Throwable {
         ConvertersHolder holder = new ConvertersHolder(Arrays.asList(new ParamConverterProvider[] { TEST_CONVERTER }));
         Converter<?> converter = holder.findConverter(java.util.Date.class, null, null).get();
         java.util.Date date = (java.util.Date) converter.convert(java.util.Date.class, null, null, (String) null);
@@ -53,7 +53,7 @@ public class ConvertersHolderTest {
     }
 
     @Test //
-    public void paramConverterNotUsed() throws Exception {
+    public void paramConverterNotUsed() throws Throwable {
         ConvertersHolder holder = new ConvertersHolder(Arrays.asList(new ParamConverterProvider[] { TEST_CONVERTER }));
         Converter<?> converter = holder.findConverter(String.class, null, null).get();
         String result = (String) converter.convert(java.util.Date.class, null, null, "AAA");
@@ -61,7 +61,7 @@ public class ConvertersHolderTest {
     }
 
     @Test //
-    public void paramConverterArray() throws Exception {
+    public void paramConverterArray() throws Throwable {
         ConvertersHolder holder = new ConvertersHolder(Arrays.asList(new ParamConverterProvider[] { TEST_CONVERTER }));
         Converter<?> converter = holder.findConverter(java.util.Date.class, null, null).get();
         List<?> dates = converter.convert(java.util.Date.class, null, null, new String[] { "A", "B" });
@@ -98,7 +98,7 @@ public class ConvertersHolderTest {
     }
 
     @Test //
-    public void valueOf() throws Exception {
+    public void valueOf() throws Throwable {
         ConvertersHolder holder = new ConvertersHolder();
         Converter<?> converter = holder.findConverter(TestValueOf.class, null, null).get();
         TestValueOf result = (TestValueOf) converter.convert(TestValueOf.class, null, null, "XYZ");
@@ -106,7 +106,7 @@ public class ConvertersHolderTest {
     }
 
     @Test //
-    public void enumFromString() throws Exception {
+    public void enumFromString() throws Throwable {
         ConvertersHolder holder = new ConvertersHolder();
         Converter<?> converter = holder.findConverter(TestEnumFromString.class, null, null).get();
         TestEnumFromString result = (TestEnumFromString) converter.convert(TestEnumFromString.class, null, null, "CCCC");
@@ -114,7 +114,7 @@ public class ConvertersHolderTest {
     }
 
     @Test //
-    public void enumValueOf() throws Exception {
+    public void enumValueOf() throws Throwable {
         ConvertersHolder holder = new ConvertersHolder();
         Converter<?> converter = holder.findConverter(TestEnum.class, null, null).get();
         assertEquals(StaticStringMethodConverter.class, converter.getClass());

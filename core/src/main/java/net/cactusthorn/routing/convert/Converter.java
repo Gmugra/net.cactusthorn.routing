@@ -8,9 +8,9 @@ import java.util.List;
 
 public interface Converter<T> {
 
-    T convert(Class<?> type, Type genericType, Annotation[] annotations, String value) throws Exception;
+    T convert(Class<?> type, Type genericType, Annotation[] annotations, String value) throws Throwable;
 
-    default List<T> convert(Class<?> type, Type genericType, Annotation[] annotations, String[] values) throws Exception {
+    default List<T> convert(Class<?> type, Type genericType, Annotation[] annotations, String[] values) throws Throwable {
         if (values == null || values.length == 0) {
             return Collections.emptyList();
         }

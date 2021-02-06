@@ -20,7 +20,7 @@ public class BooleanConverterTest {
     }
 
     @Test //
-    public void testArray() throws Exception {
+    public void testArray() throws Throwable {
         BooleanConverter c = new BooleanConverter();
         String[] value = new String[] { "true", null, "false" };
         Boolean[] valuesAsBoolean = new Boolean[] { true, false, false };
@@ -29,14 +29,14 @@ public class BooleanConverterTest {
     }
 
     @Test //
-    public void testNullArray() throws Exception {
+    public void testNullArray() throws Throwable {
         BooleanConverter c = new BooleanConverter();
         List<Boolean> result = c.convert(Boolean.class, null, null, (String[]) null);
         assertTrue(result.isEmpty());
     }
 
     @Test //
-    public void testEmptyArray() throws Exception {
+    public void testEmptyArray() throws Throwable {
         BooleanConverter c = new BooleanConverter();
         List<Boolean> result = c.convert(Boolean.class, null, null, new String[0]);
         assertTrue(result.isEmpty());

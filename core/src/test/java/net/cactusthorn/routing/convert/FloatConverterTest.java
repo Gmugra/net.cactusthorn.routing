@@ -9,7 +9,7 @@ import org.junit.jupiter.api.Test;
 public class FloatConverterTest {
 
     @Test //
-    public void test() throws Exception {
+    public void test() {
         FloatConverter c = new FloatConverter();
         Float result = c.convert(Float.class, null, null, "125.5");
         assertEquals(125.5f, result);
@@ -20,7 +20,7 @@ public class FloatConverterTest {
     }
 
     @Test //
-    public void testArray() throws Exception {
+    public void testArray() throws Throwable {
         FloatConverter c = new FloatConverter();
         String[] value = new String[] { "125.5", "  ", "16.3" };
         Float[] valuesAsFloat = new Float[] { 125.5f, null, 16.3f };
@@ -29,14 +29,14 @@ public class FloatConverterTest {
     }
 
     @Test //
-    public void testNullArray() throws Exception {
+    public void testNullArray() throws Throwable {
         FloatConverter c = new FloatConverter();
         List<Float> result = c.convert(Float.class, null, null, (String[]) null);
         assertTrue(result.isEmpty());
     }
 
     @Test //
-    public void testEmptyArray() throws Exception {
+    public void testEmptyArray() throws Throwable {
         FloatConverter c = new FloatConverter();
         List<Float> result = c.convert(Float.class, null, null, new String[0]);
         assertTrue(result.isEmpty());

@@ -1,4 +1,4 @@
-package net.cactusthorn.routing.demo.jetty.entrypoint;
+package net.cactusthorn.routing.demo.jetty.resource;
 
 import javax.inject.Inject;
 import javax.ws.rs.Consumes;
@@ -9,13 +9,13 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.HeaderParam;
 
-import net.cactusthorn.routing.demo.jetty.dagger.EntryPoint;
+import net.cactusthorn.routing.demo.jetty.dagger.Resource;
 
 @Path("rest/api/gson") //
-public class GsonEntryPoint implements EntryPoint {
+public class GsonResource implements Resource {
 
     @Inject //
-    public GsonEntryPoint() {
+    public GsonResource() {
     }
 
     @GET @Produces(MediaType.APPLICATION_JSON) //

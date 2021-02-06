@@ -10,7 +10,7 @@ import javax.inject.Provider;
 public interface Session {
 
     @NamedScope(SessionScope.class) //
-    Map<Class<?>, Provider<EntryPoint>> entryPoints(); // session scope entry points
+    Map<Class<?>, Provider<Resource>> resources(); // session scope entry points
 
     @Subcomponent.Builder //
     interface Builder {

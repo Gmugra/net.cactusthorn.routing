@@ -9,7 +9,7 @@ import org.junit.jupiter.api.Test;
 public class StringConstructorConvertorTest {
 
     @Test //
-    public void simple() throws Exception {
+    public void simple() throws Throwable {
         StringConstructorConverter c = new StringConstructorConverter();
         c.register(StringBuilder.class);
         StringBuilder s = (StringBuilder) c.convert(StringBuilder.class, null, null, "test it");
@@ -17,13 +17,13 @@ public class StringConstructorConvertorTest {
     }
 
     @Test //
-    public void notSupported() throws Exception {
+    public void notSupported() {
         StringConstructorConverter c = new StringConstructorConverter();
         assertFalse(c.register(Math.class));
     }
 
     @Test //
-    public void nullTest() throws Exception {
+    public void nullTest() throws Throwable {
         StringConstructorConverter c = new StringConstructorConverter();
         c.register(StringBuilder.class);
         StringBuilder s = (StringBuilder) c.convert(StringBuilder.class, null, null, (String) null);
@@ -31,7 +31,7 @@ public class StringConstructorConvertorTest {
     }
 
     @Test //
-    public void array() throws Exception {
+    public void list() throws Throwable {
         StringConstructorConverter c = new StringConstructorConverter();
         c.register(StringBuilder.class);
         List<?> result = c.convert(StringBuilder.class, null, null, new String[] { "aaa", "bbb" });

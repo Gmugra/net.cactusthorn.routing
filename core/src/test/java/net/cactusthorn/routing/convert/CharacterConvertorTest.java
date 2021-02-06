@@ -9,7 +9,7 @@ import org.junit.jupiter.api.Test;
 public class CharacterConvertorTest {
 
     @Test //
-    public void test() throws Exception {
+    public void test() {
         CharacterConverter c = new CharacterConverter();
         Character result = c.convert(Character.class, null, null, "125");
         assertEquals('1', result);
@@ -20,7 +20,7 @@ public class CharacterConvertorTest {
     }
 
     @Test //
-    public void testArray() throws Exception {
+    public void testArray() throws Throwable {
         CharacterConverter c = new CharacterConverter();
         String[] value = new String[] { "215", "  ", "61" };
         Character[] valuesAsCharacter = new Character[] { '2', ' ', '6' };
@@ -29,14 +29,14 @@ public class CharacterConvertorTest {
     }
 
     @Test //
-    public void testNullArray() throws Exception {
+    public void testNullArray() throws Throwable {
         CharacterConverter c = new CharacterConverter();
         List<Character> result = c.convert(Character.class, null, null, (String[]) null);
         assertTrue(result.isEmpty());
     }
 
     @Test //
-    public void testEmptyArray() throws Exception {
+    public void testEmptyArray() throws Throwable {
         CharacterConverter c = new CharacterConverter();
         List<Character> result = c.convert(Character.class, null, null, new String[0]);
         assertTrue(result.isEmpty());

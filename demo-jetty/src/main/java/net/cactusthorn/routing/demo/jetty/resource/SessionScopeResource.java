@@ -1,4 +1,4 @@
-package net.cactusthorn.routing.demo.jetty.entrypoint;
+package net.cactusthorn.routing.demo.jetty.resource;
 
 import javax.inject.Inject;
 import javax.ws.rs.GET;
@@ -8,14 +8,14 @@ import net.cactusthorn.routing.demo.jetty.dagger.*;
 import net.cactusthorn.routing.demo.jetty.service.IAmSingletonService;
 
 @SessionScope //
-public class SessionScopeEntryPoint implements EntryPoint {
+public class SessionScopeResource implements Resource {
 
     private int counter = 0;
 
     private IAmSingletonService iam;
 
     @Inject //
-    public SessionScopeEntryPoint(IAmSingletonService iam) {
+    public SessionScopeResource(IAmSingletonService iam) {
         this.iam = iam;
     }
 

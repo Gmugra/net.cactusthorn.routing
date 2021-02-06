@@ -84,7 +84,7 @@ public class MethodParameterTest extends InvokeTestAncestor {
     private static final RoutingConfig CONFIG = RoutingConfig.builder(new TestItProvider()).build();
 
     @Test //
-    public void defaultValue() throws Exception {
+    public void defaultValue() throws Throwable {
         MethodParameter param = parameterInfo(TestIt.class, "defaultValue", CONFIG);
         List<?> list = (List<?>) param.convert((String[]) null);
         assertEquals(1, list.size());
@@ -92,19 +92,19 @@ public class MethodParameterTest extends InvokeTestAncestor {
     }
 
     @Test //
-    public void wrongDefaultValue() throws Exception {
+    public void wrongDefaultValue() {
         assertThrows(RoutingInitializationException.class, () -> parameterInfo(TestIt.class, "wrongDefaultValue", CONFIG));
     }
 
     @Test //
-    public void nullDefaultValue() throws Exception {
+    public void nullDefaultValue() throws Throwable {
         MethodParameter param = parameterInfo(TestIt.class, "simpleDefaultValue", CONFIG);
         UUID uuid = (UUID) param.convert((String) null);
         assertNull(uuid);
     }
 
     @Test //
-    public void set() throws Exception {
+    public void set() throws Throwable {
         MethodParameter info = parameterInfo(TestIt.class, "set", CONFIG);
 
         assertTrue(info.collection());
@@ -136,7 +136,7 @@ public class MethodParameterTest extends InvokeTestAncestor {
     }
 
     @Test //
-    public void list() throws Exception {
+    public void list() throws Throwable {
         MethodParameter info = parameterInfo(TestIt.class, "list", CONFIG);
 
         List<?> list2 = (List<?>) info.convert(new String[0]);
@@ -152,7 +152,7 @@ public class MethodParameterTest extends InvokeTestAncestor {
     }
 
     @Test //
-    public void sortedSet() throws Exception {
+    public void sortedSet() throws Throwable {
         MethodParameter info = parameterInfo(TestIt.class, "sortedSet", CONFIG);
 
         SortedSet<?> sortedSet2 = (SortedSet<?>) info.convert(new String[0]);

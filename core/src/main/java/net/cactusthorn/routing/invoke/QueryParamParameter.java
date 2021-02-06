@@ -35,7 +35,7 @@ public class QueryParamParameter extends MethodParameter {
                 return convert(req.getParameterValues(name()));
             }
             return convert(req.getParameter(name()));
-        } catch (Exception e) {
+        } catch (Throwable e) {
             throw new NotFoundException(String.format(CONVERSION_ERROR_MESSAGE, position(), type().getSimpleName(), e), e);
         }
     }

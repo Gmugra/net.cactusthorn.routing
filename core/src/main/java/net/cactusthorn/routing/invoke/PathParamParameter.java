@@ -38,7 +38,7 @@ public class PathParamParameter extends MethodParameter {
             String value = pathValues.value(name());
             value = "".equals(value) ? null : value;
             return convert(value);
-        } catch (Exception e) {
+        } catch (Throwable e) {
             throw new NotFoundException(String.format(CONVERSION_ERROR_MESSAGE, position(), type().getSimpleName(), e), e);
         }
     }

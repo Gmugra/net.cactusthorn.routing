@@ -5,7 +5,7 @@ import java.util.Date;
 import javax.ws.rs.core.NewCookie;
 import javax.ws.rs.ext.RuntimeDelegate.HeaderDelegate;
 
-public final class NewCookieHeaderDelegate extends HeaderDelegateAncestor implements HeaderDelegate<NewCookie> {
+public final class NewCookieHeaderDelegate implements HeaderDelegate<NewCookie> {
 
     private static final DateHeaderDelegate DATE_HEADER_DELEGATE = new DateHeaderDelegate();
 
@@ -17,7 +17,7 @@ public final class NewCookieHeaderDelegate extends HeaderDelegateAncestor implem
 
         String[] parts = str.trim().split(";");
 
-        String[] main = getSubParts(parts[0].trim());
+        String[] main = Headers.getSubParts(parts[0].trim());
 
         String name = main[0];
         String value = main[1];
@@ -33,43 +33,31 @@ public final class NewCookieHeaderDelegate extends HeaderDelegateAncestor implem
         for (int i = 1; i < parts.length; i++) {
             String tmp = parts[i].trim();
             if (tmp.startsWith("Version")) {
-                String[] subPart = getSubParts(tmp.trim());
+                String[] subPart = Headers.getSubParts(tmp.trim());
                 version = Integer.parseInt(subPart[1]);
             } else if (tmp.startsWith("Comment")) {
-                String[] subPart = getSubParts(tmp.trim());
+                String[] subPart = Headers.getSubParts(tmp.trim());
                 comment = subPart[1];
             } else if (tmp.startsWith("Domain")) {
-                String[] subPart = getSubParts(tmp.trim());
+                String[] subPart = Headers.getSubParts(tmp.trim());
                 domain = subPart[1];
             } else if (tmp.startsWith("Path")) {
-                String[] subPart = getSubParts(tmp.trim());
+                String[] subPart = Headers.getSubParts(tmp.trim());
                 path = subPart[1];
             } else if (tmp.startsWith("Max-Age")) {
-                String[] subPart = getSubParts(tmp.trim());
+                String[] subPart = Headers.getSubParts(tmp.trim());
                 maxAge = Integer.parseInt(subPart[1]);
             } else if ("Secure".equals(tmp)) {
                 secure = true;
             } else if ("HttpOnly".equals(tmp)) {
                 httpOnly = true;
             } else if (tmp.startsWith("Expires")) {
-                String[] subPart = getSubParts(tmp.trim());
+                String[] subPart = Headers.getSubParts(tmp.trim());
                 expiry = DATE_HEADER_DELEGATE.fromString(subPart[1]);
             }
         }
 
         return new NewCookie(name, value, path, domain, version, comment, maxAge, expiry, secure, httpOnly);
-    }
-
-    private String[] getSubParts(String str) {
-        int valueStart = str.indexOf('=');
-        if (valueStart == -1) {
-            throw new IllegalArgumentException("Wrong: '=' is missing");
-        }
-        String value = str.substring(valueStart + 1).trim();
-        if (value.charAt(0) == '"') {
-            value = value.substring(1, value.length() - 1).trim();
-        }
-        return new String[] {str.substring(0, valueStart).trim(), value};
     }
 
     @Override //
@@ -78,30 +66,34 @@ public final class NewCookieHeaderDelegate extends HeaderDelegateAncestor implem
             throw new IllegalArgumentException("cookie can not be null");
         }
 
-        String result = cookie.getName() + '=' + addQuotesIfContainsWhitespace(cookie.getValue());
-        result += ";Version=" + cookie.getVersion();
+        StringBuilder result = new StringBuilder(cookie.getName()).append('=');
+        Headers.addQuotesIfContainsWhitespace(result, cookie.getValue());
+        result.append(";Version=").append(cookie.getVersion());
 
         if (cookie.getComment() != null) {
-            result += ";Comment=" + addQuotesIfContainsWhitespace(cookie.getComment());
+            result.append(";Comment=");
+            Headers.addQuotesIfContainsWhitespace(result, cookie.getComment());
         }
         if (cookie.getDomain() != null) {
-            result += ";Domain=" + addQuotesIfContainsWhitespace(cookie.getDomain());
+            result.append(";Domain=");
+            Headers.addQuotesIfContainsWhitespace(result, cookie.getDomain());
         }
         if (cookie.getPath() != null) {
-            result += ";Path=" + addQuotesIfContainsWhitespace(cookie.getPath());
+            result.append(";Path=");
+            Headers.addQuotesIfContainsWhitespace(result, cookie.getPath());
         }
         if (cookie.getMaxAge() != -1) {
-            result += ";Max-Age=" + cookie.getMaxAge();
+            result.append(";Max-Age=").append(cookie.getMaxAge());
         }
         if (cookie.isSecure()) {
-            result += ";Secure";
+            result.append(";Secure");
         }
         if (cookie.isHttpOnly()) {
-            result += ";HttpOnly";
+            result.append(";HttpOnly");
         }
         if (cookie.getExpiry() != null) {
-            result += ";Expires=" + DATE_HEADER_DELEGATE.toString(cookie.getExpiry());
+            result.append(";Expires=").append(DATE_HEADER_DELEGATE.toString(cookie.getExpiry()));
         }
-        return result;
+        return result.toString();
     }
 }

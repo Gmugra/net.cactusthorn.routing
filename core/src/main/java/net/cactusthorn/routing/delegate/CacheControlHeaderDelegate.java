@@ -7,7 +7,7 @@ import java.util.StringJoiner;
 import javax.ws.rs.core.CacheControl;
 import javax.ws.rs.ext.RuntimeDelegate.HeaderDelegate;
 
-public class CacheControlHeaderDelegate extends HeaderDelegateAncestor implements HeaderDelegate<CacheControl> {
+public class CacheControlHeaderDelegate implements HeaderDelegate<CacheControl> {
 
     @Override
     public CacheControl fromString(String header) {
@@ -43,24 +43,23 @@ public class CacheControlHeaderDelegate extends HeaderDelegateAncestor implement
             joiner.add("proxy-revalidate");
         }
         if (cacheControl.getMaxAge() >= 0) {
-            joiner.add("max-age=" + Integer.toString(cacheControl.getMaxAge()));
+            joiner.add("max-age=" + cacheControl.getMaxAge());
         }
         if (cacheControl.getSMaxAge() >= 0) {
-            joiner.add("s-maxage=" + Integer.toString(cacheControl.getSMaxAge()));
+            joiner.add("s-maxage=" + cacheControl.getSMaxAge());
         }
         for (Map.Entry<String, String> entry : cacheControl.getCacheExtension().entrySet()) {
-            joiner.add(entry.getKey() + '=' + addQuotesIfContainsWhitespace(entry.getValue()));
+            joiner.add(entry.getKey() + '=' + Headers.addQuotesIfContainsWhitespace(entry.getValue()));
         }
         return joiner.toString();
     }
 
     private String withFields(String name, List<String> fields) {
-        StringJoiner joiner = new StringJoiner(", ");
-        fields.forEach(f -> joiner.add(f));
-        String fieldsAsString = joiner.toString();
-        if (fieldsAsString.isEmpty()) {
+        if (fields.isEmpty()) {
             return name;
         }
-        return name + "=\"" + fieldsAsString + '\"';
+        StringJoiner joiner = new StringJoiner(", ", name + "=\"", "\"");
+        fields.forEach(f -> joiner.add(f));
+        return joiner.toString();
     }
 }

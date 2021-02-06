@@ -1,19 +1,16 @@
 package net.cactusthorn.routing.convert;
 
 import java.lang.annotation.Annotation;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
+import java.lang.invoke.MethodHandle;
+import java.lang.invoke.MethodHandles;
+import java.lang.invoke.MethodType;
 import java.lang.reflect.Type;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Optional;
-
-import net.cactusthorn.routing.RoutingInitializationException;
 
 public final class StaticStringMethodConverter implements Converter<Object> {
 
-    private final Map<Type, Method> methods = new HashMap<>();
+    private final Map<Type, MethodHandle> methods = new HashMap<>();
     private String methodName;
 
     public StaticStringMethodConverter(String methodName) {
@@ -21,33 +18,21 @@ public final class StaticStringMethodConverter implements Converter<Object> {
     }
 
     @Override //
-    public Object convert(Class<?> type, Type genericType, Annotation[] annotations, String value)
-            throws IllegalAccessException, IllegalArgumentException, InvocationTargetException {
+    public Object convert(Class<?> type, Type genericType, Annotation[] annotations, String value) throws Throwable {
         if (value == null) {
             return null;
         }
-        Method method = methods.get(type);
-        return method.invoke(null, value);
+        return methods.get(type).invoke(value);
     }
 
     boolean register(Class<?> type) {
-        Optional<Method> method = findMethod(type);
-        if (method.isPresent()) {
-            methods.put(type, method.get());
-            return true;
-        }
-        return false;
-    }
-
-    private Optional<Method> findMethod(Class<?> clazz) {
         try {
-            Method method = clazz.getMethod(methodName, String.class);
-            return Modifier.isStatic(method.getModifiers()) ? Optional.of(method) : Optional.empty();
-        } catch (NoSuchMethodException e) {
-            return Optional.empty();
-        } catch (SecurityException e) {
-            throw new RoutingInitializationException("The problem with method invocation", e);
+            MethodType methodType = MethodType.methodType(type, String.class);
+            MethodHandle methodHandle = MethodHandles.publicLookup().findStatic(type, methodName, methodType);
+            methods.put(type, methodHandle);
+            return true;
+        } catch (Exception e) {
+            return false;
         }
     }
-
 }

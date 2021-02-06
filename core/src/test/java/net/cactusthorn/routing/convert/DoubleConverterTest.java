@@ -9,7 +9,7 @@ import org.junit.jupiter.api.Test;
 public class DoubleConverterTest {
 
     @Test //
-    public void test() throws Exception {
+    public void test() {
         DoubleConverter c = new DoubleConverter();
         Double result = c.convert(Double.class, null, null, "125.5");
         assertEquals(125.5d, result);
@@ -20,7 +20,7 @@ public class DoubleConverterTest {
     }
 
     @Test //
-    public void testArray() throws Exception {
+    public void testArray() throws Throwable {
         DoubleConverter c = new DoubleConverter();
         String[] value = new String[] { "125.5", "  ", "16.3" };
         Double[] valuesAsDouble = new Double[] { 125.5d, null, 16.3d };
@@ -29,14 +29,14 @@ public class DoubleConverterTest {
     }
 
     @Test //
-    public void testNullArray() throws Exception {
+    public void testNullArray() throws Throwable {
         DoubleConverter c = new DoubleConverter();
         List<Double> result = c.convert(Double.class, null, null, (String[]) null);
         assertTrue(result.isEmpty());
     }
 
     @Test //
-    public void testEmptyArray() throws Exception {
+    public void testEmptyArray() throws Throwable {
         DoubleConverter c = new DoubleConverter();
         List<Double> result = c.convert(Double.class, null, null, new String[0]);
         assertTrue(result.isEmpty());

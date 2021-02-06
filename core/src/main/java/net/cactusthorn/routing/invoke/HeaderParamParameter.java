@@ -36,7 +36,7 @@ public class HeaderParamParameter extends MethodParameter {
     public Object findValue(HttpServletRequest req, HttpServletResponse res, ServletContext con, PathValues pathValues) {
         try {
             return convert(req.getHeader(name()));
-        } catch (Exception e) {
+        } catch (Throwable e) {
             throw new BadRequestException(String.format(CONVERSION_ERROR_MESSAGE, position(), type().getSimpleName(), e), e);
         }
     }

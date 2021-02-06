@@ -39,7 +39,7 @@ public class ConvertersMessageBodyReader extends MessageBodyReaderAncestor<Objec
                     streamToString(entityStream, mediaType));
         } catch (IOException e) {
             throw e;
-        } catch (Exception e) {
+        } catch (Throwable e) {
             throw new ProcessingException(e);
         }
     }

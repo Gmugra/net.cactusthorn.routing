@@ -9,7 +9,7 @@ import org.junit.jupiter.api.Test;
 public class LongConverterTest {
 
     @Test //
-    public void test() throws Exception {
+    public void test() {
         LongConverter c = new LongConverter();
         Long result = c.convert(Long.class, null, null, "125");
         assertEquals(125L, result);
@@ -20,7 +20,7 @@ public class LongConverterTest {
     }
 
     @Test //
-    public void testArray() throws Exception {
+    public void testArray() throws Throwable {
         LongConverter c = new LongConverter();
         String[] value = new String[] { "125", "  ", "16" };
         Long[] valuesAsLong = new Long[] { 125L, null, 16L };
@@ -29,14 +29,14 @@ public class LongConverterTest {
     }
 
     @Test //
-    public void testNullArray() throws Exception {
+    public void testNullArray() throws Throwable {
         LongConverter c = new LongConverter();
         List<Long> result = c.convert(Long.class, null, null, (String[]) null);
         assertTrue(result.isEmpty());
     }
 
     @Test //
-    public void testEmptyArray() throws Exception {
+    public void testEmptyArray() throws Throwable {
         LongConverter c = new LongConverter();
         List<Long> result = c.convert(Long.class, null, null, new String[0]);
         assertTrue(result.isEmpty());

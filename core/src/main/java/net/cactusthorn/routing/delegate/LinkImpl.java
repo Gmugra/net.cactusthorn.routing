@@ -53,27 +53,12 @@ public final class LinkImpl extends Link {
     }
 
     @Override public String toString() {
-        String result = '<' + getUri().toASCIIString() + '>';
+        StringBuilder result = new StringBuilder("<").append(getUri().toASCIIString()).append('>');
         for (Map.Entry<String, String> entry : getParams().entrySet()) {
-            result += "; " + entry.getKey() + '=' + addQuotesIfContainsWhitespace(entry.getValue());
+            result.append("; ").append(entry.getKey()).append('=');
+            Headers.addQuotesIfContainsWhitespace(result, entry.getValue());
         }
-        return result;
-    }
-
-    private boolean containsWhiteSpace(String str) {
-        for (char c : str.toCharArray()) {
-            if (Character.isWhitespace(c)) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    private String addQuotesIfContainsWhitespace(String str) {
-        if (containsWhiteSpace(str)) {
-            return '"' + str + '"';
-        }
-        return str;
+        return result.toString();
     }
 
     public static class LinkBuilderImpl implements Builder {
@@ -103,23 +88,11 @@ public final class LinkImpl extends Link {
 
             params.clear();
             for (int i = 1; i < parts.length; i++) {
-                String[] subParts = getSubParts(parts[i]);
+                String[] subParts = Headers.getSubParts(parts[i]);
                 params.put(subParts[0], subParts[1]);
             }
 
             return this;
-        }
-
-        private String[] getSubParts(String str) {
-            int valueStart = str.indexOf('=');
-            if (valueStart == -1) {
-                throw new IllegalArgumentException("Wrong: '=' is missing");
-            }
-            String value = str.substring(valueStart + 1).trim();
-            if (value.charAt(0) == '"') {
-                value = value.substring(1, value.length() - 1).trim();
-            }
-            return new String[] {str.substring(0, valueStart).trim(), value};
         }
 
         @Override public Builder uri(URI uri) {

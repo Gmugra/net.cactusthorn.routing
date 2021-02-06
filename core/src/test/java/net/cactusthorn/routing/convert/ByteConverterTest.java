@@ -9,7 +9,7 @@ import org.junit.jupiter.api.Test;
 public class ByteConverterTest {
 
     @Test //
-    public void test() throws Exception {
+    public void test() {
         ByteConverter c = new ByteConverter();
         Byte result = c.convert(Byte.class, null, null, "125");
         assertEquals((byte) 125, result);
@@ -20,7 +20,7 @@ public class ByteConverterTest {
     }
 
     @Test //
-    public void testArray() throws Exception {
+    public void testArray() throws Throwable {
         ByteConverter c = new ByteConverter();
         String[] value = new String[] { "125", "  ", "16" };
         Byte[] valuesAsByte = new Byte[] { 125, null, 16 };
@@ -29,14 +29,14 @@ public class ByteConverterTest {
     }
 
     @Test //
-    public void testNullArray() throws Exception {
+    public void testNullArray() throws Throwable {
         ByteConverter c = new ByteConverter();
         List<Byte> result = c.convert(Byte.class, null, null, (String[]) null);
         assertTrue(result.isEmpty());
     }
 
     @Test //
-    public void testEmptyArray() throws Exception {
+    public void testEmptyArray() throws Throwable {
         ByteConverter c = new ByteConverter();
         List<Byte> result = c.convert(Byte.class, null, null, new String[0]);
         assertTrue(result.isEmpty());

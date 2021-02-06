@@ -1,4 +1,4 @@
-package net.cactusthorn.routing.demo.jetty.entrypoint;
+package net.cactusthorn.routing.demo.jetty.resource;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -23,13 +23,13 @@ import javax.ws.rs.FormParam;
 import net.cactusthorn.routing.Templated;
 import net.cactusthorn.routing.annotation.FormPart;
 import net.cactusthorn.routing.annotation.Template;
-import net.cactusthorn.routing.demo.jetty.dagger.EntryPoint;
+import net.cactusthorn.routing.demo.jetty.dagger.Resource;
 
 @Path("html") //
-public class HtmlEntryPoint implements EntryPoint {
+public class HtmlResource implements Resource {
 
     @Inject //
-    public HtmlEntryPoint() {
+    public HtmlResource() {
     }
 
     @GET @Produces("text/html") @Template("/form.html") //
