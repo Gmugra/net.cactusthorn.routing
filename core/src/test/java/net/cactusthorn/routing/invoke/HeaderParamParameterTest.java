@@ -3,6 +3,8 @@ package net.cactusthorn.routing.invoke;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Stream;
 
@@ -34,7 +36,7 @@ public class HeaderParamParameterTest extends InvokeTestAncestor {
         public void simpleArray(@HeaderParam("val") String[] values) {
         }
 
-        public void list(@HeaderParam("val") List<String> values) {
+        public void list(@HeaderParam("val") List<Integer> values) {
         }
 
         public void defaultValue(@HeaderParam("val") @DefaultValue("D") String value) {
@@ -60,8 +62,33 @@ public class HeaderParamParameterTest extends InvokeTestAncestor {
     }
 
     @Test //
-    public void list() {
-        assertThrows(RoutingInitializationException.class, () -> parameterInfo(EntryPoint1.class, "list", CONFIG));
+    public void list() throws Exception {
+
+        List<String> list = new ArrayList<>();
+        list.add("10");
+        list.add("20");
+
+        Mockito.when(request.getHeaders("val")).thenReturn(Collections.enumeration(list));
+
+        MethodParameter mp = parameterInfo(EntryPoint1.class, "list", CONFIG);
+
+        List<?> result = (List<?>) mp.findValue(request, null, null, null);
+
+        assertEquals(2, result.size());
+        assertEquals(10, result.get(0));
+        assertEquals(20, result.get(1));
+    }
+
+    @Test //
+    public void nullList() throws Exception {
+
+        Mockito.when(request.getHeaders("val")).thenReturn(null);
+
+        MethodParameter mp = parameterInfo(EntryPoint1.class, "list", CONFIG);
+
+        List<?> result = (List<?>) mp.findValue(request, null, null, null);
+
+        assertEquals(0, result.size());
     }
 
     @ParameterizedTest @MethodSource("provideArguments") //
