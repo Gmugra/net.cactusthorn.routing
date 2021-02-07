@@ -120,7 +120,7 @@ public final class MethodInvoker {
         try {
             return method.invoke(object, values);
         } catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
-            LOG.log(Level.SEVERE, "The problem with method invocation: {0}", new Object[] {e.getMessage()});
+            LOG.log(Level.SEVERE, "The problem with method invocation", e);
             throw new ServerErrorException("The problem with method invocation", Status.INTERNAL_SERVER_ERROR, e);
         }
     }

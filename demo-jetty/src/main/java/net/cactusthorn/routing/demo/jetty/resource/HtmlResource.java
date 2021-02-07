@@ -5,7 +5,6 @@ import java.nio.file.Files;
 import java.util.List;
 
 import javax.inject.Inject;
-import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.Part;
@@ -64,7 +63,7 @@ public class HtmlResource implements Resource {
         }
 
         String fileName2 = part2.getSubmittedFileName();
-        if (!"".equals(fileName)) {
+        if (!"".equals(fileName2)) {
             java.nio.file.Path path = tmpDir.resolve(fileName2);
             Files.copy(part2.getInputStream(), path);
             result += path;
@@ -79,8 +78,8 @@ public class HtmlResource implements Resource {
             @FormParam("fname") String fname,
             @FormParam("lname") String lname,
             @FormParam("box") List<Integer> box,
-            @CookieParam("JSESSIONID") Cookie jsession) {
-        return fname + " :: " + lname + " :: " + box + " :: " + jsession.getValue();
+            @CookieParam("JSESSIONID") String jsession) {
+        return fname + " :: " + lname + " :: " + box + " :: " + jsession;
     }
     // @formatter:on
 }

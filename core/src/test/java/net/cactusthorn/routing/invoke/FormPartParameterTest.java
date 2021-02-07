@@ -13,6 +13,8 @@ import java.util.stream.Stream;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.Part;
+import javax.ws.rs.Consumes;
+import javax.ws.rs.core.MediaType;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -27,6 +29,7 @@ import net.cactusthorn.routing.annotation.FormPart;
 
 public class FormPartParameterTest extends InvokeTestAncestor {
 
+    @Consumes(MediaType.MULTIPART_FORM_DATA)
     public static class EntryPoint1 {
 
         public void simple(@FormPart("val") Part value) {
@@ -36,6 +39,10 @@ public class FormPartParameterTest extends InvokeTestAncestor {
         }
 
         public void wrongType(@FormPart("val") String value) {
+        }
+
+        @Consumes(MediaType.TEXT_HTML)
+        public void wrongConsumes(@FormPart("val") Part val) {
         }
     }
 
@@ -99,6 +106,11 @@ public class FormPartParameterTest extends InvokeTestAncestor {
     @Test //
     public void wrongType() {
         assertThrows(RoutingInitializationException.class, () -> parameterInfo(EntryPoint1.class, "wrongType", CONFIG));
+    }
+
+    @Test //
+    public void wrongConsumes() {
+        assertThrows(RoutingInitializationException.class, () -> parameterInfo(EntryPoint1.class, "wrongConsumes", CONFIG));
     }
 
     @ParameterizedTest @MethodSource("provideArguments") //

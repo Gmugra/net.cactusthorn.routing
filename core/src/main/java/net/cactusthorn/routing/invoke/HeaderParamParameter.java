@@ -3,8 +3,6 @@ package net.cactusthorn.routing.invoke;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
 import java.lang.reflect.Type;
-import java.util.Collections;
-import java.util.Enumeration;
 
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
@@ -34,12 +32,7 @@ public class HeaderParamParameter extends MethodParameter {
     public Object findValue(HttpServletRequest req, HttpServletResponse res, ServletContext con, PathValues pathValues) {
         try {
             if (collection()) {
-                String[] values = null;
-                Enumeration<String> header = req.getHeaders(name());
-                if (header != null) {
-                    values = Collections.list(header).toArray(new String[0]);
-                }
-                return convert(values);
+                return convert(req.getHeaders(name()));
             }
             return convert(req.getHeader(name()));
         } catch (Throwable e) {

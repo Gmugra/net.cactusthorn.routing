@@ -29,6 +29,7 @@ import net.cactusthorn.routing.annotation.FormPart;
 class MethodParameterFactory {
 
     private static final String ONLY_POST_PUT_PATCH = "entity parameter supported only for POST, PUT and PATCH; Method: %s";
+    private static final String CONTEXT_NOT_SUPPORTED = "@Context is not supporting %s; Method: %s";
 
     static List<MethodParameter> create(Method method, RoutingConfig routingConfig, Set<MediaType> consumesMediaTypes) {
         List<MethodParameter> parameters = new ArrayList<>();
@@ -53,13 +54,13 @@ class MethodParameterFactory {
             return new FormParamParameter(method, parameter, genericType, position, routingConfig.convertersHolder(), consumesMediaTypes);
         }
         if (parameter.getAnnotation(FormPart.class) != null) {
-            return new FormPartParameter(method, parameter, genericType, position);
+            return new FormPartParameter(method, parameter, genericType, position, consumesMediaTypes);
         }
         if (parameter.getAnnotation(HeaderParam.class) != null) {
             return new HeaderParamParameter(method, parameter, genericType, position, routingConfig.convertersHolder());
         }
         if (parameter.getAnnotation(CookieParam.class) != null) {
-            return new CookieParamParameter(method, parameter, genericType, position);
+            return new CookieParamParameter(method, parameter, genericType, position, routingConfig.convertersHolder());
         }
         if (parameter.getAnnotation(Context.class) != null) {
             if (HttpServletRequest.class == parameter.getType()) {
@@ -74,7 +75,7 @@ class MethodParameterFactory {
             if (SecurityContext.class == parameter.getType()) {
                 return new SecurityContextParameter(method, parameter, genericType, position);
             }
-            // TODO Exception
+            throw new RoutingInitializationException(CONTEXT_NOT_SUPPORTED, parameter.getType(), method);
         }
         if (method.getAnnotation(POST.class) != null || method.getAnnotation(PUT.class) != null
                 || method.getAnnotation(PATCH.class) != null) {

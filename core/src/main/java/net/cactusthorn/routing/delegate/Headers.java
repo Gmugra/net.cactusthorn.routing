@@ -2,6 +2,7 @@ package net.cactusthorn.routing.delegate;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import javax.ws.rs.core.Cookie;
 
@@ -78,5 +79,10 @@ public class Headers {
         }
         result.add(new Cookie(cookieName, cookieValue, path, domain, version));
         return result;
+    }
+
+    public static List<Cookie> parseCookies(String cookieName, String cookieHeader) {
+        List<Cookie> result = parseCookies(cookieHeader);
+        return result.stream().filter(c -> c.getName().equals(cookieName)).collect(Collectors.toList());
     }
 }

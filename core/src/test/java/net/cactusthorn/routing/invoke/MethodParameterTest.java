@@ -19,6 +19,7 @@ import javax.ws.rs.Consumes;
 import javax.ws.rs.DefaultValue;
 import javax.ws.rs.FormParam;
 import javax.ws.rs.QueryParam;
+import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 
 import org.junit.jupiter.api.Test;
@@ -71,6 +72,9 @@ public class MethodParameterTest extends InvokeTestAncestor {
 
         public void simpleDefaultValue(@QueryParam("") UUID input) {
         }
+
+        public void wrongContext(@Context UUID input) {
+        }
     }
 
     public static class TestItProvider implements ComponentProvider {
@@ -82,6 +86,11 @@ public class MethodParameterTest extends InvokeTestAncestor {
     }
 
     private static final RoutingConfig CONFIG = RoutingConfig.builder(new TestItProvider()).build();
+
+    @Test //
+    public void wrongContext() throws Throwable {
+        assertThrows(RoutingInitializationException.class, () -> parameterInfo(TestIt.class, "wrongContext", CONFIG));
+    }
 
     @Test //
     public void defaultValue() throws Throwable {

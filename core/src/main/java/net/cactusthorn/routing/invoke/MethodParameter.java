@@ -8,6 +8,7 @@ import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Enumeration;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
@@ -37,11 +38,11 @@ public abstract class MethodParameter {
     private Type genericType;
     private int position;
 
-    private Object defaultValue;
+    private Object defaultObject;
 
     private Converter<?> converter;
-    private Class<?> coverterType;
-    private Type coverterGenericType;
+    private Class<?> converterType;
+    private Type converterGenericType;
     private Optional<Class<?>> collection = Optional.empty();
 
     public MethodParameter(Method method, Parameter parameter, Type genericType, int position) {
@@ -57,42 +58,23 @@ public abstract class MethodParameter {
 
         collection = collectionType();
 
-        coverterType = parameter.getType();
-        coverterGenericType = genericType;
+        converterType = parameter.getType();
+        converterGenericType = genericType;
         if (collection.isPresent()) {
             Class<?> collectionGenericType = collectionGenericType();
             if (collectionGenericType != null) {
-                coverterType = collectionGenericType;
-                coverterGenericType = collectionGenericType;
+                converterType = collectionGenericType;
+                converterGenericType = collectionGenericType;
             }
         }
+        converter = findConverter(convertersHolder);
 
-        Optional<Converter<?>> optional = convertersHolder.findConverter(coverterType, coverterGenericType, parameter.getAnnotations());
-        if (optional.isPresent()) {
-            converter = optional.get();
-        } else {
-            throw new RoutingInitializationException(UNKNOWN_CONVERTER_MESSAGE, parameter.getType(), method);
+        String defautlValue = null;
+        DefaultValue defaultAnnotation = annotation(DefaultValue.class);
+        if (defaultAnnotation != null) {
+            defautlValue = defaultAnnotation.value();
         }
-
-        defaultValue = createDefaultValue();
-    }
-
-    protected Object createDefaultValue() {
-        DefaultValue annotation = annotation(DefaultValue.class);
-        try {
-            if (annotation == null) {
-                if (collection()) {
-                    return emptyCollection();
-                }
-                return converter.convert(coverterType, coverterGenericType, annotations(), (String) null);
-            }
-            if (collection()) {
-                return createCollection(new String[] {annotation.value()});
-            }
-            return converter.convert(coverterType, coverterGenericType, annotations(), annotation.value());
-        } catch (Throwable e) {
-            throw new RoutingInitializationException(WRONG_DEFAULT_MESSAGE, e, method);
-        }
+        defaultObject = createDefaultObject(defautlValue);
     }
 
     protected abstract Object findValue(HttpServletRequest req, HttpServletResponse res, ServletContext con, PathValues pathValues)
@@ -126,24 +108,63 @@ public abstract class MethodParameter {
         return position;
     }
 
+    protected Class<?> converterType() {
+        return converterType;
+    }
+
+    protected Type converterGenericType() {
+        return converterGenericType;
+    }
+
     protected boolean collection() {
         return collection.isPresent();
+    }
+
+    protected Converter<?> findConverter(ConvertersHolder convertersHolder) {
+        Optional<Converter<?>> optional = convertersHolder.findConverter(converterType(), converterGenericType(), annotations());
+        if (optional.isPresent()) {
+            return optional.get();
+        } else {
+            throw new RoutingInitializationException(UNKNOWN_CONVERTER_MESSAGE, parameter.getType(), method);
+        }
+    }
+
+    protected Object createDefaultObject(String defautlValue) {
+        try {
+            if (collection()) {
+                if (defautlValue == null) {
+                    return emptyCollection();
+                }
+                return createCollection(new String[] {defautlValue});
+            }
+            return converter.convert(converterType(), converterGenericType(), annotations(), defautlValue);
+        } catch (Throwable e) {
+            throw new RoutingInitializationException(WRONG_DEFAULT_MESSAGE, e, method);
+        }
     }
 
     @SuppressWarnings("unchecked") //
     protected <T> T convert(String value) throws Throwable {
         if (value == null) {
-            return (T) defaultValue;
+            return (T) defaultObject;
         }
-        return (T) converter.convert(coverterType, coverterGenericType, annotations(), value);
+        return (T) converter.convert(converterType(), converterGenericType(), annotations(), value);
     }
 
     @SuppressWarnings("unchecked") //
     protected <T> Collection<T> convert(String[] values) throws Throwable {
         if (values == null) {
-            return (Collection<T>) defaultValue;
+            return (Collection<T>) defaultObject;
         }
         return createCollection(values);
+    }
+
+    @SuppressWarnings("unchecked") //
+    protected <T> Collection<T> convert(Enumeration<String> values) throws Throwable {
+        if (values == null) {
+            return (Collection<T>) defaultObject;
+        }
+        return createCollection(Collections.list(values).toArray(new String[0]));
     }
 
     /**
@@ -166,25 +187,24 @@ public abstract class MethodParameter {
         return Collections.emptySet();
     }
 
-    @SuppressWarnings("unchecked") //
     private <T> Collection<T> createCollection(String[] values) throws Throwable {
         if (List.class == collection.get()) {
             List<T> result = new ArrayList<>();
             for (String value : values) {
-                result.add((T) converter.convert(coverterType, coverterGenericType, annotations(), value));
+                result.add(convert(value));
             }
             return Collections.unmodifiableList(result);
         }
         if (SortedSet.class == collection.get()) {
             SortedSet<T> result = new TreeSet<>();
             for (String value : values) {
-                result.add((T) converter.convert(coverterType, coverterGenericType, annotations(), value));
+                result.add(convert(value));
             }
             return Collections.unmodifiableSortedSet(result);
         }
         Set<T> result = new HashSet<>();
         for (String value : values) {
-            result.add((T) converter.convert(coverterType, coverterGenericType, annotations(), value));
+            result.add(convert(value));
         }
         return Collections.unmodifiableSet(result);
     }

@@ -3,25 +3,29 @@ package net.cactusthorn.routing.invoke;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
 import java.lang.reflect.Type;
+import java.util.Collection;
+import java.util.List;
 
 import javax.servlet.ServletContext;
-import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.ws.rs.BadRequestException;
 import javax.ws.rs.CookieParam;
+import javax.ws.rs.core.Cookie;
+import javax.ws.rs.core.HttpHeaders;
 
-import net.cactusthorn.routing.RoutingInitializationException;
 import net.cactusthorn.routing.PathTemplate.PathValues;
+import net.cactusthorn.routing.convert.Converter;
+import net.cactusthorn.routing.convert.ConvertersHolder;
+import net.cactusthorn.routing.convert.CookieConverter;
+import net.cactusthorn.routing.delegate.Headers;
 
 public class CookieParamParameter extends MethodParameter {
 
-    protected static final String WRONG_TYPE = "@CookieParam can be used only for javax.servlet.http.Cookie type; Method: %s";
+    private static final CookieConverter COOKIE_CONVERTER = new CookieConverter();
 
-    public CookieParamParameter(Method method, Parameter parameter, Type genericType, int position) {
-        super(method, parameter, genericType, position);
-        if (type() != Cookie.class) {
-            throw new RoutingInitializationException(WRONG_TYPE, method());
-        }
+    public CookieParamParameter(Method method, Parameter parameter, Type genericType, int position, ConvertersHolder convertersHolder) {
+        super(method, parameter, genericType, position, convertersHolder);
     }
 
     @Override //
@@ -34,16 +38,62 @@ public class CookieParamParameter extends MethodParameter {
     }
 
     @Override //
+    protected Converter<?> findConverter(ConvertersHolder convertersHolder) {
+        if (Cookie.class == converterType()) {
+            return COOKIE_CONVERTER;
+        }
+        return super.findConverter(convertersHolder);
+    }
+
+    @Override //
+    protected Object createDefaultObject(String defaultValue) {
+        String prepared = defaultValue;
+        if (defaultValue != null) {
+            prepared = name() + '=' + Headers.addQuotesIfContainsWhitespace(defaultValue);
+        }
+        return super.createDefaultObject(prepared);
+    }
+
+    @Override @SuppressWarnings("unchecked") //
+    protected <T> T convert(String value) throws Throwable {
+        if (value == null) {
+            return super.convert((String) null);
+        }
+        Cookie cookie = COOKIE_CONVERTER.convert(converterType(), converterGenericType(), annotations(), value);
+        if (Cookie.class == converterType()) {
+            return (T) cookie;
+        }
+        return super.convert(cookie.getValue());
+    }
+
+    @Override //
     public Object findValue(HttpServletRequest req, HttpServletResponse res, ServletContext con, PathValues pathValues) {
-        Cookie[] cookies = req.getCookies();
-        if (cookies == null) {
-            return null;
-        }
-        for (Cookie cookie : cookies) {
-            if (name().equals(cookie.getName())) {
-                return cookie;
+        try {
+            String cookieHeader = req.getHeader(HttpHeaders.COOKIE);
+            if (cookieHeader == null) {
+                if (collection()) {
+                    return convert((String[]) null);
+                }
+                return convert((String) null);
             }
+            List<Cookie> cookies = Headers.parseCookies(name(), cookieHeader);
+            if (collection()) {
+                return convert(cookies);
+            }
+            return convert(cookies.isEmpty() ? null : cookies.get(0).toString());
+        } catch (Throwable e) {
+            throw new BadRequestException(String.format(CONVERSION_ERROR_MESSAGE, position(), type().getSimpleName(), e), e);
         }
-        return null;
+    }
+
+    private <T> Collection<T> convert(List<Cookie> cookies) throws Throwable {
+        if (cookies.isEmpty()) {
+            return convert((String[]) null);
+        }
+        String[] arr = new String[cookies.size()];
+        for (int i = 0; i < cookies.size(); i++) {
+            arr[i] = cookies.get(i).toString();
+        }
+        return convert(arr);
     }
 }
