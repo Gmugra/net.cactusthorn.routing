@@ -1,4 +1,4 @@
-package net.cactusthorn.routing.delegate;
+package net.cactusthorn.routing.util;
 
 import java.util.ArrayList;
 import java.util.List;

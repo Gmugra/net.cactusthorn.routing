@@ -8,7 +8,6 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;
 import java.util.Arrays;
 import java.util.Date;
-import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -58,16 +57,6 @@ public class ConvertersHolderTest {
         Converter<?> converter = holder.findConverter(String.class, null, null).get();
         String result = (String) converter.convert(java.util.Date.class, null, null, "AAA");
         assertEquals("AAA", result);
-    }
-
-    @Test //
-    public void paramConverterArray() throws Throwable {
-        ConvertersHolder holder = new ConvertersHolder(Arrays.asList(new ParamConverterProvider[] { TEST_CONVERTER }));
-        Converter<?> converter = holder.findConverter(java.util.Date.class, null, null).get();
-        List<?> dates = converter.convert(java.util.Date.class, null, null, new String[] { "A", "B" });
-        assertEquals(2, dates.size());
-        assertEquals(DATE, dates.get(0));
-        assertEquals(DATE, dates.get(1));
     }
 
     public static enum TestEnum {

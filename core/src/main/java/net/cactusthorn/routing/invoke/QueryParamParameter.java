@@ -13,7 +13,7 @@ import javax.ws.rs.QueryParam;
 import net.cactusthorn.routing.PathTemplate.PathValues;
 import net.cactusthorn.routing.convert.ConvertersHolder;
 
-public class QueryParamParameter extends MethodParameter {
+public class QueryParamParameter extends ConvertableMethodParameter {
 
     public QueryParamParameter(Method method, Parameter parameter, Type genericType, int position, ConvertersHolder convertersHolder) {
         super(method, parameter, genericType, position, convertersHolder);

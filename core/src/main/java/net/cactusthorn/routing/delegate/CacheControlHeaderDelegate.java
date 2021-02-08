@@ -7,6 +7,8 @@ import java.util.StringJoiner;
 import javax.ws.rs.core.CacheControl;
 import javax.ws.rs.ext.RuntimeDelegate.HeaderDelegate;
 
+import net.cactusthorn.routing.util.Headers;
+
 public class CacheControlHeaderDelegate implements HeaderDelegate<CacheControl> {
 
     @Override

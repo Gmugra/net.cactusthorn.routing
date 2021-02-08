@@ -13,16 +13,21 @@ import javax.ws.rs.BadRequestException;
 import javax.ws.rs.CookieParam;
 import javax.ws.rs.core.Cookie;
 import javax.ws.rs.core.HttpHeaders;
+import javax.ws.rs.ext.RuntimeDelegate;
 
 import net.cactusthorn.routing.PathTemplate.PathValues;
 import net.cactusthorn.routing.convert.Converter;
 import net.cactusthorn.routing.convert.ConvertersHolder;
-import net.cactusthorn.routing.convert.CookieConverter;
-import net.cactusthorn.routing.delegate.Headers;
+import net.cactusthorn.routing.util.Headers;
 
-public class CookieParamParameter extends MethodParameter {
+public class CookieParamParameter extends ConvertableMethodParameter {
 
-    private static final CookieConverter COOKIE_CONVERTER = new CookieConverter();
+    private static final Converter<Cookie> COOKIE_CONVERTER = (type, genericType, annotations, value) -> {
+        if (value == null) {
+            return null;
+        }
+        return RuntimeDelegate.getInstance().createHeaderDelegate(Cookie.class).fromString(value);
+    };
 
     public CookieParamParameter(Method method, Parameter parameter, Type genericType, int position, ConvertersHolder convertersHolder) {
         super(method, parameter, genericType, position, convertersHolder);

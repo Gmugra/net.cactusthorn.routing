@@ -7,12 +7,6 @@ import org.junit.jupiter.api.Test;
 public class PrimitiveConverterTest {
 
     @Test //
-    public void array() throws Exception {
-        PrimitiveConverter c = new PrimitiveConverter();
-        assertThrows(UnsupportedOperationException.class, () -> c.convert(Byte.TYPE, null, null, new String[0]));
-    }
-
-    @Test //
     public void byteTest() throws Exception {
         PrimitiveConverter c = new PrimitiveConverter();
         byte v = (byte) c.convert(Byte.TYPE, null, null, "1");

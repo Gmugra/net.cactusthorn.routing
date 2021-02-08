@@ -8,7 +8,7 @@ import java.util.List;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 
-import net.cactusthorn.routing.Http;
+import net.cactusthorn.routing.util.Http;
 
 public final class ProducesParser {
 

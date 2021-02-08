@@ -5,6 +5,8 @@ import java.util.Date;
 import javax.ws.rs.core.NewCookie;
 import javax.ws.rs.ext.RuntimeDelegate.HeaderDelegate;
 
+import net.cactusthorn.routing.util.Headers;
+
 public final class NewCookieHeaderDelegate implements HeaderDelegate<NewCookie> {
 
     private static final DateHeaderDelegate DATE_HEADER_DELEGATE = new DateHeaderDelegate();

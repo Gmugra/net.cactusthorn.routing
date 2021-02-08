@@ -2,7 +2,6 @@ package net.cactusthorn.routing.convert;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;
-import java.util.List;
 
 public final class PrimitiveConverter implements Converter<Object> {
 
@@ -33,11 +32,6 @@ public final class PrimitiveConverter implements Converter<Object> {
             return convertBoolean(value);
         }
         throw new IllegalArgumentException("Not a primitive type");
-    }
-
-    @Override //
-    public List<Object> convert(Class<?> type, Type genericType, Annotation[] annotations, String[] values) throws Exception {
-        throw new UnsupportedOperationException();
     }
 
     private static Integer convertInt(String input) {

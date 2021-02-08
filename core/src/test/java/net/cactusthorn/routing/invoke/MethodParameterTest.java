@@ -32,7 +32,7 @@ import net.cactusthorn.routing.convert.ConvertersHolder;
 
 public class MethodParameterTest extends InvokeTestAncestor {
 
-    private static class TestMP extends MethodParameter {
+    private static class TestMP extends ConvertableMethodParameter {
 
         public TestMP(Method method, Parameter parameter, Type genericType, int position, ConvertersHolder convertersHolder) {
             super(method, parameter, genericType, position, convertersHolder);
@@ -94,7 +94,7 @@ public class MethodParameterTest extends InvokeTestAncestor {
 
     @Test //
     public void defaultValue() throws Throwable {
-        MethodParameter param = parameterInfo(TestIt.class, "defaultValue", CONFIG);
+        ConvertableMethodParameter param = (ConvertableMethodParameter) parameterInfo(TestIt.class, "defaultValue", CONFIG);
         List<?> list = (List<?>) param.convert((String[]) null);
         assertEquals(1, list.size());
         assertEquals(20, list.get(0));
@@ -107,25 +107,25 @@ public class MethodParameterTest extends InvokeTestAncestor {
 
     @Test //
     public void nullDefaultValue() throws Throwable {
-        MethodParameter param = parameterInfo(TestIt.class, "simpleDefaultValue", CONFIG);
+        ConvertableMethodParameter param = (ConvertableMethodParameter) parameterInfo(TestIt.class, "simpleDefaultValue", CONFIG);
         UUID uuid = (UUID) param.convert((String) null);
         assertNull(uuid);
     }
 
     @Test //
     public void set() throws Throwable {
-        MethodParameter info = parameterInfo(TestIt.class, "set", CONFIG);
+        ConvertableMethodParameter param = (ConvertableMethodParameter) parameterInfo(TestIt.class, "set", CONFIG);
 
-        assertTrue(info.collection());
+        assertTrue(param.collection());
 
-        Set<Object> set = (Set<Object>) info.convert(new String[0]);
+        Set<Object> set = (Set<Object>) param.convert(new String[0]);
         assertTrue(set.isEmpty());
 
-        set = (Set<Object>) info.convert((String[]) null);
+        set = (Set<Object>) param.convert((String[]) null);
         assertTrue(set.isEmpty());
 
         List<Integer> expected = Arrays.asList(10, 20, 20);
-        Set<Object> set2 = (Set<Object>) info.convert(new String[] { "10", "20" });
+        Set<Object> set2 = (Set<Object>) param.convert(new String[] { "10", "20" });
         assertEquals(2, set2.size());
         assertTrue(set2.containsAll(expected));
         assertThrows(UnsupportedOperationException.class, () -> set2.add((Object) 40));
@@ -146,32 +146,32 @@ public class MethodParameterTest extends InvokeTestAncestor {
 
     @Test //
     public void list() throws Throwable {
-        MethodParameter info = parameterInfo(TestIt.class, "list", CONFIG);
+        ConvertableMethodParameter param = (ConvertableMethodParameter) parameterInfo(TestIt.class, "list", CONFIG);
 
-        List<?> list2 = (List<?>) info.convert(new String[0]);
+        List<?> list2 = (List<?>) param.convert(new String[0]);
         assertTrue(list2.isEmpty());
 
-        list2 = (List<?>) info.convert((String[]) null);
+        list2 = (List<?>) param.convert((String[]) null);
         assertTrue(list2.isEmpty());
 
         Double[] expected = new Double[] { 1.1d, 2.2d };
-        List<Object> list = (List<Object>) info.convert(new String[] { "1.1", "2.2" });
+        List<Object> list = (List<Object>) param.convert(new String[] { "1.1", "2.2" });
         assertArrayEquals(expected, list.toArray());
         assertThrows(UnsupportedOperationException.class, () -> list.add((Object) 3.3));
     }
 
     @Test //
     public void sortedSet() throws Throwable {
-        MethodParameter info = parameterInfo(TestIt.class, "sortedSet", CONFIG);
+        ConvertableMethodParameter param = (ConvertableMethodParameter) parameterInfo(TestIt.class, "sortedSet", CONFIG);
 
-        SortedSet<?> sortedSet2 = (SortedSet<?>) info.convert(new String[0]);
+        SortedSet<?> sortedSet2 = (SortedSet<?>) param.convert(new String[0]);
         assertTrue(sortedSet2.isEmpty());
 
-        sortedSet2 = (SortedSet<?>) info.convert((String[]) null);
+        sortedSet2 = (SortedSet<?>) param.convert((String[]) null);
         assertTrue(sortedSet2.isEmpty());
 
         String expected = "46400000-8cc0-11bd-b43e-10d46e4ef14d";
-        SortedSet<?> sortedSet = (SortedSet<?>) info.convert(new String[] { "46400000-8cc0-11bd-b43e-10d46e4ef14d" });
+        SortedSet<?> sortedSet = (SortedSet<?>) param.convert(new String[] { "46400000-8cc0-11bd-b43e-10d46e4ef14d" });
         assertEquals(expected, sortedSet.first().toString());
         assertThrows(UnsupportedOperationException.class, () -> sortedSet.add(null));
     }

@@ -14,7 +14,7 @@ import net.cactusthorn.routing.RoutingInitializationException;
 import net.cactusthorn.routing.PathTemplate.PathValues;
 import net.cactusthorn.routing.convert.ConvertersHolder;
 
-public class PathParamParameter extends MethodParameter {
+public class PathParamParameter extends ConvertableMethodParameter {
 
     public PathParamParameter(Method method, Parameter parameter, Type genericType, int position, ConvertersHolder convertersHolder) {
         super(method, parameter, genericType, position, convertersHolder);

@@ -13,7 +13,7 @@ import javax.ws.rs.HeaderParam;
 import net.cactusthorn.routing.PathTemplate.PathValues;
 import net.cactusthorn.routing.convert.ConvertersHolder;
 
-public class HeaderParamParameter extends MethodParameter {
+public class HeaderParamParameter extends ConvertableMethodParameter {
 
     public HeaderParamParameter(Method method, Parameter parameter, Type genericType, int position, ConvertersHolder convertersHolder) {
         super(method, parameter, genericType, position, convertersHolder);

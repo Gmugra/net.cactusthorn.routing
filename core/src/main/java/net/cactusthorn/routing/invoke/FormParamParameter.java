@@ -19,7 +19,7 @@ import net.cactusthorn.routing.RoutingInitializationException;
 import net.cactusthorn.routing.PathTemplate.PathValues;
 import net.cactusthorn.routing.convert.ConvertersHolder;
 
-public class FormParamParameter extends MethodParameter {
+public class FormParamParameter extends ConvertableMethodParameter {
 
     // @formatter:off
     private static final Set<MediaType> CONTENT_TYPE = Collections

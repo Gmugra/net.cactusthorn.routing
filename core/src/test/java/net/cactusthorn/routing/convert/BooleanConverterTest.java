@@ -2,43 +2,27 @@ package net.cactusthorn.routing.convert;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-import java.util.List;
-
 import org.junit.jupiter.api.Test;
 
 public class BooleanConverterTest {
 
+    static final BooleanConverter CONVERTER = new BooleanConverter();
+
     @Test //
-    public void test() throws Exception {
-        BooleanConverter c = new BooleanConverter();
-        Boolean result = c.convert(Boolean.class, null, null, "true");
+    public void simple() throws Exception {
+        Boolean result = CONVERTER.convert(Boolean.class, null, null, "true");
         assertTrue(result);
-        result = c.convert(null, null, null, (String) null);
+    }
+
+    @Test //
+    public void nul() throws Exception {
+        Boolean result = CONVERTER.convert(null, null, null, null);
         assertFalse(result);
-        result = c.convert(null, null, null, "  ");
+    }
+
+    @Test //
+    public void empty() throws Exception {
+        Boolean result = CONVERTER.convert(null, null, null, "  ");
         assertFalse(result);
-    }
-
-    @Test //
-    public void testArray() throws Throwable {
-        BooleanConverter c = new BooleanConverter();
-        String[] value = new String[] { "true", null, "false" };
-        Boolean[] valuesAsBoolean = new Boolean[] { true, false, false };
-        List<Boolean> result = c.convert(Boolean.class, null, null, value);
-        assertArrayEquals(valuesAsBoolean, result.toArray());
-    }
-
-    @Test //
-    public void testNullArray() throws Throwable {
-        BooleanConverter c = new BooleanConverter();
-        List<Boolean> result = c.convert(Boolean.class, null, null, (String[]) null);
-        assertTrue(result.isEmpty());
-    }
-
-    @Test //
-    public void testEmptyArray() throws Throwable {
-        BooleanConverter c = new BooleanConverter();
-        List<Boolean> result = c.convert(Boolean.class, null, null, new String[0]);
-        assertTrue(result.isEmpty());
     }
 }

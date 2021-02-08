@@ -2,43 +2,27 @@ package net.cactusthorn.routing.convert;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-import java.util.List;
-
 import org.junit.jupiter.api.Test;
 
 public class DoubleConverterTest {
 
+    static final DoubleConverter CONVERTER = new DoubleConverter();
+
     @Test //
     public void test() {
-        DoubleConverter c = new DoubleConverter();
-        Double result = c.convert(Double.class, null, null, "125.5");
+        Double result = CONVERTER.convert(Double.class, null, null, "125.5");
         assertEquals(125.5d, result);
-        result = c.convert(null, null, null, (String) null);
+    }
+
+    @Test //
+    public void nul() throws Exception {
+        Double result = CONVERTER.convert(null, null, null, null);
         assertNull(result);
-        result = c.convert(null, null, null, "  ");
+    }
+
+    @Test //
+    public void empty() throws Exception {
+        Double result = CONVERTER.convert(null, null, null, "  ");
         assertNull(result);
-    }
-
-    @Test //
-    public void testArray() throws Throwable {
-        DoubleConverter c = new DoubleConverter();
-        String[] value = new String[] { "125.5", "  ", "16.3" };
-        Double[] valuesAsDouble = new Double[] { 125.5d, null, 16.3d };
-        List<Double> result = c.convert(Double.class, null, null, value);
-        assertArrayEquals(valuesAsDouble, result.toArray());
-    }
-
-    @Test //
-    public void testNullArray() throws Throwable {
-        DoubleConverter c = new DoubleConverter();
-        List<Double> result = c.convert(Double.class, null, null, (String[]) null);
-        assertTrue(result.isEmpty());
-    }
-
-    @Test //
-    public void testEmptyArray() throws Throwable {
-        DoubleConverter c = new DoubleConverter();
-        List<Double> result = c.convert(Double.class, null, null, new String[0]);
-        assertTrue(result.isEmpty());
     }
 }

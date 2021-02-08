@@ -3,6 +3,8 @@ package net.cactusthorn.routing.delegate;
 import javax.ws.rs.core.Cookie;
 import javax.ws.rs.ext.RuntimeDelegate.HeaderDelegate;
 
+import net.cactusthorn.routing.util.Headers;
+
 public class CookieHeaderDelegate implements HeaderDelegate<Cookie> {
 
     @Override //

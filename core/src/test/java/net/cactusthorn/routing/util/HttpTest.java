@@ -1,4 +1,4 @@
-package net.cactusthorn.routing;
+package net.cactusthorn.routing.util;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -12,8 +12,6 @@ import javax.ws.rs.core.Cookie;
 import javax.ws.rs.core.MediaType;
 
 import org.junit.jupiter.api.Test;
-
-import net.cactusthorn.routing.delegate.Headers;
 
 public class HttpTest {
 

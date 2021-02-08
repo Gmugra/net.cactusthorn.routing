@@ -13,7 +13,7 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.ext.MessageBodyWriter;
 
-import net.cactusthorn.routing.Http;
+import net.cactusthorn.routing.util.Http;
 
 public class MessageBodyHeadersWriter implements MessageBodyWriter<Object> {
 

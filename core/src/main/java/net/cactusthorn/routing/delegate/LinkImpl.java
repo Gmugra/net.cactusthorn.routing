@@ -10,6 +10,8 @@ import java.util.Map;
 import javax.ws.rs.core.Link;
 import javax.ws.rs.core.UriBuilder;
 
+import net.cactusthorn.routing.util.Headers;
+
 public final class LinkImpl extends Link {
 
     private URI uri;
