@@ -8,7 +8,7 @@ import java.util.List;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 
-import net.cactusthorn.routing.util.Http;
+import net.cactusthorn.routing.util.Headers;
 
 public final class ProducesParser {
 
@@ -38,7 +38,7 @@ public final class ProducesParser {
                 mediaTypes.add(new MediaType(parts[0], parts[1]));
             }
         }
-        Collections.sort(mediaTypes, Http.ACCEPT_COMPARATOR);
+        Collections.sort(mediaTypes, Headers.ACCEPT_COMPARATOR);
         return mediaTypes;
     }
 }

@@ -294,9 +294,7 @@ public class RoutingServletTest {
     public void notAccept() throws ServletException, IOException {
         Mockito.when(req.getPathInfo()).thenReturn("/api/post");
         Mockito.when(req.getMethod()).thenReturn(HttpMethod.POST);
-        List<String> accept = new ArrayList<>();
-        accept.add("application/json");
-        Mockito.when(req.getHeaders(HttpHeaders.ACCEPT)).thenReturn(Collections.enumeration(accept));
+        Mockito.when(req.getHeader(HttpHeaders.ACCEPT)).thenReturn(MediaType.APPLICATION_JSON);
 
         servlet.doPost(req, resp);
 
@@ -498,9 +496,7 @@ public class RoutingServletTest {
     public void wrongProduces() throws ServletException, IOException {
         Mockito.when(req.getPathInfo()).thenReturn("/api/wrong/produces");
         Mockito.when(req.getMethod()).thenReturn(HttpMethod.GET);
-        List<String> accept = new ArrayList<>();
-        accept.add(MediaType.TEXT_HTML);
-        Mockito.when(req.getHeaders(HttpHeaders.ACCEPT)).thenReturn(Collections.enumeration(accept));
+        Mockito.when(req.getHeader(HttpHeaders.ACCEPT)).thenReturn(MediaType.TEXT_HTML);
 
         servlet.doGet(req, resp);
 

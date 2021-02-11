@@ -29,7 +29,7 @@ public class HttpTest {
         list.add(new MediaType("*", "json"));
         list.add(null);
 
-        Collections.sort(list, Http.ACCEPT_COMPARATOR);
+        Collections.sort(list, Headers.ACCEPT_COMPARATOR);
 
         assertEquals("text/plain", _toString(list.get(0)));
         assertEquals("application/json", _toString(list.get(1)));
@@ -57,11 +57,10 @@ public class HttpTest {
 
     @Test //
     public void parseAccept() {
-        List<String> accept = new ArrayList<>();
-        accept.add(
-                "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9");
+        String accept = "text/html,application/xhtml+xml,application/xml;"
+                + "q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9";
 
-        List<MediaType> mediaTypes = Http.parseAccept(Collections.enumeration(accept));
+        List<MediaType> mediaTypes = Headers.parseAccept(accept);
         assertEquals("text/html", mediaTypes.get(0).toString());
         assertEquals("application/xhtml+xml", mediaTypes.get(1).toString());
         assertEquals("image/avif", mediaTypes.get(2).toString());
@@ -74,7 +73,7 @@ public class HttpTest {
 
     @Test //
     public void parseEmptyAccept() {
-        List<MediaType> mediaTypes = Http.parseAccept(Collections.emptyEnumeration());
+        List<MediaType> mediaTypes = Headers.parseAccept(null);
         assertEquals(MediaType.WILDCARD, mediaTypes.get(0).toString());
     }
 

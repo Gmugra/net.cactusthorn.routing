@@ -25,6 +25,7 @@ import net.cactusthorn.routing.body.writer.MessageBodyHeadersWriter;
 import net.cactusthorn.routing.invoke.MethodInvoker.ReturnObjectInfo;
 import net.cactusthorn.routing.resource.ResourceScanner;
 import net.cactusthorn.routing.resource.ResourceScanner.Resource;
+import net.cactusthorn.routing.util.Headers;
 import net.cactusthorn.routing.util.Http;
 import net.cactusthorn.routing.PathTemplate.PathValues;
 
@@ -112,7 +113,7 @@ public class RoutingServlet extends HttpServlet {
             resp.sendError(HttpServletResponse.SC_NOT_FOUND, "Not Found");
             return;
         }
-        List<MediaType> accept = Http.parseAccept(req.getHeaders(HttpHeaders.ACCEPT));
+        List<MediaType> accept = Headers.parseAccept(req.getHeader(HttpHeaders.ACCEPT));
         boolean matchContentTypeFail = false;
         boolean matchAcceptFail = false;
         for (Resource resource : resources) {

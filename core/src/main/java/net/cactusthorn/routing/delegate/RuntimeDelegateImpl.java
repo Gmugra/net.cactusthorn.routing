@@ -18,6 +18,8 @@ import javax.ws.rs.core.UriBuilder;
 import javax.ws.rs.core.Variant.VariantListBuilder;
 import javax.ws.rs.ext.RuntimeDelegate;
 
+import net.cactusthorn.routing.util.Language;
+
 public class RuntimeDelegateImpl extends RuntimeDelegate {
 
     private final Map<Class<?>, HeaderDelegate<?>> headerDelegates = new HashMap<>();
@@ -32,6 +34,7 @@ public class RuntimeDelegateImpl extends RuntimeDelegate {
         headerDelegates.put(NewCookie.class, new NewCookieHeaderDelegate());
         headerDelegates.put(CacheControl.class, new CacheControlHeaderDelegate());
         headerDelegates.put(Cookie.class, new CookieHeaderDelegate());
+        headerDelegates.put(Language.class, new LanguageHeaderDelegate());
     }
 
     @Override //

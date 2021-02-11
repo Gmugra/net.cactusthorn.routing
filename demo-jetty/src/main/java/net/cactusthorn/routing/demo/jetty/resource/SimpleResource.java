@@ -15,6 +15,7 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
+import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.SecurityContext;
@@ -68,5 +69,10 @@ public class SimpleResource implements Resource {
 
     @GET @RolesAllowed({ "WrongRole" }) @Path("/wrongrole") //
     public void wrongRole() {
+    }
+
+    @GET @Path("/headers") //
+    public String headers(@Context HttpHeaders headers) {
+        return headers.getHeaderString(HttpHeaders.USER_AGENT);
     }
 }

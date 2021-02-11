@@ -3,8 +3,6 @@ package net.cactusthorn.routing.resource;
 import static org.junit.jupiter.api.Assertions.*;
 
 import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -18,7 +16,7 @@ import net.cactusthorn.routing.PathTemplate.PathValues;
 import net.cactusthorn.routing.RoutingConfig;
 import net.cactusthorn.routing.annotation.Template;
 import net.cactusthorn.routing.resource.ResourceScanner.Resource;
-import net.cactusthorn.routing.util.Http;
+import net.cactusthorn.routing.util.Headers;
 
 import javax.ws.rs.GET;
 import javax.ws.rs.HEAD;
@@ -139,15 +137,12 @@ public class ScannerTest {
 
         assertTrue(entryPoint.match("/"));
 
-        List<String> header = new ArrayList<>();
-        header.add(MediaType.APPLICATION_JSON);
-        header.add(MediaType.TEXT_PLAIN);
-        List<MediaType> accept = Http.parseAccept(Collections.enumeration(header));
+        String header = MediaType.APPLICATION_JSON + ", " + MediaType.TEXT_PLAIN; 
+        List<MediaType> accept = Headers.parseAccept(header);
         assertTrue(entryPoint.matchAccept(accept).isPresent());
 
-        header.clear();
-        header.add(MediaType.APPLICATION_JSON);
-        accept = Http.parseAccept(Collections.enumeration(header));
+        header = MediaType.APPLICATION_JSON; 
+        accept = Headers.parseAccept(header);
         assertFalse(entryPoint.matchAccept(accept).isPresent());
     }
 
@@ -182,9 +177,8 @@ public class ScannerTest {
         assertEquals(PathValues.EMPTY, values);
         assertTrue(entryPoint.match("/api/"));
 
-        List<String> header = new ArrayList<>();
-        header.add(MediaType.WILDCARD);
-        List<MediaType> accept = Http.parseAccept(Collections.enumeration(header));
+        String header = MediaType.WILDCARD;
+        List<MediaType> accept = Headers.parseAccept(header);
         assertTrue(entryPoint.matchAccept(accept).isPresent());
     }
 

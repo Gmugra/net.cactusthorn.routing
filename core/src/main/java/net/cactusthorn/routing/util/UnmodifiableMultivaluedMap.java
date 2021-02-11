@@ -127,4 +127,16 @@ public class UnmodifiableMultivaluedMap<K, V> implements MultivaluedMap<K, V> {
         return entrySet;
     }
     // Map }
+
+    @Override public String toString() {
+        return map.toString();
+    }
+
+    @Override public int hashCode() {
+        return map.hashCode();
+    }
+
+    @Override public boolean equals(Object obj) {
+        return map.equals(obj);
+    }
 }

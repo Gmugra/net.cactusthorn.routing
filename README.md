@@ -72,12 +72,12 @@ public class Application {
     public static void main(String... args) {
 
         ComponentProvider myComponentProvider = new MyComponentProvider(...);
-        Collection<Class<?>> entryPoints = ...
+        Collection<Class<?>> resources = ...
 
         RoutingConfig config =
             RoutingConfig.builder(myComponentProvider)
-            .addResource(MyEntryPoint.class)
-            .addResource(entryPoints)
+            .addResource(MyResource.class)
+            .addResource(resources)
             .addBodyWriter(new SimpleGsonBodyWriter<>())
             .addBodyReader(new SimpleGsonBodyReader<>())
             .addBodyWriter(new SimpleThymeleafBodyWriter("/thymeleaf/"))
@@ -138,6 +138,7 @@ The type of the annotated parameter must either:
    * javax.servlet.http.HttpServletResponse
    * javax.servlet.ServletContext
    * javax.ws.rs.core.SecurityContext
+   * javax.ws.rs.core.HttpHeaders;
 1. `javax.ws.rs.core.Response`
 
 ### Extensions

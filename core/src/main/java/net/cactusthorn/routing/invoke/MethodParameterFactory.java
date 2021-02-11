@@ -21,6 +21,7 @@ import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
 import javax.ws.rs.PATCH;
 import javax.ws.rs.core.Context;
+import javax.ws.rs.core.HttpHeaders;
 
 import net.cactusthorn.routing.RoutingConfig;
 import net.cactusthorn.routing.RoutingInitializationException;
@@ -74,6 +75,9 @@ class MethodParameterFactory {
             }
             if (SecurityContext.class == parameter.getType()) {
                 return new SecurityContextParameter(method, parameter, genericType, position);
+            }
+            if (HttpHeaders.class == parameter.getType()) {
+                return new HttpHeadersParameter(method, parameter, genericType, position);
             }
             throw new RoutingInitializationException(CONTEXT_NOT_SUPPORTED, parameter.getType(), method);
         }

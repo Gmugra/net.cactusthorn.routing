@@ -86,4 +86,11 @@ public class UnmodifiableMultivaluedMapTest {
         assertThrows(UnsupportedOperationException.class, () -> entries.add(null));
         assertThrows(UnsupportedOperationException.class, () -> entry.setValue(LIST));
     }
+    
+    @Test
+    public void object() {
+        assertEquals(MAP.toString(), U.toString());
+        assertTrue(U.equals(MAP));
+        assertEquals(MAP.hashCode(), U.hashCode());
+    }
 }
