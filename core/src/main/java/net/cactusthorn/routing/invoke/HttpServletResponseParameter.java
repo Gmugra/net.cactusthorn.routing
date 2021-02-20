@@ -8,7 +8,7 @@ import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import net.cactusthorn.routing.PathTemplate.PathValues;
+import net.cactusthorn.routing.uri.PathTemplate.PathValues;
 
 public final class HttpServletResponseParameter extends MethodParameter {
 

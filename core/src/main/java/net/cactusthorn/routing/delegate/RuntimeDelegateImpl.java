@@ -39,7 +39,7 @@ public class RuntimeDelegateImpl extends RuntimeDelegate {
 
     @Override //
     public UriBuilder createUriBuilder() {
-        throw new UnsupportedOperationException("createUriBuilder() is not supported");
+        return new UriBuilderImpl();
     }
 
     @Override //

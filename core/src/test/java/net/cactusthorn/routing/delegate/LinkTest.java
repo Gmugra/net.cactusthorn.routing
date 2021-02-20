@@ -6,6 +6,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 
 import javax.ws.rs.core.Link;
+import javax.ws.rs.core.UriBuilder;
 
 import org.junit.jupiter.api.Test;
 
@@ -23,17 +24,35 @@ public class LinkTest {
         assertEquals("<https://example.com>; rel=preconnect; type=text/css; title=compact; aaa=\"bb cc\"", link.toString());
     }
 
-    @Test public void linkUnsupported() {
-        Link link = Link.valueOf("<example.com>");
-        assertThrows(UnsupportedOperationException.class, () -> link.getUriBuilder());
+    @Test public void paramNull() {
+        Link.Builder builder = new LinkImpl.LinkBuilderImpl();
+        assertThrows(IllegalArgumentException.class, () -> builder.param(null, "aa"));
+        assertThrows(IllegalArgumentException.class, () -> builder.param("aa", null));
+    }
+
+    @Test public void getUriBuilder() {
+        Link link = Link.valueOf("<http://example.com>");
+        UriBuilder uriBuilder = link.getUriBuilder();
+        assertEquals("http://example.com", uriBuilder.build().toString());
+    }
+
+    @Test public void uriBuilder() {
+        Link.Builder builder = new LinkImpl.LinkBuilderImpl();
+        builder.uriBuilder(UriBuilder.fromUri("http://example.com"));
+        assertEquals("<http://example.com>", builder.build().toString());
     }
 
     @Test public void link() {
         Link.Builder builder = new LinkImpl.LinkBuilderImpl();
-        Link link = builder.uri("example.com").build();
+        Link link = builder.uri("http://example.com").build();
         Link link2 = builder.link(link).build();
         assertEquals(link.toString(), link2.toString());
         assertNotEquals(link.hashCode(), link2.hashCode());
+    }
+
+    @Test public void relNull() {
+        Link.Builder builder = new LinkImpl.LinkBuilderImpl();
+        assertThrows(IllegalArgumentException.class, () -> builder.rel(null));
     }
 
     @Test public void rel() {
@@ -53,10 +72,20 @@ public class LinkTest {
         assertTrue(link.getRels().isEmpty());
     }
 
+    @Test public void titleNull() {
+        Link.Builder builder = new LinkImpl.LinkBuilderImpl();
+        assertThrows(IllegalArgumentException.class, () -> builder.title(null));
+    }
+
     @Test public void title() {
         Link.Builder builder = new LinkImpl.LinkBuilderImpl();
         Link link = builder.link("<https://example.com>; title=compact").build();
         assertEquals("compact", link.getTitle());
+    }
+
+    @Test public void typeNull() {
+        Link.Builder builder = new LinkImpl.LinkBuilderImpl();
+        assertThrows(IllegalArgumentException.class, () -> builder.type(null));
     }
 
     @Test public void type() {
@@ -72,12 +101,30 @@ public class LinkTest {
         assertThrows(IllegalArgumentException.class, () -> builder.link("<https://example.com>; type-text/css"));
     }
 
-    @Test public void builderUnsupported() {
-        Link.Builder builder = new LinkImpl.LinkBuilderImpl();
-        assertThrows(UnsupportedOperationException.class, () -> builder.baseUri((URI) null));
-        assertThrows(UnsupportedOperationException.class, () -> builder.baseUri((String) null));
-        assertThrows(UnsupportedOperationException.class, () -> builder.uriBuilder(null));
-        assertThrows(UnsupportedOperationException.class, () -> builder.buildRelativized(null));
+    @Test public void template() {
+        Link link = Link.fromUri("http://{host}/root/customers/{id}").rel("update").type("text/plain").build("localhost", "1234");
+        assertEquals("<http://localhost/root/customers/1234>; rel=update; type=text/plain", link.toString());
     }
 
+    @Test public void buildRelativized() throws URISyntaxException {
+        Link link = Link.fromUri("a/d/e").rel("update").type("text/plain").baseUri("http://localhost/")
+                .buildRelativized(new URI("http://localhost/a"));
+        assertEquals("<d/e>; rel=update; type=text/plain", link.toString());
+    }
+
+    @Test public void buildRelativized2() throws URISyntaxException {
+        Link link = Link.fromUri("a/d/e").rel("update").type("text/plain").buildRelativized(new URI("a"));
+        assertEquals("<d/e>; rel=update; type=text/plain", link.toString());
+    }
+
+    @Test public void buildRelativized3() throws URISyntaxException {
+        Link link = Link.fromUri("a/d/e").rel("update").type("text/plain").baseUri(new URI("http://localhost/"))
+                .buildRelativized(new URI("http://localhost/a"));
+        assertEquals("<d/e>; rel=update; type=text/plain", link.toString());
+    }
+
+    @Test public void buildRelativizedNull() throws URISyntaxException {
+        Link.Builder builder = new LinkImpl.LinkBuilderImpl();
+        assertThrows(IllegalArgumentException.class, () -> builder.buildRelativized(null));
+    }
 }

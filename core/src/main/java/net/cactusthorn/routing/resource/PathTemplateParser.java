@@ -4,8 +4,8 @@ import java.lang.reflect.Method;
 
 import javax.ws.rs.Path;
 
-import net.cactusthorn.routing.PathTemplate;
 import net.cactusthorn.routing.RoutingInitializationException;
+import net.cactusthorn.routing.uri.PathTemplate;
 
 public final class PathTemplateParser {
 

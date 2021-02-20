@@ -34,7 +34,7 @@ import net.cactusthorn.routing.ComponentProvider;
 import net.cactusthorn.routing.RoutingConfig;
 import net.cactusthorn.routing.ServletTestInputStream;
 import net.cactusthorn.routing.invoke.MethodInvoker.ReturnObjectInfo;
-import net.cactusthorn.routing.PathTemplate.PathValues;
+import net.cactusthorn.routing.uri.PathTemplate.PathValues;
 import net.cactusthorn.routing.validate.ParametersValidator;
 
 public class MethodInvokerTest extends InvokeTestAncestor {

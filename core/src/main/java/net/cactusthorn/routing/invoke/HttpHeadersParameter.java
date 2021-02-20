@@ -22,7 +22,7 @@ import javax.ws.rs.core.MultivaluedHashMap;
 import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.ext.RuntimeDelegate;
 
-import net.cactusthorn.routing.PathTemplate.PathValues;
+import net.cactusthorn.routing.uri.PathTemplate.PathValues;
 import net.cactusthorn.routing.util.CaseInsensitiveMultivaluedMap;
 import net.cactusthorn.routing.util.Headers;
 import net.cactusthorn.routing.util.UnmodifiableMultivaluedMap;

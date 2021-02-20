@@ -20,8 +20,8 @@ import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.ext.MessageBodyReader;
 
 import net.cactusthorn.routing.RoutingInitializationException;
-import net.cactusthorn.routing.PathTemplate.PathValues;
 import net.cactusthorn.routing.body.reader.BodyReader;
+import net.cactusthorn.routing.uri.PathTemplate.PathValues;
 
 public final class BodyReaderParameter extends MethodParameter {
 

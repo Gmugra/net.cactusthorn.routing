@@ -1,13 +1,12 @@
-package net.cactusthorn.routing.pathtemplate;
+package net.cactusthorn.routing.uri;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 import java.util.*;
 import java.util.regex.PatternSyntaxException;
+import java.util.stream.Collectors;
 
 import org.junit.jupiter.api.Test;
-
-import net.cactusthorn.routing.PathTemplate;
 
 public class PathTemplateParamTest {
 
@@ -16,7 +15,7 @@ public class PathTemplateParamTest {
     @Test //
     public void single() {
         PathTemplate pt = new PathTemplate("/api/{id}/bbb");
-        List<String> parameters = pt.parameters();
+        List<Template.TemplateVariable> parameters = pt.variables();
         assertEquals(1, parameters.size());
         assertFalse(pt.isSimple());
     }
@@ -24,36 +23,36 @@ public class PathTemplateParamTest {
     @Test //
     public void simple() {
         PathTemplate pt = new PathTemplate("/api/te{id}st/som{ddd}ething{some}");
-        List<String> parameters = pt.parameters();
-        assertEquals(3, parameters.size());
-        assertTrue(parameters.containsAll(PARAM_NAMES));
+        assertEquals(3, pt.variables().size());
+        Set<String> names = pt.variables().stream().map(v -> v.name()).collect(Collectors.toSet());
+        assertTrue(names.containsAll(PARAM_NAMES));
         assertFalse(pt.isSimple());
     }
 
     @Test //
     public void withSpaces() {
         PathTemplate pt = new PathTemplate("/api/te{id  }st/som{   ddd}ething{  some\t}");
-        List<String> parameters = pt.parameters();
-        assertEquals(3, parameters.size());
-        assertTrue(parameters.containsAll(PARAM_NAMES));
+        assertEquals(3, pt.variables().size());
+        Set<String> names = pt.variables().stream().map(v -> v.name()).collect(Collectors.toSet());
+        assertTrue(names.containsAll(PARAM_NAMES));
         assertFalse(pt.isSimple());
     }
 
     @Test //
     public void withRegExp() {
         PathTemplate pt = new PathTemplate("/api/te{id : ab}st/som{   ddd :ffff}ething{  some:   rtz\t}");
-        List<String> parameters = pt.parameters();
-        assertEquals(3, parameters.size());
-        assertTrue(parameters.containsAll(PARAM_NAMES));
+        assertEquals(3, pt.variables().size());
+        Set<String> names = pt.variables().stream().map(v -> v.name()).collect(Collectors.toSet());
+        assertTrue(names.containsAll(PARAM_NAMES));
         assertFalse(pt.isSimple());
     }
 
     @Test //
     public void mixed() {
         PathTemplate pt = new PathTemplate("/api/te{id}st/som{   ddd:ffff}ething{some: rtz\t}");
-        List<String> parameters = pt.parameters();
-        assertEquals(3, parameters.size());
-        assertTrue(parameters.containsAll(PARAM_NAMES));
+        assertEquals(3, pt.variables().size());
+        Set<String> names = pt.variables().stream().map(v -> v.name()).collect(Collectors.toSet());
+        assertTrue(names.containsAll(PARAM_NAMES));
         assertFalse(pt.isSimple());
     }
 
@@ -107,6 +106,6 @@ public class PathTemplateParamTest {
     @Test //
     public void patternMultiple() {
         PathTemplate pt = new PathTemplate("/api/test{ ddd:aaaa }/som{ddd : aaaa}");
-        assertEquals(2, pt.regExpParametersAmount());
+        assertEquals(2, pt.regExpParamsAmount());
     }
 }

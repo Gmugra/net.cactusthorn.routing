@@ -1,12 +1,8 @@
-package net.cactusthorn.routing.pathtemplate;
+package net.cactusthorn.routing.uri;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-import java.net.URISyntaxException;
-
 import org.junit.jupiter.api.Test;
-
-import net.cactusthorn.routing.PathTemplate;
 
 public class PathTemplateSimpleTest {
 
@@ -45,8 +41,8 @@ public class PathTemplateSimpleTest {
     public void withParams() {
         PathTemplate pt = new PathTemplate("/api/te{id : xxxx}st/som{ddd}ething{some: xxx}");
         assertEquals(19, pt.literalCharsAmount());
-        assertEquals(1, pt.simpleParametersAmount());
-        assertEquals(2, pt.regExpParametersAmount());
+        assertEquals(1, pt.simpleParamsAmount());
+        assertEquals(2, pt.regExpParamsAmount());
         assertFalse(pt.isSimple());
     }
 
@@ -58,12 +54,6 @@ public class PathTemplateSimpleTest {
     @Test //
     public void wrongCharacter() {
         assertThrows(IllegalArgumentException.class, () -> new PathTemplate("/api/te{ id,ddd  }ething"));
-    }
-
-    @Test //
-    public void uri() {
-        Exception exception = assertThrows(IllegalArgumentException.class, () -> new PathTemplate("sert/}dddd"));
-        assertEquals(URISyntaxException.class, exception.getCause().getClass());
     }
 
     @Test //

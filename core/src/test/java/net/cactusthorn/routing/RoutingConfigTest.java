@@ -14,12 +14,12 @@ import javax.ws.rs.core.Response;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
-import net.cactusthorn.routing.PathTemplate.PathValues;
 import net.cactusthorn.routing.RoutingConfig.ConfigProperty;
 import net.cactusthorn.routing.body.reader.ConvertersMessageBodyReader;
 import net.cactusthorn.routing.body.writer.ObjectMessageBodyWriter;
 import net.cactusthorn.routing.convert.ParamConverterProviderWrapperTest;
 import net.cactusthorn.routing.resource.ResourceScanner;
+import net.cactusthorn.routing.uri.PathTemplate.PathValues;
 import net.cactusthorn.routing.validate.ParametersValidator;
 
 public class RoutingConfigTest {

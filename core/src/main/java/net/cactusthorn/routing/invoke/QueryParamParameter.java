@@ -10,8 +10,8 @@ import javax.servlet.http.HttpServletResponse;
 import javax.ws.rs.NotFoundException;
 import javax.ws.rs.QueryParam;
 
-import net.cactusthorn.routing.PathTemplate.PathValues;
 import net.cactusthorn.routing.convert.ConvertersHolder;
+import net.cactusthorn.routing.uri.PathTemplate.PathValues;
 
 public class QueryParamParameter extends ConvertableMethodParameter {
 

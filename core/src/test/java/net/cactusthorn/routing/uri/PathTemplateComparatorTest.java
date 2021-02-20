@@ -1,10 +1,8 @@
-package net.cactusthorn.routing.pathtemplate;
+package net.cactusthorn.routing.uri;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 import org.junit.jupiter.api.Test;
-
-import net.cactusthorn.routing.PathTemplate;
 
 public class PathTemplateComparatorTest {
 

@@ -16,7 +16,7 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
 
 import net.cactusthorn.routing.RoutingInitializationException;
-import net.cactusthorn.routing.PathTemplate.PathValues;
+import net.cactusthorn.routing.uri.PathTemplate.PathValues;
 import net.cactusthorn.routing.ComponentProvider;
 import net.cactusthorn.routing.RoutingConfig;
 

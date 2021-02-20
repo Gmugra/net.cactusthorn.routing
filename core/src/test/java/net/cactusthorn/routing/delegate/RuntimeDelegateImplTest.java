@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import javax.ws.rs.core.Link;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.UriBuilder;
 import javax.ws.rs.core.Variant;
 
 import org.junit.jupiter.api.Test;
@@ -37,8 +38,13 @@ public class RuntimeDelegateImplTest {
     }
 
     @Test //
+    public void createUriBuilder() {
+        UriBuilder uriBuilder = IMPL.createUriBuilder();
+        assertNotNull(uriBuilder);
+    }
+
+    @Test //
     public void checkUnsupported() {
-        assertThrows(UnsupportedOperationException.class, () -> IMPL.createUriBuilder());
         assertThrows(UnsupportedOperationException.class, () -> IMPL.createEndpoint(null, null));
     }
 }

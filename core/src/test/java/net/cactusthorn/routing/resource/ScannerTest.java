@@ -11,11 +11,11 @@ import javax.servlet.http.HttpServletRequest;
 import org.junit.jupiter.api.Test;
 
 import net.cactusthorn.routing.ComponentProvider;
-import net.cactusthorn.routing.PathTemplate;
-import net.cactusthorn.routing.PathTemplate.PathValues;
 import net.cactusthorn.routing.RoutingConfig;
 import net.cactusthorn.routing.annotation.Template;
 import net.cactusthorn.routing.resource.ResourceScanner.Resource;
+import net.cactusthorn.routing.uri.PathTemplate;
+import net.cactusthorn.routing.uri.PathTemplate.PathValues;
 import net.cactusthorn.routing.util.Headers;
 
 import javax.ws.rs.GET;

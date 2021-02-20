@@ -21,7 +21,7 @@ import javax.ws.rs.core.Response.Status;
 
 import net.cactusthorn.routing.RoutingConfig;
 import net.cactusthorn.routing.Templated;
-import net.cactusthorn.routing.PathTemplate.PathValues;
+import net.cactusthorn.routing.uri.PathTemplate.PathValues;
 
 public final class MethodInvoker {
 

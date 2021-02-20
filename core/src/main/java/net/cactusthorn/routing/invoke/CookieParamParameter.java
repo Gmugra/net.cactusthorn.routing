@@ -15,9 +15,9 @@ import javax.ws.rs.core.Cookie;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.ext.RuntimeDelegate;
 
-import net.cactusthorn.routing.PathTemplate.PathValues;
 import net.cactusthorn.routing.convert.Converter;
 import net.cactusthorn.routing.convert.ConvertersHolder;
+import net.cactusthorn.routing.uri.PathTemplate.PathValues;
 import net.cactusthorn.routing.util.Headers;
 
 public class CookieParamParameter extends ConvertableMethodParameter {

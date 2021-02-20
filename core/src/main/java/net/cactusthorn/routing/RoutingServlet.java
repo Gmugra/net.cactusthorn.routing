@@ -25,9 +25,9 @@ import net.cactusthorn.routing.body.writer.MessageBodyHeadersWriter;
 import net.cactusthorn.routing.invoke.MethodInvoker.ReturnObjectInfo;
 import net.cactusthorn.routing.resource.ResourceScanner;
 import net.cactusthorn.routing.resource.ResourceScanner.Resource;
+import net.cactusthorn.routing.uri.PathTemplate.PathValues;
 import net.cactusthorn.routing.util.Headers;
 import net.cactusthorn.routing.util.Http;
-import net.cactusthorn.routing.PathTemplate.PathValues;
 
 public class RoutingServlet extends HttpServlet {
 

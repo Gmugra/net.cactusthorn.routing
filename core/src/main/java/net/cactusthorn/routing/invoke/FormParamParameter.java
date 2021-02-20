@@ -16,8 +16,8 @@ import javax.ws.rs.NotFoundException;
 import javax.ws.rs.core.MediaType;
 
 import net.cactusthorn.routing.RoutingInitializationException;
-import net.cactusthorn.routing.PathTemplate.PathValues;
 import net.cactusthorn.routing.convert.ConvertersHolder;
+import net.cactusthorn.routing.uri.PathTemplate.PathValues;
 
 public class FormParamParameter extends ConvertableMethodParameter {
 

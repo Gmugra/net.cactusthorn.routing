@@ -10,8 +10,8 @@ import javax.servlet.http.HttpServletResponse;
 import javax.ws.rs.BadRequestException;
 import javax.ws.rs.HeaderParam;
 
-import net.cactusthorn.routing.PathTemplate.PathValues;
 import net.cactusthorn.routing.convert.ConvertersHolder;
+import net.cactusthorn.routing.uri.PathTemplate.PathValues;
 
 public class HeaderParamParameter extends ConvertableMethodParameter {
 

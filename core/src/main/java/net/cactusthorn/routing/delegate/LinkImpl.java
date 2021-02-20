@@ -27,7 +27,7 @@ public final class LinkImpl extends Link {
     }
 
     @Override public UriBuilder getUriBuilder() {
-        throw new UnsupportedOperationException();
+        return UriBuilder.fromUri(uri);
     }
 
     @Override public String getRel() {
@@ -65,11 +65,12 @@ public final class LinkImpl extends Link {
 
     public static class LinkBuilderImpl implements Builder {
 
-        private URI uuri;
+        private UriBuilder uriBuilder;
+        private URI baseUri;
         private final Map<String, String> params = new LinkedHashMap<>();
 
         @Override public Builder link(Link link) {
-            this.uuri = link.getUri();
+            uriBuilder = UriBuilder.fromUri(link.getUri());
             params.clear();
             params.putAll(link.getParams());
             return this;
@@ -86,7 +87,8 @@ public final class LinkImpl extends Link {
             if (tmp.charAt(uriAsStr.length() - 1) != '>') {
                 throw new IllegalArgumentException("Wrong: '>' is missing");
             }
-            uuri = URI.create(uriAsStr.substring(1, uriAsStr.length() - 1).trim());
+            String uri = uriAsStr.substring(1, uriAsStr.length() - 1).trim();
+            uriBuilder = UriBuilder.fromUri(URI.create(uri));
 
             params.clear();
             for (int i = 1; i < parts.length; i++) {
@@ -98,53 +100,80 @@ public final class LinkImpl extends Link {
         }
 
         @Override public Builder uri(URI uri) {
-            this.uuri = uri;
+            uriBuilder = UriBuilder.fromUri(uri);
             return this;
         }
 
         @Override public Builder uri(String uri) {
-            this.uuri = URI.create(uri);
+            uriBuilder = UriBuilder.fromUri(uri);
             return this;
         }
 
         @Override public Builder baseUri(URI uri) {
-            throw new UnsupportedOperationException();
+            this.baseUri = uri;
+            return this;
         }
 
         @Override public Builder baseUri(String uri) {
-            throw new UnsupportedOperationException();
+            this.baseUri = URI.create(uri);
+            return this;
         }
 
-        @Override public Builder uriBuilder(UriBuilder uriBuilder) {
-            throw new UnsupportedOperationException();
+        @Override public Builder uriBuilder(UriBuilder builder) {
+            this.uriBuilder = builder.clone();
+            return this;
         }
 
         @Override public Builder rel(String rel) {
+            if (rel == null) {
+                throw new IllegalArgumentException("rel is null");
+            }
             params.put(REL, rel);
             return this;
         }
 
         @Override public Builder title(String title) {
+            if (title == null) {
+                throw new IllegalArgumentException("title is null");
+            }
             params.put(TITLE, title);
             return this;
         }
 
         @Override public Builder type(String type) {
+            if (type == null) {
+                throw new IllegalArgumentException("type is null");
+            }
             params.put(TYPE, type);
             return this;
         }
 
         @Override public Builder param(String name, String value) {
+            if (name == null) {
+                throw new IllegalArgumentException("name is null");
+            }
+            if (value == null) {
+                throw new IllegalArgumentException("value is null");
+            }
             params.put(name, value);
             return this;
         }
 
         @Override public Link build(Object... values) {
-            return new LinkImpl(uuri, params);
+            URI linkUri = uriBuilder.build(values);
+            return new LinkImpl(linkUri, params);
         }
 
-        @Override public Link buildRelativized(URI uri, Object... vvalues) {
-            throw new UnsupportedOperationException();
+        @Override public Link buildRelativized(URI uri, Object... values) {
+            if (uri == null) {
+                throw new IllegalArgumentException("uri is null");
+            }
+            URI result = uriBuilder.build(values);
+            URI with = result;
+            if (baseUri != null) {
+                with = baseUri.resolve(result);
+            }
+            return new LinkImpl(uri.relativize(with), params);
         }
     }
 }

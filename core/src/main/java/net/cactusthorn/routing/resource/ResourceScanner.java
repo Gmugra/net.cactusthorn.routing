@@ -17,12 +17,12 @@ import javax.ws.rs.Path;
 import javax.annotation.security.RolesAllowed;
 
 import net.cactusthorn.routing.annotation.Template;
-import net.cactusthorn.routing.PathTemplate;
 import net.cactusthorn.routing.RoutingConfig;
 import net.cactusthorn.routing.Templated;
-import net.cactusthorn.routing.PathTemplate.PathValues;
 import net.cactusthorn.routing.invoke.MethodInvoker;
 import net.cactusthorn.routing.invoke.MethodInvoker.ReturnObjectInfo;
+import net.cactusthorn.routing.uri.PathTemplate;
+import net.cactusthorn.routing.uri.PathTemplate.PathValues;
 
 public class ResourceScanner {
 
