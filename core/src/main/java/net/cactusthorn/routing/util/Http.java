@@ -11,7 +11,7 @@ import javax.ws.rs.ext.RuntimeDelegate.HeaderDelegate;
 public final class Http {
 
     @SuppressWarnings("unchecked") //
-    public static void writeHeaders(HttpServletResponse response, MultivaluedMap<String, Object> headers) {
+    public void writeHeaders(HttpServletResponse response, MultivaluedMap<String, Object> headers) {
         for (Map.Entry<String, List<Object>> entry : headers.entrySet()) {
             if (entry.getValue() == null) {
                 continue;

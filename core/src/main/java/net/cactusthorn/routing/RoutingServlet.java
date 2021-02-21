@@ -180,12 +180,14 @@ public class RoutingServlet extends HttpServlet {
         return path;
     }
 
+    private static final Http HTTP = new Http();
+
     private void produce(HttpServletResponse resp, Resource resource, Response result, MediaType producesMediaType) throws IOException {
 
         StatusType status = result.getStatusInfo();
         resp.setStatus(status.getStatusCode());
         if (status.getStatusCode() == Status.NO_CONTENT.getStatusCode() || status.getFamily() == Status.Family.REDIRECTION) {
-            Http.writeHeaders(resp, result.getHeaders());
+            HTTP.writeHeaders(resp, result.getHeaders());
             return;
         }
 

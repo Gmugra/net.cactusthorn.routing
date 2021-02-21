@@ -46,6 +46,8 @@ public class MessageBodyHeadersWriter implements MessageBodyWriter<Object> {
 
     private static class HeadersWriterOutputStream extends FilterOutputStream {
 
+        private static final Http HTTP = new Http();
+
         private boolean done;
         private HttpServletResponse response;
         private MultivaluedMap<String, Object> httpHeaders;
@@ -64,7 +66,7 @@ public class MessageBodyHeadersWriter implements MessageBodyWriter<Object> {
             if (httpHeaders == null) {
                 return;
             }
-            Http.writeHeaders(response, httpHeaders);
+            HTTP.writeHeaders(response, httpHeaders);
         }
 
         @Override //
