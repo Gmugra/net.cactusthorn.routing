@@ -1,4 +1,4 @@
-package net.cactusthorn.routing;
+package net.cactusthorn.routing.body.writer;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -10,11 +10,22 @@ public class Templated {
     private String template;
     private Object entity;
 
-    public Templated(HttpServletRequest req, HttpServletResponse resp, String template, Object entity) {
-        this.req = req;
-        this.resp = resp;
+    public Templated(String template, Object entity, HttpServletRequest req, HttpServletResponse resp) {
+        if (template == null) {
+            throw new IllegalArgumentException("template is null");
+        }
         this.template = template;
         this.entity = entity;
+        this.req = req;
+        this.resp = resp;
+    }
+
+    public Templated(String template, Object entity) {
+        this(template, entity, null, null);
+    }
+
+    public Templated(String template) {
+        this(template, null, null, null);
     }
 
     public HttpServletRequest request() {
@@ -32,5 +43,4 @@ public class Templated {
     public Object entity() {
         return entity;
     }
-
 }

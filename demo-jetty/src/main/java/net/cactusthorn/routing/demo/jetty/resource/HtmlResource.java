@@ -5,23 +5,20 @@ import java.nio.file.Files;
 import java.util.List;
 
 import javax.inject.Inject;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.Part;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
-import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.CookieParam;
 import javax.ws.rs.FormParam;
 
-import net.cactusthorn.routing.Templated;
 import net.cactusthorn.routing.annotation.FormPart;
 import net.cactusthorn.routing.annotation.Template;
+import net.cactusthorn.routing.body.writer.Templated;
 import net.cactusthorn.routing.demo.jetty.dagger.Resource;
 
 @Path("html") //
@@ -43,8 +40,8 @@ public class HtmlResource implements Resource {
     }
 
     @GET @Path("upload") //
-    public Response showUpload(@Context HttpServletRequest request, @Context HttpServletResponse response) {
-        Templated templated = new Templated(request, response, "/fileupload.html", null);
+    public Response showUpload() {
+        Templated templated = new Templated("/fileupload.html");
         return Response.ok(templated).type(MediaType.TEXT_HTML_TYPE).build();
     }
 

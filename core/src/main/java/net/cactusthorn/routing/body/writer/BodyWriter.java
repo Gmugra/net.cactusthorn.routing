@@ -9,7 +9,6 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.ext.MessageBodyWriter;
 
 import net.cactusthorn.routing.RoutingConfig;
-import net.cactusthorn.routing.Templated;
 import net.cactusthorn.routing.body.Initializable;
 import net.cactusthorn.routing.body.BodyProcessor;
 

@@ -24,7 +24,7 @@ import org.thymeleaf.templateresolver.ClassLoaderTemplateResolver;
 import org.thymeleaf.context.WebContext;
 
 import net.cactusthorn.routing.RoutingConfig;
-import net.cactusthorn.routing.Templated;
+import net.cactusthorn.routing.body.writer.Templated;
 import net.cactusthorn.routing.body.writer.TemplatedMessageBodyWriter;
 
 @Produces({MediaType.TEXT_HTML})

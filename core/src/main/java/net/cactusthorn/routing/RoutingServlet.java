@@ -22,6 +22,7 @@ import javax.ws.rs.ext.MessageBodyWriter;
 import net.cactusthorn.routing.RoutingConfig.ConfigProperty;
 import net.cactusthorn.routing.body.writer.BodyWriter;
 import net.cactusthorn.routing.body.writer.MessageBodyHeadersWriter;
+import net.cactusthorn.routing.body.writer.Templated;
 import net.cactusthorn.routing.invoke.MethodInvoker.ReturnObjectInfo;
 import net.cactusthorn.routing.resource.ResourceScanner;
 import net.cactusthorn.routing.resource.ResourceScanner.Resource;
@@ -141,7 +142,7 @@ public class RoutingServlet extends HttpServlet {
                         resp.sendError(HttpServletResponse.SC_NOT_ACCEPTABLE, "Not acceptable");
                         return;
                     }
-                    produce(resp, resource, result, producesMediaType.get());
+                    produce(req, resp, resource, result, producesMediaType.get());
                 } catch (WebApplicationException wae) {
                     resp.sendError(wae.getResponse().getStatus(), wae.getMessage());
                 } catch (Exception e) {
@@ -182,7 +183,8 @@ public class RoutingServlet extends HttpServlet {
 
     private static final Http HTTP = new Http();
 
-    private void produce(HttpServletResponse resp, Resource resource, Response result, MediaType producesMediaType) throws IOException {
+    private void produce(HttpServletRequest req, HttpServletResponse resp, Resource resource, Response result,
+            MediaType producesMediaType) throws IOException {
 
         StatusType status = result.getStatusInfo();
         resp.setStatus(status.getStatusCode());
@@ -201,14 +203,36 @@ public class RoutingServlet extends HttpServlet {
         resp.setCharacterEncoding(responseMediaType.getParameters().get(MediaType.CHARSET_PARAMETER));
         resp.setContentType(new MediaType(responseMediaType.getType(), responseMediaType.getSubtype()).toString());
 
-        ReturnObjectInfo info = resource.returnObjectInfo().withEntity(result.getEntity());
+        Object entity = prepareEntity(req, resp, result.getEntity());
+
+        ReturnObjectInfo info = resource.returnObjectInfo().withEntity(entity);
 
         MessageBodyHeadersWriter writer = new MessageBodyHeadersWriter(resp, findBodyWriter(responseMediaType, info));
 
-        writer.writeTo(result.getEntity(), info.type(), info.genericType(), info.annotations(), responseMediaType, result.getHeaders(),
+        writer.writeTo(entity, info.type(), info.genericType(), info.annotations(), responseMediaType, result.getHeaders(),
                 resp.getOutputStream());
 
         LOG.log(Level.FINE, "Producer processing done for Content-Type: {0}", new Object[] {responseMediaType});
+    }
+
+    private Object prepareEntity(HttpServletRequest req, HttpServletResponse resp, Object entity) {
+        if (entity == null) {
+            return null;
+        }
+        if (entity instanceof Templated) {
+            Templated templated = (Templated) entity;
+            if (templated.request() != null && templated.response() != null) {
+                return entity;
+            }
+            if (templated.request() != null) {
+                return new Templated(templated.template(), templated.entity(), templated.request(), resp);
+            }
+            if (templated.response() != null) {
+                return new Templated(templated.template(), templated.entity(), req, templated.response());
+            }
+            return new Templated(templated.template(), templated.entity(), req, resp);
+        }
+        return entity;
     }
 
     @SuppressWarnings("rawtypes") //
@@ -218,6 +242,8 @@ public class RoutingServlet extends HttpServlet {
                 return bodyWriter.messageBodyWriter();
             }
         }
+
+        //Actually it's impossible, because exists ObjectMessageBodyWriter
         throw new ServerErrorException("MessageBodyWriter not found", Status.INTERNAL_SERVER_ERROR);
     }
 

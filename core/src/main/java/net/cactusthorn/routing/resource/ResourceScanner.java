@@ -17,8 +17,8 @@ import javax.ws.rs.Path;
 import javax.annotation.security.RolesAllowed;
 
 import net.cactusthorn.routing.annotation.Template;
+import net.cactusthorn.routing.body.writer.Templated;
 import net.cactusthorn.routing.RoutingConfig;
-import net.cactusthorn.routing.Templated;
 import net.cactusthorn.routing.invoke.MethodInvoker;
 import net.cactusthorn.routing.invoke.MethodInvoker.ReturnObjectInfo;
 import net.cactusthorn.routing.uri.PathTemplate;
@@ -63,7 +63,7 @@ public class ResourceScanner {
             if (result == null && template == null) {
                 return Response.status(Status.NO_CONTENT).build();
             }
-            Templated templated = new Templated(req, res, template, result);
+            Templated templated = new Templated(template, result, req, res);
             return Response.ok(templated).build();
         }
 

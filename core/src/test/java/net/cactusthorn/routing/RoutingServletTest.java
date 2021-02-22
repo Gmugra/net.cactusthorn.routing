@@ -2,13 +2,7 @@ package net.cactusthorn.routing;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-import java.io.BufferedWriter;
 import java.io.IOException;
-import java.io.OutputStream;
-import java.io.OutputStreamWriter;
-import java.io.Writer;
-import java.lang.annotation.Annotation;
-import java.lang.reflect.Type;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
@@ -32,11 +26,8 @@ import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
-import javax.ws.rs.WebApplicationException;
-import javax.ws.rs.core.Context;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
@@ -48,26 +39,9 @@ import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 
-import net.cactusthorn.routing.annotation.*;
-import net.cactusthorn.routing.body.writer.TemplatedMessageBodyWriter;
 import net.cactusthorn.routing.validate.ParametersValidator;
 
 public class RoutingServletTest {
-
-    @Produces(MediaType.TEXT_HTML) public static class TestTemplated implements TemplatedMessageBodyWriter {
-
-        @Override public boolean isWriteable(Class<?> type, Type genericType, Annotation[] annotations, MediaType mediaType) {
-            return true;
-        }
-
-        @Override public void writeTo(Templated templated, Class<?> type, Type genericType, Annotation[] annotations, MediaType mediaType,
-                MultivaluedMap<String, Object> httpHeaders, OutputStream entityStream) throws IOException, WebApplicationException {
-            String charset = mediaType.getParameters().get(MediaType.CHARSET_PARAMETER);
-            try (Writer writer = new BufferedWriter(new OutputStreamWriter(entityStream, charset))) {
-                writer.write(templated.entity().toString());
-            }
-        }
-    }
 
     public static final ParametersValidator TEST_VALIDATOR = (object, method, parameters) -> {
         throw new BadRequestException("abc");
@@ -158,17 +132,6 @@ public class RoutingServletTest {
             return Response.status(Status.SEE_OTHER).location(new URI("/xyz")).build();
         }
 
-        @POST @Path("api/template") //
-        public Response template(@Context HttpServletRequest request, @Context HttpServletResponse response) {
-            Templated t = new Templated(request, response, "t", "templated result");
-            return Response.ok(t).type(MediaType.TEXT_HTML_TYPE.withCharset("UTF-8")).build();
-        }
-
-        @POST @Path("api/template/A") @Template("/xyz.html") @Produces("text/html,*/*")//
-        public String templateA() {
-            return "some value";
-        }
-
         @GET @Path("api/wrong/produces") @Produces(MediaType.TEXT_HTML) //
         public Response wrongProduces() {
             return Response.ok("some value").type(MediaType.TEXT_PLAIN_TYPE).build();
@@ -221,41 +184,6 @@ public class RoutingServletTest {
         ArgumentCaptor<Integer> code = ArgumentCaptor.forClass(Integer.class);
         Mockito.verify(resp).sendError(code.capture(), Mockito.any());
         assertEquals(HttpServletResponse.SC_NOT_FOUND, code.getValue());
-    }
-
-    @Test //
-    public void templated() throws ServletException, IOException {
-        RoutingConfig c = RoutingConfig.builder(new EntryPoint1Provider()).addResource(EntryPoint1.class)
-                .addBodyWriter(new TestTemplated()).build();
-        RoutingServlet toSpy = new RoutingServlet(c);
-        RoutingServlet s = Mockito.spy(toSpy);
-        Mockito.doReturn(null).when(s).getServletContext();
-        s.init();
-
-        Mockito.when(req.getPathInfo()).thenReturn("/api/template");
-        Mockito.when(req.getMethod()).thenReturn(HttpMethod.POST);
-        s.service(req, resp);
-        assertEquals("templated result", outputStream.toString());
-    }
-
-    @Test //
-    public void templatedA() throws ServletException, IOException {
-        RoutingConfig c = RoutingConfig.builder(new EntryPoint1Provider()).addResource(EntryPoint1.class)
-                .addBodyWriter(new TestTemplated()).build();
-        RoutingServlet toSpy = new RoutingServlet(c);
-        RoutingServlet s = Mockito.spy(toSpy);
-        Mockito.doReturn(null).when(s).getServletContext();
-        s.init();
-
-        Mockito.when(req.getPathInfo()).thenReturn("/api/template/A");
-        Mockito.when(req.getMethod()).thenReturn(HttpMethod.POST);
-        s.service(req, resp);
-
-        ArgumentCaptor<String> contentType = ArgumentCaptor.forClass(String.class);
-        Mockito.verify(resp).setContentType(contentType.capture());
-        assertEquals("text/html", contentType.getValue());
-
-        assertEquals("some value", outputStream.toString());
     }
 
     @Test //
