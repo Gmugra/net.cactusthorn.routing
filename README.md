@@ -148,7 +148,7 @@ The type of the annotated parameter must either:
 1. `javax.annotation.security.RolesAllowed` method annotation
    1. to check entry point against request.isUserInRole(...)
    1. Implemetation example exists in **demo-jetty** module
-1. `@Template` annotation, `Templated`-class and `TemplatedMessageBodyWriter` to implement message body writers for html-template-engines (e.g. FreeMarker, Thymeleaf)
+1. `@Template` annotation, `Templated`-class and `TemplatedMessageBodyWriter` to implement message body writers for html-template-engines (e.g. [FreeMarker](https://freemarker.apache.org), [Thymeleaf](https://www.thymeleaf.org) )
    * Implemetation example is **thymeleaf** module
 1. Default parameter name
    1. Only when project compiled with `javac -parameters`
@@ -346,4 +346,4 @@ public class SimpleThymeleafBodyWriter implements net.cactusthorn.routing.body.w
 Public Releases can be also downloaded from [GitHub Releases](https://github.com/Gmugra/net.cactusthorn.routing/releases) or [GitHub Packages](https://github.com/Gmugra?tab=packages&repo_name=net.cactusthorn.routing)
 
 ## LICENSE
-net.cactusthorn.routing is released under the BSD license. See LICENSE file included for the details.
+net.cactusthorn.routing is released under the BSD 3-Clause license. See LICENSE file included for the details.
