@@ -3,11 +3,13 @@ package net.cactusthorn.routing.delegate;
 import javax.ws.rs.core.EntityTag;
 import javax.ws.rs.ext.RuntimeDelegate.HeaderDelegate;
 
+import net.cactusthorn.routing.util.Messages;
+
 public final class EntityTagHeaderDelegate implements HeaderDelegate<EntityTag> {
 
     @Override public EntityTag fromString(String str) {
         if (str == null) {
-            throw new IllegalArgumentException("value can not be null");
+            throw new IllegalArgumentException(Messages.isNull("str"));
         }
         String value = str.trim();
         boolean weak = value.startsWith("W/");
@@ -20,7 +22,7 @@ public final class EntityTagHeaderDelegate implements HeaderDelegate<EntityTag> 
 
     @Override public String toString(EntityTag entityTag) {
         if (entityTag == null) {
-            throw new IllegalArgumentException("entityTag can not be null");
+            throw new IllegalArgumentException(Messages.isNull("entityTag"));
         }
         String header = "";
         if (entityTag.isWeak()) {

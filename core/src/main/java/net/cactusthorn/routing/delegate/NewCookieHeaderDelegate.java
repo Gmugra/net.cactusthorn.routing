@@ -6,6 +6,7 @@ import javax.ws.rs.core.NewCookie;
 import javax.ws.rs.ext.RuntimeDelegate.HeaderDelegate;
 
 import net.cactusthorn.routing.util.Headers;
+import net.cactusthorn.routing.util.Messages;
 
 public final class NewCookieHeaderDelegate implements HeaderDelegate<NewCookie> {
 
@@ -14,7 +15,7 @@ public final class NewCookieHeaderDelegate implements HeaderDelegate<NewCookie> 
     @Override //
     public NewCookie fromString(String str) {
         if (str == null) {
-            throw new IllegalArgumentException("parameter can not be null");
+            throw new IllegalArgumentException(Messages.isNull("str"));
         }
 
         String[] parts = str.trim().split(";");
@@ -65,7 +66,7 @@ public final class NewCookieHeaderDelegate implements HeaderDelegate<NewCookie> 
     @Override //
     public String toString(NewCookie cookie) {
         if (cookie == null) {
-            throw new IllegalArgumentException("cookie can not be null");
+            throw new IllegalArgumentException(Messages.isNull("cookie"));
         }
 
         StringBuilder result = new StringBuilder(cookie.getName()).append('=');

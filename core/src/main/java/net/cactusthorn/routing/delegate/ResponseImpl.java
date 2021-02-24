@@ -30,6 +30,9 @@ import javax.ws.rs.core.Variant;
 import javax.ws.rs.ext.RuntimeDelegate;
 import javax.ws.rs.ext.RuntimeDelegate.HeaderDelegate;
 
+import net.cactusthorn.routing.util.Messages;
+import static net.cactusthorn.routing.util.Messages.Key.WRONG_HTTP_STATUS_CODE;
+
 public class ResponseImpl extends Response {
 
     private int status;
@@ -348,7 +351,7 @@ public class ResponseImpl extends Response {
 
         @Override public ResponseBuilder status(int sstatus) {
             if (sstatus < MIN_STATUS || sstatus > MAX_STATUS) {
-                throw new IllegalArgumentException("status code must be >= 100 and <= 599");
+                throw new IllegalArgumentException(Messages.msg(WRONG_HTTP_STATUS_CODE));
             }
             this.status = sstatus;
             return this;

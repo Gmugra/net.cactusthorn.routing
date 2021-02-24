@@ -90,6 +90,9 @@ public final class Headers {
         }
     };
 
+    private Headers() {
+    }
+
     public static final Comparator<MediaType> ACCEPT_COMPARATOR = new AcceptComparator();
 
     public static final Comparator<Language> ACCEPT_LANGUAGE_COMPARATOR = new AcceptLanguageComparator();
@@ -121,7 +124,7 @@ public final class Headers {
     public static String[] getSubParts(String str) {
         int valueStart = str.indexOf('=');
         if (valueStart == -1) {
-            throw new IllegalArgumentException("Wrong: '=' is missing");
+            throw new IllegalArgumentException(Messages.isMissing('='));
         }
         String value = str.substring(valueStart + 1).trim();
         if (value.charAt(0) == '"') {

@@ -19,6 +19,10 @@ import net.cactusthorn.routing.RoutingInitializationException;
 import net.cactusthorn.routing.convert.ConvertersHolder;
 import net.cactusthorn.routing.uri.PathTemplate.PathValues;
 
+import net.cactusthorn.routing.util.Messages;
+import static net.cactusthorn.routing.util.Messages.Key.WRONG_CONTENT_TYPE;
+import static net.cactusthorn.routing.util.Messages.Key.ERROR_AT_PARAMETER_POSITION;
+
 public class FormParamParameter extends ConvertableMethodParameter {
 
     // @formatter:off
@@ -27,15 +31,14 @@ public class FormParamParameter extends ConvertableMethodParameter {
                     new MediaType[] {MediaType.APPLICATION_FORM_URLENCODED_TYPE, MediaType.MULTIPART_FORM_DATA_TYPE})));
     // @formatter:off
 
-    private static final String WRONG_CONTENT_TYPE = "@FormParam can be used only with @Consumes content types: %s; Method: %s";
-
     public FormParamParameter(Method method, Parameter parameter, Type genericType, int position, ConvertersHolder convertersHolder,
             Set<MediaType> consumesMediaTypes) {
         super(method, parameter, genericType, position, convertersHolder);
 
         for (MediaType contentType : consumesMediaTypes) {
             if (!CONTENT_TYPE.contains(contentType)) {
-                throw new RoutingInitializationException(WRONG_CONTENT_TYPE, CONTENT_TYPE, method());
+                throw new RoutingInitializationException(
+                        Messages.msg(WRONG_CONTENT_TYPE, "@FormParam", CONTENT_TYPE, method()));
             }
         }
     }
@@ -57,8 +60,7 @@ public class FormParamParameter extends ConvertableMethodParameter {
             }
             return convert(req.getParameter(name()));
         } catch (Throwable e) {
-            throw new NotFoundException(
-                    String.format(CONVERSION_ERROR_MESSAGE, position(), type().getSimpleName(), e), e);
+            throw new NotFoundException(Messages.msg(ERROR_AT_PARAMETER_POSITION, position(), type().getSimpleName(), e), e);
         }
     }
 }

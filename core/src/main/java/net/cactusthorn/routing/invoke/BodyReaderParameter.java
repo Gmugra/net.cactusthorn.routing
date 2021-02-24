@@ -23,9 +23,11 @@ import net.cactusthorn.routing.RoutingInitializationException;
 import net.cactusthorn.routing.body.reader.BodyReader;
 import net.cactusthorn.routing.uri.PathTemplate.PathValues;
 
-public final class BodyReaderParameter extends MethodParameter {
+import net.cactusthorn.routing.util.Messages;
+import static net.cactusthorn.routing.util.Messages.Key.BODY_READER_NOT_FOUND;
+import static net.cactusthorn.routing.util.Messages.Key.SOMETHING_TOTALLY_WRONG;
 
-    protected static final String BODY_READER_NOT_FOUND = "body reader for media-type %s not found; Method: %s";
+public final class BodyReaderParameter extends MethodParameter {
 
     private Map<MediaType, MessageBodyReader<?>> messageBodyReaders = new HashMap<>();
 
@@ -41,7 +43,7 @@ public final class BodyReaderParameter extends MethodParameter {
                 }
             }
             if (!messageBodyReaders.containsKey(consumesMediaType)) {
-                throw new RoutingInitializationException(BODY_READER_NOT_FOUND, consumesMediaType, method());
+                throw new RoutingInitializationException(Messages.msg(BODY_READER_NOT_FOUND, consumesMediaType, method()));
             }
         }
     }
@@ -61,7 +63,7 @@ public final class BodyReaderParameter extends MethodParameter {
                 return entry.getValue();
             }
         }
-        throw new BadRequestException("Something totally wrong");
+        throw new BadRequestException(Messages.msg(SOMETHING_TOTALLY_WRONG));
     }
 
     private MediaType contentType(HttpServletRequest req) {

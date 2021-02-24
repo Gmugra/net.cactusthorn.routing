@@ -17,6 +17,7 @@ import net.cactusthorn.routing.body.writer.BodyWriter;
 import net.cactusthorn.routing.body.writer.ObjectMessageBodyWriter;
 import net.cactusthorn.routing.body.writer.StringMessageBodyWriter;
 import net.cactusthorn.routing.convert.ConvertersHolder;
+import net.cactusthorn.routing.util.Messages;
 import net.cactusthorn.routing.validate.ParametersValidator;
 
 import java.util.ArrayList;
@@ -138,7 +139,7 @@ public final class RoutingConfig {
 
         private Builder(ComponentProvider componentProvider) {
             if (componentProvider == null) {
-                throw new IllegalArgumentException("ComponentProvider can not be null");
+                throw new IllegalArgumentException(Messages.isNull("componentProvider"));
             }
             this.componentProvider = componentProvider;
 
@@ -156,7 +157,7 @@ public final class RoutingConfig {
 
         public Builder addParamConverterProvider(ParamConverterProvider provider) {
             if (provider == null) {
-                throw new IllegalArgumentException("ParamConverterProvider can not be null");
+                throw new IllegalArgumentException(Messages.isNull("provider"));
             }
             providers.add(provider);
             return this;
@@ -204,7 +205,7 @@ public final class RoutingConfig {
 
         public Builder setApplicationPath(String path) {
             if (path == null) {
-                throw new IllegalArgumentException("application-path can not be null");
+                throw new IllegalArgumentException(Messages.isNull("path"));
             }
             applicationPath = path;
             if (applicationPath.charAt(0) != '/') {

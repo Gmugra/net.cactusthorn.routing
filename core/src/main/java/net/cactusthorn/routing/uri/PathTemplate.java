@@ -6,6 +6,9 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import net.cactusthorn.routing.util.Messages;
+import static net.cactusthorn.routing.util.Messages.Key.ERROR_MULTIPLE_TEMPLATE_PARAM;
+
 public final class PathTemplate extends Template {
 
     public static final class PathValues {
@@ -61,8 +64,6 @@ public final class PathTemplate extends Template {
 
     private static final String SIMPLE_PATTERN = "([^/]+)";
 
-    private static final String MULTIPLE_PARAM = "Template contain parameter \"%s\" multiple times with different pattern";
-
     private int simpleParamsAmount;
     private int regExpParamsAmount;
 
@@ -79,7 +80,7 @@ public final class PathTemplate extends Template {
                 if (variable.pattern().isPresent()) {
                     String regExp = variable.pattern().get();
                     if (paramsBuf.containsKey(variable.name()) && !regExp.equals(paramsBuf.get(variable.name()))) {
-                        throw new IllegalArgumentException(String.format(MULTIPLE_PARAM, variable.name()));
+                        throw new IllegalArgumentException(Messages.msg(ERROR_MULTIPLE_TEMPLATE_PARAM, variable.name()));
                     }
                     regExpParamsAmount++;
                     if (!paramsBuf.containsKey(variable.name())) {

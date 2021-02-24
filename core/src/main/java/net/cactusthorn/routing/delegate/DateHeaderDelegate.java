@@ -12,6 +12,8 @@ import java.util.Locale;
 
 import javax.ws.rs.ext.RuntimeDelegate.HeaderDelegate;
 
+import net.cactusthorn.routing.util.Messages;
+
 public final class DateHeaderDelegate implements HeaderDelegate<Date> {
 
     public static final String RFC_1123_FORMAT = "EEE, dd MMM yyyy HH:mm:ss zzz";
@@ -46,7 +48,7 @@ public final class DateHeaderDelegate implements HeaderDelegate<Date> {
     @Override //
     public Date fromString(String value) {
         if (value == null) {
-            throw new IllegalArgumentException("value can not be null");
+            throw new IllegalArgumentException(Messages.isNull("value"));
         }
         String tmp = value.trim();
         try {
@@ -59,7 +61,7 @@ public final class DateHeaderDelegate implements HeaderDelegate<Date> {
     @Override //
     public String toString(Date date) {
         if (date == null) {
-            throw new IllegalArgumentException("date can not be null");
+            throw new IllegalArgumentException(Messages.isNull("date"));
         }
         return date.toInstant().atZone(GMT).format(FORMATTER);
     }

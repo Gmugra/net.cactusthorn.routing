@@ -7,6 +7,9 @@ import javax.ws.rs.Path;
 import net.cactusthorn.routing.RoutingInitializationException;
 import net.cactusthorn.routing.uri.PathTemplate;
 
+import net.cactusthorn.routing.util.Messages;
+import static net.cactusthorn.routing.util.Messages.Key.PATH_TEMPLATE_INCORRECT;
+
 public final class PathTemplateParser {
 
     PathTemplate create(Method method, String classPath) {
@@ -14,7 +17,7 @@ public final class PathTemplateParser {
             String path = classPath.substring(0, classPath.length() - 1) + prepareMethodPath(method.getAnnotation(Path.class));
             return new PathTemplate(path);
         } catch (IllegalArgumentException e) {
-            throw new RoutingInitializationException("Path template is incorrect %s", e, method);
+            throw new RoutingInitializationException(Messages.msg(PATH_TEMPLATE_INCORRECT, method), e);
         }
     }
 

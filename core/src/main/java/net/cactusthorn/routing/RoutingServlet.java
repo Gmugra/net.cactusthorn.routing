@@ -16,6 +16,7 @@ import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
+import static javax.ws.rs.core.Response.Status.*;
 import javax.ws.rs.core.Response.StatusType;
 import javax.ws.rs.ext.MessageBodyWriter;
 
@@ -29,6 +30,11 @@ import net.cactusthorn.routing.resource.ResourceScanner.Resource;
 import net.cactusthorn.routing.uri.PathTemplate.PathValues;
 import net.cactusthorn.routing.util.Headers;
 import net.cactusthorn.routing.util.Http;
+
+import net.cactusthorn.routing.util.Messages;
+import static net.cactusthorn.routing.util.Messages.Key.MESSAGE_BODY_WRITER_NOT_FOUND;
+import static net.cactusthorn.routing.util.Messages.Key.INFO_PRODUCER_PROCESSING_DONE;
+import static net.cactusthorn.routing.util.Messages.Key.INFO_PATH_INFO;
 
 public class RoutingServlet extends HttpServlet {
 
@@ -111,7 +117,7 @@ public class RoutingServlet extends HttpServlet {
         }
         String path = getPath(contentType, req);
         if (resources.isEmpty()) {
-            resp.sendError(HttpServletResponse.SC_NOT_FOUND, "Not Found");
+            resp.sendError(NOT_FOUND.getStatusCode(), NOT_FOUND.getReasonPhrase());
             return;
         }
         List<MediaType> accept = Headers.parseAccept(req.getHeader(HttpHeaders.ACCEPT));
@@ -121,7 +127,7 @@ public class RoutingServlet extends HttpServlet {
             PathValues pathValues = resource.parse(path);
             if (pathValues != null) {
                 if (!resource.matchRolesAllowed(req)) {
-                    resp.sendError(HttpServletResponse.SC_FORBIDDEN, "Forbidden");
+                    resp.sendError(FORBIDDEN.getStatusCode(), FORBIDDEN.getReasonPhrase());
                     return;
                 }
                 try {
@@ -135,28 +141,29 @@ public class RoutingServlet extends HttpServlet {
                         continue;
                     }
                     Response result = resource.invoke(req, resp, servletContext, pathValues);
-                    //It could be that in resource method Response object was created manually and media-type was set,
-                    //and this media-type do not match request Accept-header.
-                    //In this case -> response error at ones.
+                    // It could be that in resource method Response object was created manually and
+                    // media-type was set,
+                    // and this media-type do not match request Accept-header.
+                    // In this case -> response error at ones.
                     if (!matchAccept(accept, result)) {
-                        resp.sendError(HttpServletResponse.SC_NOT_ACCEPTABLE, "Not acceptable");
+                        resp.sendError(NOT_ACCEPTABLE.getStatusCode(), NOT_ACCEPTABLE.getReasonPhrase());
                         return;
                     }
                     produce(req, resp, resource, result, producesMediaType.get());
                 } catch (WebApplicationException wae) {
                     resp.sendError(wae.getResponse().getStatus(), wae.getMessage());
                 } catch (Exception e) {
-                    resp.sendError(HttpServletResponse.SC_BAD_REQUEST, e.getMessage());
+                    resp.sendError(BAD_REQUEST.getStatusCode(), e.getMessage());
                 }
                 return;
             }
         }
         if (matchContentTypeFail) {
-            resp.sendError(HttpServletResponse.SC_UNSUPPORTED_MEDIA_TYPE, "Unsupported Media Type");
+            resp.sendError(UNSUPPORTED_MEDIA_TYPE.getStatusCode(), UNSUPPORTED_MEDIA_TYPE.getReasonPhrase());
         } else if (matchAcceptFail) {
-            resp.sendError(HttpServletResponse.SC_NOT_ACCEPTABLE, "Not acceptable");
+            resp.sendError(NOT_ACCEPTABLE.getStatusCode(), NOT_ACCEPTABLE.getReasonPhrase());
         } else {
-            resp.sendError(HttpServletResponse.SC_NOT_FOUND, "Not Found");
+            resp.sendError(NOT_FOUND.getStatusCode(), NOT_FOUND.getReasonPhrase());
         }
     }
 
@@ -176,15 +183,16 @@ public class RoutingServlet extends HttpServlet {
         } else if (!"/".equals(path) && path.charAt(path.length() - 1) != '/') {
             path += '/';
         }
-        LOG.log(Level.FINE, "{0}({1} {2}) PathInfo -> original: \"{3}\", corrected: \"{4}\"",
-                new Object[] {req.getMethod(), contentType, req.getCharacterEncoding(), original, path});
+        if (LOG.isLoggable(Level.FINE)) {
+            LOG.log(Level.FINE, Messages.msg(INFO_PATH_INFO, req.getMethod(), contentType, req.getCharacterEncoding(), original, path));
+        }
         return path;
     }
 
     private static final Http HTTP = new Http();
 
-    private void produce(HttpServletRequest req, HttpServletResponse resp, Resource resource, Response result,
-            MediaType producesMediaType) throws IOException {
+    private void produce(HttpServletRequest req, HttpServletResponse resp, Resource resource, Response result, MediaType producesMediaType)
+            throws IOException {
 
         StatusType status = result.getStatusInfo();
         resp.setStatus(status.getStatusCode());
@@ -212,7 +220,9 @@ public class RoutingServlet extends HttpServlet {
         writer.writeTo(entity, info.type(), info.genericType(), info.annotations(), responseMediaType, result.getHeaders(),
                 resp.getOutputStream());
 
-        LOG.log(Level.FINE, "Producer processing done for Content-Type: {0}", new Object[] {responseMediaType});
+        if (LOG.isLoggable(Level.FINE)) {
+            LOG.log(Level.FINE, Messages.msg(INFO_PRODUCER_PROCESSING_DONE, responseMediaType));
+        }
     }
 
     private Object prepareEntity(HttpServletRequest req, HttpServletResponse resp, Object entity) {
@@ -243,8 +253,8 @@ public class RoutingServlet extends HttpServlet {
             }
         }
 
-        //Actually it's impossible, because exists ObjectMessageBodyWriter
-        throw new ServerErrorException("MessageBodyWriter not found", Status.INTERNAL_SERVER_ERROR);
+        // Actually it's impossible, because exists ObjectMessageBodyWriter
+        throw new ServerErrorException(Messages.msg(MESSAGE_BODY_WRITER_NOT_FOUND), INTERNAL_SERVER_ERROR);
     }
 
     private boolean matchAccept(List<MediaType> accept, Response result) {

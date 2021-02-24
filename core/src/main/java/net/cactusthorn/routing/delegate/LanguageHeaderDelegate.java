@@ -6,13 +6,14 @@ import javax.ws.rs.ext.RuntimeDelegate.HeaderDelegate;
 
 import net.cactusthorn.routing.util.Headers;
 import net.cactusthorn.routing.util.Language;
+import net.cactusthorn.routing.util.Messages;
 
 public class LanguageHeaderDelegate implements HeaderDelegate<Language> {
 
     @Override //
     public Language fromString(String languageTag) {
         if (languageTag == null) {
-            throw new IllegalArgumentException("languageTag can not be null");
+            throw new IllegalArgumentException(Messages.isNull("languageTag"));
         }
         String[] parts = languageTag.split(";");
         String localeStr = parts[0].trim();
@@ -35,7 +36,7 @@ public class LanguageHeaderDelegate implements HeaderDelegate<Language> {
     @Override //
     public String toString(Language language) {
         if (language == null) {
-            throw new IllegalArgumentException("language can not be null");
+            throw new IllegalArgumentException(Messages.isNull("language"));
         }
         return language.getLocale().toLanguageTag() + ";q=" + language.getQ();
     }

@@ -20,8 +20,7 @@ public class UnmodifiableMultivaluedMapTest {
     static List<String> LIST = Arrays.asList("L1", "L2");
     static UnmodifiableMultivaluedMap<String, String> U;
 
-    @BeforeAll
-    public static void setUp() {
+    @BeforeAll public static void setUp() {
         MAP.add("A", "b");
         MAP.addFirst("A", "c");
         MAP.add("A", "f");
@@ -30,8 +29,7 @@ public class UnmodifiableMultivaluedMapTest {
         U = new UnmodifiableMultivaluedMap<>(MAP);
     }
 
-    @Test
-    public void validate() {
+    @Test public void validate() {
         assertEquals("c", U.getFirst("A"));
         assertTrue(U.equalsIgnoreValueOrder(MAP));
         assertEquals(3, U.size());
@@ -45,8 +43,7 @@ public class UnmodifiableMultivaluedMapTest {
         assertEquals(3, U.entrySet().size());
     }
 
-    @Test
-    public void modifySimple() {
+    @Test public void modifySimple() {
 
         // MultivaluedMap
         assertThrows(UnsupportedOperationException.class, () -> U.putSingle("z", "y"));
@@ -62,8 +59,7 @@ public class UnmodifiableMultivaluedMapTest {
         assertThrows(UnsupportedOperationException.class, () -> U.clear());
     }
 
-    @Test
-    public void modifySubObjects() {
+    @Test public void modifySubObjects() {
 
         List<String> values = U.get("A");
         assertThrows(UnsupportedOperationException.class, () -> values.add("W"));
@@ -75,8 +71,7 @@ public class UnmodifiableMultivaluedMapTest {
         assertThrows(UnsupportedOperationException.class, () -> allValues.add(LIST));
     }
 
-    @Test
-    public void modifyEntrySet() {
+    @Test public void modifyEntrySet() {
 
         Set<Map.Entry<String, List<String>>> entries = U.entrySet();
         Map.Entry<String, List<String>> entry = entries.iterator().next();
@@ -86,11 +81,18 @@ public class UnmodifiableMultivaluedMapTest {
         assertThrows(UnsupportedOperationException.class, () -> entries.add(null));
         assertThrows(UnsupportedOperationException.class, () -> entry.setValue(LIST));
     }
-    
-    @Test
-    public void object() {
+
+    @Test public void object() {
         assertEquals(MAP.toString(), U.toString());
         assertTrue(U.equals(MAP));
         assertEquals(MAP.hashCode(), U.hashCode());
+    }
+
+    @Test public void entryValueNull() {
+        CaseInsensitiveMultivaluedMap<String> map = new CaseInsensitiveMultivaluedMap<>();
+        map.put("AA", null);
+        UnmodifiableMultivaluedMap<String,String> umap = new UnmodifiableMultivaluedMap<>(map);
+        Map.Entry<String,List<String>> entry = umap.entrySet().iterator().next();
+        assertNull(entry.getValue());
     }
 }

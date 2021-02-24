@@ -27,10 +27,14 @@ import net.cactusthorn.routing.RoutingConfig;
 import net.cactusthorn.routing.RoutingInitializationException;
 import net.cactusthorn.routing.annotation.FormPart;
 
-class MethodParameterFactory {
+import net.cactusthorn.routing.util.Messages;
+import static net.cactusthorn.routing.util.Messages.Key.CONTEXT_NOT_SUPPORTED;
+import static net.cactusthorn.routing.util.Messages.Key.ONLY_POST_PUT_PATCH;
 
-    private static final String ONLY_POST_PUT_PATCH = "entity parameter supported only for POST, PUT and PATCH; Method: %s";
-    private static final String CONTEXT_NOT_SUPPORTED = "@Context is not supporting %s; Method: %s";
+final class MethodParameterFactory {
+
+    private MethodParameterFactory() {
+    }
 
     static List<MethodParameter> create(Method method, RoutingConfig routingConfig, Set<MediaType> consumesMediaTypes) {
         List<MethodParameter> parameters = new ArrayList<>();
@@ -79,12 +83,12 @@ class MethodParameterFactory {
             if (HttpHeaders.class == parameter.getType()) {
                 return new HttpHeadersParameter(method, parameter, genericType, position);
             }
-            throw new RoutingInitializationException(CONTEXT_NOT_SUPPORTED, parameter.getType(), method);
+            throw new RoutingInitializationException(Messages.msg(CONTEXT_NOT_SUPPORTED, parameter.getType(), method));
         }
         if (method.getAnnotation(POST.class) != null || method.getAnnotation(PUT.class) != null
                 || method.getAnnotation(PATCH.class) != null) {
             return new BodyReaderParameter(method, parameter, genericType, position, consumesMediaTypes, routingConfig.bodyReaders());
         }
-        throw new RoutingInitializationException(ONLY_POST_PUT_PATCH, method);
+        throw new RoutingInitializationException(Messages.msg(ONLY_POST_PUT_PATCH, method));
     }
 }

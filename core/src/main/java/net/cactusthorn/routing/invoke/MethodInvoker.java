@@ -23,6 +23,10 @@ import net.cactusthorn.routing.RoutingConfig;
 import net.cactusthorn.routing.body.writer.Templated;
 import net.cactusthorn.routing.uri.PathTemplate.PathValues;
 
+import net.cactusthorn.routing.util.Messages;
+import static net.cactusthorn.routing.util.Messages.Key.ERROR_AT_PARAMETER_POSITION;
+import static net.cactusthorn.routing.util.Messages.Key.ERROR_METHOD_INVOCATION;
+
 public final class MethodInvoker {
 
     private static final Logger LOG = Logger.getLogger(MethodInvoker.class.getName());
@@ -90,8 +94,6 @@ public final class MethodInvoker {
         parameters = MethodParameterFactory.create(method, routingConfig, consumesMediaTypes);
     }
 
-    private static final String MESSAGE = "Parameter position: %s; Parameter type: %s; %s";
-
     public ReturnObjectInfo returnObjectInfo() {
         return returnObjectInfo;
     }
@@ -109,7 +111,8 @@ public final class MethodInvoker {
             } catch (ClientErrorException e) {
                 throw e;
             } catch (Exception e) {
-                throw new BadRequestException(String.format(MESSAGE, i + 1, parameter.getClass().getSimpleName(), e), e);
+                throw new BadRequestException(
+                        Messages.msg(ERROR_AT_PARAMETER_POSITION, i + 1, parameter.getClass().getSimpleName(), e), e);
             }
         }
 
@@ -120,8 +123,9 @@ public final class MethodInvoker {
         try {
             return method.invoke(object, values);
         } catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
-            LOG.log(Level.SEVERE, "The problem with method invocation", e);
-            throw new ServerErrorException("The problem with method invocation", Status.INTERNAL_SERVER_ERROR, e);
+            String message = Messages.msg(ERROR_METHOD_INVOCATION);
+            LOG.log(Level.SEVERE, message, e);
+            throw new ServerErrorException(message, Status.INTERNAL_SERVER_ERROR, e);
         }
     }
 }

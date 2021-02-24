@@ -19,6 +19,7 @@ import javax.ws.rs.core.Variant.VariantListBuilder;
 import javax.ws.rs.ext.RuntimeDelegate;
 
 import net.cactusthorn.routing.util.Language;
+import net.cactusthorn.routing.util.Messages;
 
 public class RuntimeDelegateImpl extends RuntimeDelegate {
 
@@ -55,13 +56,13 @@ public class RuntimeDelegateImpl extends RuntimeDelegate {
     @Override //
     public <T> T createEndpoint(Application application, Class<T> endpointType)
             throws IllegalArgumentException, UnsupportedOperationException {
-        throw new UnsupportedOperationException("createEndpoint() is not supported");
+        throw new UnsupportedOperationException();
     }
 
     @Override @SuppressWarnings("unchecked") //
     public <T> HeaderDelegate<T> createHeaderDelegate(Class<T> type) throws IllegalArgumentException {
         if (type == null) {
-            throw new IllegalArgumentException("type can not be null");
+            throw new IllegalArgumentException(Messages.isNull(type));
         }
         return (HeaderDelegate<T>) headerDelegates.get(type);
     }

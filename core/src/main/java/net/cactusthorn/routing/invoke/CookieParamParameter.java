@@ -20,6 +20,9 @@ import net.cactusthorn.routing.convert.ConvertersHolder;
 import net.cactusthorn.routing.uri.PathTemplate.PathValues;
 import net.cactusthorn.routing.util.Headers;
 
+import net.cactusthorn.routing.util.Messages;
+import static net.cactusthorn.routing.util.Messages.Key.ERROR_AT_PARAMETER_POSITION;
+
 public class CookieParamParameter extends ConvertableMethodParameter {
 
     private static final Converter<Cookie> COOKIE_CONVERTER = (type, genericType, annotations, value) -> {
@@ -87,7 +90,7 @@ public class CookieParamParameter extends ConvertableMethodParameter {
             }
             return convert(cookies.isEmpty() ? null : cookies.get(0).toString());
         } catch (Throwable e) {
-            throw new BadRequestException(String.format(CONVERSION_ERROR_MESSAGE, position(), type().getSimpleName(), e), e);
+            throw new BadRequestException(Messages.msg(ERROR_AT_PARAMETER_POSITION, position(), type().getSimpleName(), e), e);
         }
     }
 

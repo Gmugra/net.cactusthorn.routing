@@ -21,12 +21,10 @@ import net.cactusthorn.routing.RoutingInitializationException;
 import net.cactusthorn.routing.convert.Converter;
 import net.cactusthorn.routing.convert.ConvertersHolder;
 
-public abstract class ConvertableMethodParameter extends MethodParameter {
+import net.cactusthorn.routing.util.Messages;
+import static net.cactusthorn.routing.util.Messages.Key.UNKNOWN_CONVERTER;
 
-    protected static final String CANT_BE_COLLECTION_MESSAGE = "%s can't be collection; Method: %s";
-    protected static final String UNKNOWN_CONVERTER_MESSAGE = "Converter for %s unknown; Method: %s";
-    protected static final String CONVERSION_ERROR_MESSAGE = "Parameter position: %s; Parameter type: %s; %s";
-    protected static final String WRONG_DEFAULT_MESSAGE = "Wrong Default Value; Method: %s";
+public abstract class ConvertableMethodParameter extends MethodParameter {
 
     private Object defaultObject;
 
@@ -78,7 +76,7 @@ public abstract class ConvertableMethodParameter extends MethodParameter {
         if (optional.isPresent()) {
             return optional.get();
         } else {
-            throw new RoutingInitializationException(UNKNOWN_CONVERTER_MESSAGE, type(), method());
+            throw new RoutingInitializationException(Messages.msg(UNKNOWN_CONVERTER, type(), method()));
         }
     }
 
@@ -92,7 +90,7 @@ public abstract class ConvertableMethodParameter extends MethodParameter {
             }
             return converter.convert(converterType(), converterGenericType(), annotations(), defautlValue);
         } catch (Throwable e) {
-            throw new RoutingInitializationException(WRONG_DEFAULT_MESSAGE, e, method());
+            throw new RoutingInitializationException(Messages.msg(UNKNOWN_CONVERTER, method()), e);
         }
     }
 

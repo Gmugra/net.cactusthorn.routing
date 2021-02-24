@@ -14,6 +14,9 @@ import net.cactusthorn.routing.uri.Template;
 import net.cactusthorn.routing.uri.UriComponentEncoder;
 import net.cactusthorn.routing.uri.UriTemplate;
 
+import net.cactusthorn.routing.util.Messages;
+import static net.cactusthorn.routing.util.Messages.Key.*;
+
 public class UriBuilderImpl extends UriBuilder implements Cloneable {
 
     private boolean opaque;
@@ -51,7 +54,7 @@ public class UriBuilderImpl extends UriBuilder implements Cloneable {
      */
     @Override public UriBuilder uri(URI uri) {
         if (uri == null) {
-            throw new IllegalArgumentException("uri is null");
+            throw new IllegalArgumentException(Messages.isNull("uri"));
         }
         if (uri.getScheme() != null) {
             scheme = uri.getScheme();
@@ -107,7 +110,7 @@ public class UriBuilderImpl extends UriBuilder implements Cloneable {
      */
     @Override public UriBuilder uri(String uriTemplate) {
         if (uriTemplate == null) {
-            throw new IllegalArgumentException("uriTemplate is null");
+            throw new IllegalArgumentException(Messages.isNull("uriTemplate"));
         }
         UriTemplate template = new UriTemplate(uriTemplate);
         opaque = template.opaque();
@@ -138,11 +141,11 @@ public class UriBuilderImpl extends UriBuilder implements Cloneable {
      */
     @Override public UriBuilder schemeSpecificPart(String ssp) {
         if (ssp == null) {
-            throw new IllegalArgumentException("ssp is null");
+            throw new IllegalArgumentException(Messages.isNull("ssp"));
         }
         UriTemplate template = new UriTemplate(scheme != null ? scheme + ':' + ssp : ssp);
         if (template.fragment() != null) {
-            throw new IllegalArgumentException("schemeSpecificPart must not contain fragment");
+            throw new IllegalArgumentException(Messages.msg(SSP_FRAGMENT));
         }
         opaque = template.opaque();
         if (opaque) {
@@ -167,7 +170,7 @@ public class UriBuilderImpl extends UriBuilder implements Cloneable {
 
     @Override public UriBuilder userInfo(String ui) {
         if (opaque) {
-            throw new IllegalArgumentException("Can't set userInfo for opaque URI");
+            throw new IllegalArgumentException(Messages.msg(SET_OPAQUE_URI, "userInfo"));
         }
         if (ui == null) {
             userInfo = null;
@@ -182,7 +185,7 @@ public class UriBuilderImpl extends UriBuilder implements Cloneable {
 
     @Override public UriBuilder host(String h) {
         if (opaque) {
-            throw new IllegalArgumentException("Can't set host for opaque URI");
+            throw new IllegalArgumentException(Messages.msg(SET_OPAQUE_URI, "host"));
         }
         if (h == null) {
             host = null;
@@ -197,10 +200,10 @@ public class UriBuilderImpl extends UriBuilder implements Cloneable {
 
     @Override public UriBuilder port(int p) {
         if (opaque) {
-            throw new IllegalArgumentException("Can't set port for opaque URI");
+            throw new IllegalArgumentException(Messages.msg(SET_OPAQUE_URI, "port"));
         }
         if (p < -1) {
-            throw new IllegalArgumentException("Invalid port");
+            throw new IllegalArgumentException(Messages.msg(INVALID_PORT));
         }
         if (p != -1) {
             authority = null;
@@ -213,7 +216,7 @@ public class UriBuilderImpl extends UriBuilder implements Cloneable {
 
     @Override public UriBuilder replacePath(String p) {
         if (opaque) {
-            throw new IllegalArgumentException("Can't replace Path for opaque URI");
+            throw new IllegalArgumentException(Messages.msg(REPLACE_OPAQUE_URI, "Path"));
         }
         if (p == null) {
             path = null;
@@ -225,37 +228,37 @@ public class UriBuilderImpl extends UriBuilder implements Cloneable {
 
     @Override public UriBuilder path(String p) {
         if (opaque) {
-            throw new IllegalArgumentException("Can't append Path for opaque URI");
+            throw new IllegalArgumentException(Messages.msg(APPEND_OPAQUE_URI, "Path"));
         }
         if (p == null) {
-            throw new IllegalArgumentException("path is null");
+            throw new IllegalArgumentException(Messages.isNull("Path"));
         }
         return appendPath(UriComponentEncoder.PATH.encode(p));
     }
 
     @Override public UriBuilder path(@SuppressWarnings("rawtypes") Class resource) {
         if (opaque) {
-            throw new IllegalArgumentException("Can't append Path for opaque URI");
+            throw new IllegalArgumentException(Messages.msg(APPEND_OPAQUE_URI, "Path"));
         }
         if (resource == null) {
-            throw new IllegalArgumentException("resource is null");
+            throw new IllegalArgumentException(Messages.isNull("resource"));
         }
         @SuppressWarnings("unchecked") Path annotation = (Path) resource.getAnnotation(Path.class);
         if (annotation == null) {
-            throw new IllegalArgumentException("resource do not has @Path annotation");
+            throw new IllegalArgumentException(Messages.msg(NOT_HAS_PATH_ANNOTATION, "resource"));
         }
         return appendPath(UriComponentEncoder.PATH.encode(annotation.value()));
     }
 
     @Override public UriBuilder path(@SuppressWarnings("rawtypes") Class resource, String method) {
         if (opaque) {
-            throw new IllegalArgumentException("Can't append Path for opaque URI");
+            throw new IllegalArgumentException(Messages.msg(APPEND_OPAQUE_URI, "Path"));
         }
         if (resource == null) {
-            throw new IllegalArgumentException("resource is null");
+            throw new IllegalArgumentException(Messages.isNull("resource"));
         }
         if (method == null) {
-            throw new IllegalArgumentException("method is null");
+            throw new IllegalArgumentException(Messages.isNull("method"));
         }
         String pathValue = null;
         for (Method m : resource.getMethods()) {
@@ -263,42 +266,42 @@ public class UriBuilderImpl extends UriBuilder implements Cloneable {
                 Path annotation = (Path) m.getAnnotation(Path.class);
                 if (annotation != null) {
                     if (pathValue != null) {
-                        throw new IllegalArgumentException("there is more than one variant of the method");
+                        throw new IllegalArgumentException(Messages.msg(METHOD_MORE_THAN_ONE));
                     }
                     pathValue = annotation.value();
                 }
             }
         }
         if (pathValue == null) {
-            throw new IllegalArgumentException("method not exist");
+            throw new IllegalArgumentException(Messages.notExist("method"));
         }
         return appendPath(UriComponentEncoder.PATH.encode(pathValue));
     }
 
     @Override public UriBuilder path(Method method) {
         if (opaque) {
-            throw new IllegalArgumentException("Can't append Path for opaque URI");
+            throw new IllegalArgumentException(Messages.msg(APPEND_OPAQUE_URI, "Path"));
         }
         if (method == null) {
-            throw new IllegalArgumentException("method is null");
+            throw new IllegalArgumentException(Messages.isNull("method"));
         }
         Path annotation = (Path) method.getAnnotation(Path.class);
         if (annotation == null) {
-            throw new IllegalArgumentException("method do not has @Path annotation");
+            throw new IllegalArgumentException(Messages.msg(NOT_HAS_PATH_ANNOTATION, "method"));
         }
         return appendPath(UriComponentEncoder.PATH.encode(annotation.value()));
     }
 
     @Override public UriBuilder segment(String... segments) {
         if (opaque) {
-            throw new IllegalArgumentException("Can't append Path-segments for opaque URI");
+            throw new IllegalArgumentException(Messages.msg(APPEND_OPAQUE_URI, "Path-segments"));
         }
         if (segments == null) {
-            throw new IllegalArgumentException("segments are null");
+            throw new IllegalArgumentException(Messages.isNull("segments"));
         }
         for (String segment : segments) {
             if (segment == null) {
-                throw new IllegalArgumentException("segment is null");
+                throw new IllegalArgumentException(Messages.isNull("segment"));
             }
             appendPath(UriComponentEncoder.PATH_SEGMENT.encode(segment));
         }
@@ -319,7 +322,7 @@ public class UriBuilderImpl extends UriBuilder implements Cloneable {
 
     @Override public UriBuilder replaceQuery(String q) {
         if (opaque) {
-            throw new IllegalArgumentException("Can't replace Query for opaque URI");
+            throw new IllegalArgumentException(Messages.msg(REPLACE_OPAQUE_URI, "Query"));
         }
         if (q == null) {
             query = null;
@@ -331,13 +334,13 @@ public class UriBuilderImpl extends UriBuilder implements Cloneable {
 
     @Override public UriBuilder queryParam(String name, Object... values) {
         if (opaque) {
-            throw new IllegalArgumentException("Can't append Query param for opaque URI");
+            throw new IllegalArgumentException(Messages.msg(APPEND_OPAQUE_URI, "Query"));
         }
         if (name == null) {
-            throw new IllegalArgumentException("name is null");
+            throw new IllegalArgumentException(Messages.isNull("name"));
         }
         if (values == null) {
-            throw new IllegalArgumentException("values is null");
+            throw new IllegalArgumentException(Messages.isNull("value"));
         }
         if (values.length == 0) {
             return this;
@@ -349,10 +352,10 @@ public class UriBuilderImpl extends UriBuilder implements Cloneable {
 
     @Override public UriBuilder replaceQueryParam(String name, Object... values) {
         if (opaque) {
-            throw new IllegalArgumentException("Can't replace Query param for opaque URI");
+            throw new IllegalArgumentException(Messages.msg(REPLACE_OPAQUE_URI, "Query param"));
         }
         if (name == null) {
-            throw new IllegalArgumentException("name is null");
+            throw new IllegalArgumentException(Messages.isNull("name"));
         }
         String encodedName = new Template(UriComponentEncoder.QUERY_PARAM.encode(name)).template();
         removeQueryParam(encodedName);
@@ -386,7 +389,7 @@ public class UriBuilderImpl extends UriBuilder implements Cloneable {
 
     @Override public UriBuilder resolveTemplates(Map<String, Object> templateValues) {
         if (templateValues == null) {
-            throw new IllegalArgumentException("templateValues is null");
+            throw new IllegalArgumentException(Messages.isNull("templateValues"));
         }
         return resolve(templateValues, false, false);
     }
@@ -394,21 +397,21 @@ public class UriBuilderImpl extends UriBuilder implements Cloneable {
     @Override public UriBuilder resolveTemplates(Map<String, Object> templateValues, boolean encodeSlashInPath)
             throws IllegalArgumentException {
         if (templateValues == null) {
-            throw new IllegalArgumentException("templateValues is null");
+            throw new IllegalArgumentException(Messages.isNull("templateValues"));
         }
         return resolve(templateValues, encodeSlashInPath, false);
     }
 
     @Override public UriBuilder resolveTemplatesFromEncoded(Map<String, Object> templateValues) {
         if (templateValues == null) {
-            throw new IllegalArgumentException("templateValues is null");
+            throw new IllegalArgumentException(Messages.isNull("templateValues"));
         }
         return resolve(templateValues, false, true);
     }
 
     @Override @SuppressWarnings("unchecked") public URI buildFromMap(Map<String, ?> values) {
         if (values == null) {
-            throw new IllegalArgumentException("values is null");
+            throw new IllegalArgumentException(Messages.isNull("values"));
         }
         try {
             UriBuilder clonned = this.clone();
@@ -422,7 +425,7 @@ public class UriBuilderImpl extends UriBuilder implements Cloneable {
     @Override @SuppressWarnings("unchecked") public URI buildFromMap(Map<String, ?> values, boolean encodeSlashInPath)
             throws IllegalArgumentException, UriBuilderException {
         if (values == null) {
-            throw new IllegalArgumentException("values is null");
+            throw new IllegalArgumentException(Messages.isNull("values"));
         }
         try {
             UriBuilder clonned = this.clone();
@@ -436,7 +439,7 @@ public class UriBuilderImpl extends UriBuilder implements Cloneable {
     @Override @SuppressWarnings("unchecked") public URI buildFromEncodedMap(Map<String, ?> values)
             throws IllegalArgumentException, UriBuilderException {
         if (values == null) {
-            throw new IllegalArgumentException("values is null");
+            throw new IllegalArgumentException(Messages.isNull("values"));
         }
         try {
             UriBuilder clonned = this.clone();
@@ -531,10 +534,10 @@ public class UriBuilderImpl extends UriBuilder implements Cloneable {
             }
             position++;
             if (position >= values.length) {
-                throw new IllegalArgumentException("Not enough values  for template variables");
+                throw new IllegalArgumentException(Messages.msg(NOT_ENOUGH_VALUES));
             }
             if (values[position] == null) {
-                throw new IllegalArgumentException("Null value is not allowed");
+                throw new IllegalArgumentException(Messages.msg(NULL_VALUE_NOT_ALLOWED));
             }
             variables.put(var.name(), values[position]);
         }
@@ -550,10 +553,10 @@ public class UriBuilderImpl extends UriBuilder implements Cloneable {
 
     private UriBuilder resolve(String name, Object value, boolean encodeSlashInPath, boolean fromEncoded) {
         if (name == null) {
-            throw new IllegalArgumentException("template variable name can't be null");
+            throw new IllegalArgumentException(Messages.isNull("template variable name"));
         }
         if (value == null) {
-            throw new IllegalArgumentException("template variable value can't be null");
+            throw new IllegalArgumentException(Messages.isNull("template variable value"));
         }
         String variable = '{' + name + '}';
         if (scheme != null) {

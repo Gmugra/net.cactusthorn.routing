@@ -9,6 +9,9 @@ import java.util.Iterator;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Variant;
 
+import net.cactusthorn.routing.util.Messages;
+import static net.cactusthorn.routing.util.Messages.Key.VARIANT_LIST_ADD;
+
 public class VariantListBuilderImpl extends Variant.VariantListBuilder {
 
     private final List<Locale> llanguages = new ArrayList<>();
@@ -25,7 +28,7 @@ public class VariantListBuilderImpl extends Variant.VariantListBuilder {
     @Override
     public Variant.VariantListBuilder add() {
         if (mmediaTypes.isEmpty() && llanguages.isEmpty() && eencodings.isEmpty()) {
-            throw new UnsupportedOperationException("At least one media-type or language or encoding must be set");
+            throw new UnsupportedOperationException(Messages.msg(VARIANT_LIST_ADD));
         }
 
         Iterator<MediaType> mediaTypesIterator = mmediaTypes.iterator();

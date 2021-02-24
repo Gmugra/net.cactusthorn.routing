@@ -7,6 +7,8 @@ import java.util.concurrent.ConcurrentHashMap;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.ext.RuntimeDelegate.HeaderDelegate;
 
+import net.cactusthorn.routing.util.Messages;
+
 public final class MediaTypeHeaderDelegate implements HeaderDelegate<MediaType> {
 
     private static final ConcurrentHashMap<String, MediaType> CACHE = new ConcurrentHashMap<>();
@@ -15,7 +17,7 @@ public final class MediaTypeHeaderDelegate implements HeaderDelegate<MediaType> 
     @Override //
     public MediaType fromString(String value) {
         if (value == null) {
-            throw new IllegalArgumentException("value can not be null");
+            throw new IllegalArgumentException(Messages.isNull("value"));
         }
 
         MediaType mediaType = CACHE.get(value);
@@ -57,7 +59,7 @@ public final class MediaTypeHeaderDelegate implements HeaderDelegate<MediaType> 
     @Override //
     public String toString(MediaType mediaType) {
         if (mediaType == null) {
-            throw new IllegalArgumentException("mediaType can not be null");
+            throw new IllegalArgumentException(Messages.isNull("mediaType"));
         }
 
         StringBuilder buf = new StringBuilder();
@@ -89,7 +91,7 @@ public final class MediaTypeHeaderDelegate implements HeaderDelegate<MediaType> 
     private void addParameter(Map<String, String> parameters, String pair) {
         int valueStart = pair.indexOf('=');
         if (valueStart == -1) {
-            throw new IllegalArgumentException("Wrong media type parameter, '=' is missing");
+            throw new IllegalArgumentException(Messages.isMissing('='));
         }
         String value = pair.substring(valueStart + 1).trim();
         if (value.charAt(0) == '"') {

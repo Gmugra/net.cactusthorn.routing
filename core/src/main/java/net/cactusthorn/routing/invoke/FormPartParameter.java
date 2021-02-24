@@ -19,10 +19,11 @@ import net.cactusthorn.routing.RoutingInitializationException;
 import net.cactusthorn.routing.annotation.FormPart;
 import net.cactusthorn.routing.uri.PathTemplate.PathValues;
 
-public class FormPartParameter extends MethodParameter {
+import net.cactusthorn.routing.util.Messages;
+import static net.cactusthorn.routing.util.Messages.Key.WRONG_CONTENT_TYPE;
+import static net.cactusthorn.routing.util.Messages.Key.FORMPART_WRONG_TYPE;
 
-    private static final String WRONG_TYPE = "@FormPart can be used only for javax.servlet.http.Part type; Method: %s";
-    private static final String WRONG_CONTENT_TYPE = "@FormPart can be used only with @Consumes content types: %s; Method: %s";
+public class FormPartParameter extends MethodParameter {
 
     // @formatter:off
     private static final Set<MediaType> CONTENT_TYPE = Collections
@@ -34,12 +35,13 @@ public class FormPartParameter extends MethodParameter {
 
         for (MediaType contentType : consumesMediaTypes) {
             if (!CONTENT_TYPE.contains(contentType)) {
-                throw new RoutingInitializationException(WRONG_CONTENT_TYPE, CONTENT_TYPE, method());
+                throw new RoutingInitializationException(
+                        Messages.msg(WRONG_CONTENT_TYPE, "@FormPart", CONTENT_TYPE, method()));
             }
         }
 
         if (type() != Part.class) {
-            throw new RoutingInitializationException(WRONG_TYPE, method());
+            throw new RoutingInitializationException(Messages.msg(FORMPART_WRONG_TYPE, method()));
         }
     }
 

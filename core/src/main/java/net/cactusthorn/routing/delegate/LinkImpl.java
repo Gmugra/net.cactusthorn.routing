@@ -11,6 +11,7 @@ import javax.ws.rs.core.Link;
 import javax.ws.rs.core.UriBuilder;
 
 import net.cactusthorn.routing.util.Headers;
+import net.cactusthorn.routing.util.Messages;
 
 public final class LinkImpl extends Link {
 
@@ -79,13 +80,13 @@ public final class LinkImpl extends Link {
         @Override public Builder link(String link) {
             String tmp = link.trim();
             if (tmp.charAt(0) != '<') {
-                throw new IllegalArgumentException("Wrong: '<' is missing");
+                throw new IllegalArgumentException(Messages.isMissing('<'));
             }
 
             String[] parts = tmp.split(";");
             String uriAsStr = parts[0].trim();
             if (tmp.charAt(uriAsStr.length() - 1) != '>') {
-                throw new IllegalArgumentException("Wrong: '>' is missing");
+                throw new IllegalArgumentException(Messages.isMissing('>'));
             }
             String uri = uriAsStr.substring(1, uriAsStr.length() - 1).trim();
             uriBuilder = UriBuilder.fromUri(URI.create(uri));
@@ -126,7 +127,7 @@ public final class LinkImpl extends Link {
 
         @Override public Builder rel(String rel) {
             if (rel == null) {
-                throw new IllegalArgumentException("rel is null");
+                throw new IllegalArgumentException(Messages.isNull("rel"));
             }
             params.put(REL, rel);
             return this;
@@ -134,7 +135,7 @@ public final class LinkImpl extends Link {
 
         @Override public Builder title(String title) {
             if (title == null) {
-                throw new IllegalArgumentException("title is null");
+                throw new IllegalArgumentException(Messages.isNull("title"));
             }
             params.put(TITLE, title);
             return this;
@@ -142,7 +143,7 @@ public final class LinkImpl extends Link {
 
         @Override public Builder type(String type) {
             if (type == null) {
-                throw new IllegalArgumentException("type is null");
+                throw new IllegalArgumentException(Messages.isNull("type"));
             }
             params.put(TYPE, type);
             return this;
@@ -150,10 +151,10 @@ public final class LinkImpl extends Link {
 
         @Override public Builder param(String name, String value) {
             if (name == null) {
-                throw new IllegalArgumentException("name is null");
+                throw new IllegalArgumentException(Messages.isNull("name"));
             }
             if (value == null) {
-                throw new IllegalArgumentException("value is null");
+                throw new IllegalArgumentException(Messages.isNull("value"));
             }
             params.put(name, value);
             return this;
@@ -166,7 +167,7 @@ public final class LinkImpl extends Link {
 
         @Override public Link buildRelativized(URI uri, Object... values) {
             if (uri == null) {
-                throw new IllegalArgumentException("uri is null");
+                throw new IllegalArgumentException(Messages.isNull("uri"));
             }
             URI result = uriBuilder.build(values);
             URI with = result;

@@ -7,6 +7,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 
+import javax.ws.rs.core.Cookie;
+
 import org.junit.jupiter.api.Test;
 
 public class HeadersTest {
@@ -53,5 +55,11 @@ public class HeadersTest {
         assertEquals(new Locale("en"), locales.get(2));
         assertEquals(new Locale("de"), locales.get(3));
         assertEquals(Locale.forLanguageTag("*"), locales.get(4));
+    }
+
+    @Test //
+    public void parseCookiesIgnoreUnknownParam() {
+        List<Cookie> cookies = Headers.parseCookies("$Version=3; name=\"some value\"; $Domain=\"DOM AIN\"; $Path=PATH; $aa=bb");
+        assertEquals("$Version=3;name=\"some value\";$Domain=\"DOM AIN\";$Path=PATH", cookies.get(0).toString());
     }
 }

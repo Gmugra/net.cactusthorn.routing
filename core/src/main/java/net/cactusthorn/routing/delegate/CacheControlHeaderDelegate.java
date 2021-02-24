@@ -8,18 +8,19 @@ import javax.ws.rs.core.CacheControl;
 import javax.ws.rs.ext.RuntimeDelegate.HeaderDelegate;
 
 import net.cactusthorn.routing.util.Headers;
+import net.cactusthorn.routing.util.Messages;
 
 public class CacheControlHeaderDelegate implements HeaderDelegate<CacheControl> {
 
     @Override
     public CacheControl fromString(String header) {
-        throw new UnsupportedOperationException("CacheControl is only for response headers.");
+        throw new UnsupportedOperationException();
     }
 
     @Override
     public String toString(CacheControl cacheControl) {
         if (cacheControl == null) {
-            throw new IllegalArgumentException("CacheControl can not be null");
+            throw new IllegalArgumentException(Messages.isNull("cacheControl"));
         }
 
         StringJoiner joiner = new StringJoiner(", ");

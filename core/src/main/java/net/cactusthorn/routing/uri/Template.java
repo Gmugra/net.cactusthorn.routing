@@ -7,6 +7,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+import net.cactusthorn.routing.util.Messages;
+import static net.cactusthorn.routing.util.Messages.Key.WRONG_TEMPLATE_PARAM;
+import static net.cactusthorn.routing.util.Messages.Key.WRONG_TEMPLATE_PARAM_CHAR;
+
 public class Template {
 
     public static final class TemplateVariable {
@@ -108,9 +112,6 @@ public class Template {
         template = templateBuf.toString();
     }
 
-    private static final String WRONG_PARAM = "Template contain improperly closed parameter";
-    private static final String WRONG_CHAR = "Template contain wrong character for parameter name at the possition %d";
-
     private TemplateVariable processParam(StringCharacterIterator it) {
 
         StringBuilder param = new StringBuilder();
@@ -119,7 +120,7 @@ public class Template {
         char c = eraseWhitespaces(it);
         do {
             if (c == '{') {
-                throw new IllegalArgumentException(WRONG_PARAM);
+                throw new IllegalArgumentException(Messages.msg(WRONG_TEMPLATE_PARAM));
             }
             if (c == '}') {
                 return new TemplateVariable(param.toString());
@@ -131,12 +132,12 @@ public class Template {
                 if (lastSpaceIndex == 0) {
                     param.append(c);
                 } else {
-                    throw new IllegalArgumentException(String.format(WRONG_CHAR, lastSpaceIndex + 1));
+                    throw new IllegalArgumentException(Messages.msg(WRONG_TEMPLATE_PARAM_CHAR, lastSpaceIndex + 1));
                 }
             } else if (Character.isWhitespace(c)) {
                 lastSpaceIndex = it.getIndex();
             } else {
-                throw new IllegalArgumentException(String.format(WRONG_CHAR, it.getIndex() + 1));
+                throw new IllegalArgumentException(Messages.msg(WRONG_TEMPLATE_PARAM_CHAR, it.getIndex() + 1));
             }
             c = it.next();
         } while (true);
@@ -170,7 +171,7 @@ public class Template {
             c = it.next();
         } while (c != DONE);
 
-        throw new IllegalArgumentException(WRONG_PARAM);
+        throw new IllegalArgumentException(Messages.msg(WRONG_TEMPLATE_PARAM));
     }
 
     @Override //

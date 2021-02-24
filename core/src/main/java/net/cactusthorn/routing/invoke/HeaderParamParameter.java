@@ -13,6 +13,9 @@ import javax.ws.rs.HeaderParam;
 import net.cactusthorn.routing.convert.ConvertersHolder;
 import net.cactusthorn.routing.uri.PathTemplate.PathValues;
 
+import net.cactusthorn.routing.util.Messages;
+import static net.cactusthorn.routing.util.Messages.Key.ERROR_AT_PARAMETER_POSITION;
+
 public class HeaderParamParameter extends ConvertableMethodParameter {
 
     public HeaderParamParameter(Method method, Parameter parameter, Type genericType, int position, ConvertersHolder convertersHolder) {
@@ -36,7 +39,7 @@ public class HeaderParamParameter extends ConvertableMethodParameter {
             }
             return convert(req.getHeader(name()));
         } catch (Throwable e) {
-            throw new BadRequestException(String.format(CONVERSION_ERROR_MESSAGE, position(), type().getSimpleName(), e), e);
+            throw new BadRequestException(Messages.msg(ERROR_AT_PARAMETER_POSITION, position(), type().getSimpleName(), e), e);
         }
     }
 }
