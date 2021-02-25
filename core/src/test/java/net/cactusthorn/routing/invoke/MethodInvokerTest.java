@@ -4,8 +4,10 @@ import static org.junit.jupiter.api.Assertions.*;
 
 import java.io.IOException;
 import java.lang.reflect.*;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.stream.Stream;
@@ -15,12 +17,16 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.ws.rs.BadRequestException;
 import javax.ws.rs.Consumes;
+import javax.ws.rs.GET;
 import javax.ws.rs.POST;
+import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.ServerErrorException;
 import javax.ws.rs.core.Context;
+import javax.ws.rs.core.GenericEntity;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
 
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
@@ -34,6 +40,7 @@ import net.cactusthorn.routing.ComponentProvider;
 import net.cactusthorn.routing.RoutingConfig;
 import net.cactusthorn.routing.ServletTestInputStream;
 import net.cactusthorn.routing.invoke.MethodInvoker.ReturnObjectInfo;
+import net.cactusthorn.routing.uri.PathTemplate;
 import net.cactusthorn.routing.uri.PathTemplate.PathValues;
 import net.cactusthorn.routing.validate.ParametersValidator;
 
@@ -76,9 +83,15 @@ public class MethodInvokerTest extends InvokeTestAncestor {
             throw new Exception("test exception");
         }
 
-        @POST
-        public void m9(String body) throws Exception {
+        @POST public void m9(String body) throws Exception {
             return;
+        }
+
+        @GET @Path("genericEntity") public Response genericEntity() throws Exception {
+            List<String> list = new ArrayList<String>();
+            GenericEntity<List<String>> entity = new GenericEntity<List<String>>(list) {
+            };
+            return Response.ok(entity).build();
         }
     }
 
@@ -155,7 +168,7 @@ public class MethodInvokerTest extends InvokeTestAncestor {
         Method method = findMethod(EntryPoint1.class, "m8");
         MethodInvoker caller = new MethodInvoker(config, EntryPoint1.class, method, DEFAULT_CONTENT_TYPES);
 
-        ReturnObjectInfo returnObjectInfo = caller.returnObjectInfo();
+        ReturnObjectInfo returnObjectInfo = caller.returnObjectInfo(request, response, null);
         assertEquals(Void.TYPE, returnObjectInfo.type());
         assertEquals(Void.TYPE, returnObjectInfo.genericType());
         assertEquals(0, returnObjectInfo.annotations().length);
@@ -172,6 +185,18 @@ public class MethodInvokerTest extends InvokeTestAncestor {
         MethodInvoker caller = new MethodInvoker(config, EntryPoint1.class, method, DEFAULT_CONTENT_TYPES);
 
         assertThrows(BadRequestException.class, () -> caller.invoke(null, null, null, null));
+    }
+
+    @Test //
+    public void genericEntity() {
+        RoutingConfig config = RoutingConfig.builder(new EntryPoint1Provider()).addResource(EntryPoint1.class)
+                .setParametersValidator(VALIDATOR).build();
+        Method method = findMethod(EntryPoint1.class, "genericEntity");
+        MethodInvoker caller = new MethodInvoker(config, EntryPoint1.class, method, DEFAULT_CONTENT_TYPES);
+        Response result = (Response) caller.invoke(request, response, context, new PathTemplate.PathValues());
+        ReturnObjectInfo info = caller.returnObjectInfo(request, response, result.getEntity());
+        assertEquals("class java.util.ArrayList", info.type().toString());
+        assertEquals("java.util.List<java.lang.String>", info.genericType().toString());
     }
 
     private static Stream<Arguments> provideArguments() {

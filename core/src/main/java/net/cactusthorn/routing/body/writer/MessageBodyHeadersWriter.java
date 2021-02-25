@@ -13,6 +13,7 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.ext.MessageBodyWriter;
 
+import net.cactusthorn.routing.invoke.MethodInvoker.ReturnObjectInfo;
 import net.cactusthorn.routing.util.Http;
 
 public class MessageBodyHeadersWriter implements MessageBodyWriter<Object> {
@@ -41,6 +42,13 @@ public class MessageBodyHeadersWriter implements MessageBodyWriter<Object> {
             MultivaluedMap<String, Object> httpHeaders, OutputStream entityStream) throws IOException, WebApplicationException {
 
         wrapped.writeTo(entity, type, genericType, annotations, mediaType, httpHeaders,
+                new HeadersWriterOutputStream(entityStream, response, httpHeaders));
+    }
+
+    public void writeTo(ReturnObjectInfo info, MediaType mediaType, MultivaluedMap<String, Object> httpHeaders, OutputStream entityStream)
+            throws IOException, WebApplicationException {
+
+        wrapped.writeTo(info.entity(), info.type(), info.genericType(), info.annotations(), mediaType, httpHeaders,
                 new HeadersWriterOutputStream(entityStream, response, httpHeaders));
     }
 

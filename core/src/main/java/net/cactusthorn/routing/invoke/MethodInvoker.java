@@ -16,8 +16,8 @@ import javax.ws.rs.BadRequestException;
 import javax.ws.rs.ClientErrorException;
 import javax.ws.rs.ServerErrorException;
 import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
+import javax.ws.rs.core.GenericEntity;
 
 import net.cactusthorn.routing.RoutingConfig;
 import net.cactusthorn.routing.body.writer.Templated;
@@ -33,11 +33,10 @@ public final class MethodInvoker {
 
     public static final class ReturnObjectInfo {
 
-        public static final ReturnObjectInfo TEMPLATED = new ReturnObjectInfo(Templated.class, null, null);
-
         private Class<?> type;
         private Type genericType;
         private Annotation[] annotations;
+        private Object entity;
 
         private ReturnObjectInfo(Method method) {
             this.type = method.getReturnType();
@@ -45,20 +44,22 @@ public final class MethodInvoker {
             this.annotations = method.getAnnotations();
         }
 
-        private ReturnObjectInfo(Class<?> type, Type genericType, Annotation[] annotations) {
-            this.type = type;
-            this.genericType = genericType;
-            this.annotations = annotations;
-        }
-
-        public ReturnObjectInfo withEntity(Object entity) {
+        private ReturnObjectInfo(HttpServletRequest req, HttpServletResponse resp, ReturnObjectInfo returnObjectInfo, Object entity) {
             if (entity instanceof Templated) {
-                return ReturnObjectInfo.TEMPLATED;
+                this.type = Templated.class;
+                this.entity = prepareEntity(req, resp, (Templated) entity);
+            } else if (entity instanceof GenericEntity) {
+                GenericEntity<?> genericEntity = (GenericEntity<?>) entity;
+                this.type = genericEntity.getRawType();
+                this.genericType = genericEntity.getType();
+                this.annotations = returnObjectInfo.annotations();
+                this.entity = genericEntity.getEntity();
+            } else {
+                this.type = returnObjectInfo.type();
+                this.genericType = returnObjectInfo.genericType();
+                this.annotations = returnObjectInfo.annotations();
+                this.entity = entity;
             }
-            if (Response.class.isAssignableFrom(type)) {
-                return new ReturnObjectInfo(entity.getClass(), null, annotations);
-            }
-            return this;
         }
 
         public Class<?> type() {
@@ -71,6 +72,23 @@ public final class MethodInvoker {
 
         public Annotation[] annotations() {
             return annotations;
+        }
+
+        public Object entity() {
+            return entity;
+        }
+
+        private Templated prepareEntity(HttpServletRequest req, HttpServletResponse resp, Templated templated) {
+            if (templated.request() != null && templated.response() != null) {
+                return templated;
+            }
+            if (templated.request() != null) {
+                return new Templated(templated.template(), templated.entity(), templated.request(), resp);
+            }
+            if (templated.response() != null) {
+                return new Templated(templated.template(), templated.entity(), req, templated.response());
+            }
+            return new Templated(templated.template(), templated.entity(), req, resp);
         }
     }
 
@@ -94,8 +112,8 @@ public final class MethodInvoker {
         parameters = MethodParameterFactory.create(method, routingConfig, consumesMediaTypes);
     }
 
-    public ReturnObjectInfo returnObjectInfo() {
-        return returnObjectInfo;
+    public ReturnObjectInfo returnObjectInfo(HttpServletRequest req, HttpServletResponse resp, Object entity) {
+        return new ReturnObjectInfo(req, resp, returnObjectInfo, entity);
     }
 
     public Object invoke(HttpServletRequest req, HttpServletResponse res, ServletContext con, PathValues pathValues) {

@@ -46,7 +46,7 @@ public class BodyWriter extends BodyProcessor {
 
     @Override //
     public boolean isProcessable(Class<?> type, Type genericType, Annotation[] annotations, MediaType mediaType) {
-        if (templated ^ type == Templated.class) {
+        if (templated ^ (type == Templated.class)) {
             return false;
         }
         return super.isProcessable(type, genericType, annotations, mediaType)

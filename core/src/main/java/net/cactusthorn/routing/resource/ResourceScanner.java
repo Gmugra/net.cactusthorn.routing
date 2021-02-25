@@ -67,8 +67,8 @@ public class ResourceScanner {
             return Response.ok(templated).build();
         }
 
-        public ReturnObjectInfo returnObjectInfo() {
-            return methodInvoker.returnObjectInfo();
+        public ReturnObjectInfo returnObjectInfo(HttpServletRequest req, HttpServletResponse resp, Object entity) {
+            return methodInvoker.returnObjectInfo(req, resp, entity);
         }
 
         public boolean match(String path) {

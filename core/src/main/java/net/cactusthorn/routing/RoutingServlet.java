@@ -23,7 +23,6 @@ import javax.ws.rs.ext.MessageBodyWriter;
 import net.cactusthorn.routing.RoutingConfig.ConfigProperty;
 import net.cactusthorn.routing.body.writer.BodyWriter;
 import net.cactusthorn.routing.body.writer.MessageBodyHeadersWriter;
-import net.cactusthorn.routing.body.writer.Templated;
 import net.cactusthorn.routing.invoke.MethodInvoker.ReturnObjectInfo;
 import net.cactusthorn.routing.resource.ResourceScanner;
 import net.cactusthorn.routing.resource.ResourceScanner.Resource;
@@ -211,38 +210,15 @@ public class RoutingServlet extends HttpServlet {
         resp.setCharacterEncoding(responseMediaType.getParameters().get(MediaType.CHARSET_PARAMETER));
         resp.setContentType(new MediaType(responseMediaType.getType(), responseMediaType.getSubtype()).toString());
 
-        Object entity = prepareEntity(req, resp, result.getEntity());
-
-        ReturnObjectInfo info = resource.returnObjectInfo().withEntity(entity);
+        ReturnObjectInfo info = resource.returnObjectInfo(req, resp, result.getEntity());
 
         MessageBodyHeadersWriter writer = new MessageBodyHeadersWriter(resp, findBodyWriter(responseMediaType, info));
 
-        writer.writeTo(entity, info.type(), info.genericType(), info.annotations(), responseMediaType, result.getHeaders(),
-                resp.getOutputStream());
+        writer.writeTo(info, responseMediaType, result.getHeaders(), resp.getOutputStream());
 
         if (LOG.isLoggable(Level.FINE)) {
             LOG.log(Level.FINE, Messages.msg(INFO_PRODUCER_PROCESSING_DONE, responseMediaType));
         }
-    }
-
-    private Object prepareEntity(HttpServletRequest req, HttpServletResponse resp, Object entity) {
-        if (entity == null) {
-            return null;
-        }
-        if (entity instanceof Templated) {
-            Templated templated = (Templated) entity;
-            if (templated.request() != null && templated.response() != null) {
-                return entity;
-            }
-            if (templated.request() != null) {
-                return new Templated(templated.template(), templated.entity(), templated.request(), resp);
-            }
-            if (templated.response() != null) {
-                return new Templated(templated.template(), templated.entity(), req, templated.response());
-            }
-            return new Templated(templated.template(), templated.entity(), req, resp);
-        }
-        return entity;
     }
 
     @SuppressWarnings("rawtypes") //
