@@ -82,6 +82,7 @@ public class Application {
             .addBodyReader(new SimpleGsonBodyReader<>())
             .addBodyWriter(new SimpleThymeleafBodyWriter("/thymeleaf/"))
             .addParamConverterProvider(new LocalDateParamConverterProvider())
+            .addExceptionMapper(new UnsupportedOperationExceptionMapper())
             .setParametersValidator(new SimpleParametersValidator())
             .build();
 
@@ -119,10 +120,10 @@ The type of the annotated parameter must either:
 1. Have a constructor that accepts a single String argument
 1. Have a static method named `valueOf` or `fromString` that accepts a single String argument (see, for example, `Integer.valueOf(String)`)
    1. If both methods are present then `valueOf` used unless the type is an enum in which case `fromString` used.
-1. Have a registered implementation of ParamConverterProvider JAX-RS extension SPI that returns a ParamConverter instance capable of a "from string" conversion for the type.
+1. Have a registered implementation of `javax.ws.rs.ext.ParamConverterProvider` JAX-RS extension SPI that returns a `ParamConverter` instance capable of a "from string" conversion for the type.
 1. Be List\<T\>, Set\<T\> or SortedSet\<T\>, where T satisfies 2, 3 or 4 above. The resulting collection is read-only.
 
-### JAX-RS
+### Supported JAX-RS features
 
 1. `@Path` for class and/or method
    * path-parameters (with regular expressions support)
@@ -138,8 +139,13 @@ The type of the annotated parameter must either:
    * javax.servlet.http.HttpServletResponse
    * javax.servlet.ServletContext
    * javax.ws.rs.core.SecurityContext
-   * javax.ws.rs.core.HttpHeaders;
+   * javax.ws.rs.core.HttpHeaders
 1. `javax.ws.rs.core.Response`
+1. `javax.ws.rs.ext.ExceptionMapper`
+1. `javax.ws.rs.ext.ParamConverterProvider`
+1. `javax.ws.rs.core.UriBuilder`
+1. `javax.ws.rs.core.Link.Builder`
+1. `javax.ws.rs.core.Variant.VariantListBuilder`
 
 ### Extensions
 
@@ -328,6 +334,22 @@ public class SimpleThymeleafBodyWriter implements net.cactusthorn.routing.body.w
     public void writeTo(Templated templated, Class<?> type, Type genericType, Annotation[] annotations, MediaType mediaType,
             MultivaluedMap<String, Object> httpHeaders, OutputStream entityStream) throws IOException, WebApplicationException {
         ...
+    }
+}
+```
+
+### ExceptionMappers
+
+Default(if the annotation is not present) priority is `javax.ws.rs.Priorities.USER`
+
+#### Example
+```java
+@javax.annotation.Priority(3000)
+public static class UnsupportedOperationExceptionMapper implements ExceptionMapper<UnsupportedOperationException> {
+
+    @Override
+    public Response toResponse(UnsupportedOperationException exception) {
+        return Response.status(Response.Status.CONFLICT).build();
     }
 }
 ```
