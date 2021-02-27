@@ -4,11 +4,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+import javax.ws.rs.ext.ExceptionMapper;
 import javax.ws.rs.ext.MessageBodyReader;
 import javax.ws.rs.ext.MessageBodyWriter;
 import javax.ws.rs.ext.ParamConverterProvider;
 
-import net.cactusthorn.routing.body.BodyProcessor;
 import net.cactusthorn.routing.body.reader.BodyReader;
 import net.cactusthorn.routing.body.reader.InputStreamMessageBodyReader;
 import net.cactusthorn.routing.body.reader.StringMessageBodyReader;
@@ -17,7 +17,9 @@ import net.cactusthorn.routing.body.writer.BodyWriter;
 import net.cactusthorn.routing.body.writer.ObjectMessageBodyWriter;
 import net.cactusthorn.routing.body.writer.StringMessageBodyWriter;
 import net.cactusthorn.routing.convert.ConvertersHolder;
+import net.cactusthorn.routing.util.ExceptionMapperWrapper;
 import net.cactusthorn.routing.util.Messages;
+import net.cactusthorn.routing.util.Prioritised;
 import net.cactusthorn.routing.validate.ParametersValidator;
 
 import java.util.ArrayList;
@@ -46,21 +48,23 @@ public final class RoutingConfig {
         }
     }
 
-    private List<Class<?>> resourceClasses;
+    private final List<Class<?>> resourceClasses;
 
-    private ConvertersHolder convertersHolder;
+    private final ConvertersHolder convertersHolder;
 
-    private List<BodyWriter> bodyWriters;
+    private final List<BodyWriter> bodyWriters;
 
-    private List<BodyReader> bodyReaders;
+    private final List<BodyReader> bodyReaders;
 
-    private ComponentProvider componentProvider;
+    private final List<ExceptionMapperWrapper<? extends Throwable>> exceptionMappers;
 
-    private Map<ConfigProperty, Object> configProperties;
+    private final ComponentProvider componentProvider;
 
-    private ParametersValidator validator;
+    private final Map<ConfigProperty, Object> configProperties;
 
-    private String applicationPath;
+    private final ParametersValidator validator;
+
+    private final String applicationPath;
 
     // @formatter:off
     private RoutingConfig(
@@ -69,6 +73,7 @@ public final class RoutingConfig {
                 List<Class<?>> resourceClasses,
                 List<BodyWriter> bodyWriters,
                 List<BodyReader> bodyReaders,
+                List<ExceptionMapperWrapper<? extends Throwable>> exceptionMappers,
                 Map<ConfigProperty, Object> configProperties,
                 ParametersValidator validator,
                 String applicationPath) {
@@ -77,6 +82,7 @@ public final class RoutingConfig {
         this.resourceClasses = resourceClasses;
         this.bodyWriters = bodyWriters;
         this.bodyReaders = bodyReaders;
+        this.exceptionMappers = exceptionMappers;
         this.configProperties = configProperties;
         this.validator = validator;
         this.applicationPath = applicationPath;
@@ -101,6 +107,10 @@ public final class RoutingConfig {
 
     public List<BodyReader> bodyReaders() {
         return bodyReaders;
+    }
+
+    public List<ExceptionMapperWrapper<? extends Throwable>> exceptionMappers() {
+        return exceptionMappers;
     }
 
     public ComponentProvider provider() {
@@ -130,6 +140,8 @@ public final class RoutingConfig {
         private final List<BodyWriter> bodyWriters = new ArrayList<>();
 
         private final List<BodyReader> bodyReaders = new ArrayList<>();
+
+        private final List<ExceptionMapperWrapper<? extends Throwable>> exceptionMappers = new ArrayList<>();
 
         private final Map<ConfigProperty, Object> configProperties = new EnumMap<>(ConfigProperty.class);
 
@@ -183,6 +195,11 @@ public final class RoutingConfig {
             return this;
         }
 
+        public Builder addExceptionMapper(ExceptionMapper<? extends Throwable> exceptionMapper) {
+            exceptionMappers.add(new ExceptionMapperWrapper<>(exceptionMapper));
+            return this;
+        }
+
         public Builder setResponseCharacterEncoding(String encoding) {
             configProperties.put(ConfigProperty.RESPONSE_CHARACTER_ENCODING, encoding);
             return this;
@@ -219,18 +236,31 @@ public final class RoutingConfig {
 
         public RoutingConfig build() {
 
-            Collections.sort(bodyWriters, BodyProcessor.PRIORITY_COMPARATOR);
+            Collections.sort(bodyWriters, Prioritised.PRIORITY_COMPARATOR);
             List<BodyWriter> unmodifiableBodyWriters = Collections.unmodifiableList(bodyWriters);
 
-            Collections.sort(bodyReaders, BodyProcessor.PRIORITY_COMPARATOR);
+            Collections.sort(bodyReaders, Prioritised.PRIORITY_COMPARATOR);
             List<BodyReader> unmodifiableBodyReaders = Collections.unmodifiableList(bodyReaders);
+
+            Collections.sort(exceptionMappers, Prioritised.PRIORITY_COMPARATOR);
+            List<ExceptionMapperWrapper<? extends Throwable>> unmodifiableExceptionMappers = Collections.unmodifiableList(exceptionMappers);
 
             Map<ConfigProperty, Object> unmodifiableConfigProperties = Collections.unmodifiableMap(configProperties);
 
             ConvertersHolder convertersHolder = new ConvertersHolder(providers);
 
-            return new RoutingConfig(componentProvider, convertersHolder, Collections.unmodifiableList(resourceClasses),
-                    unmodifiableBodyWriters, unmodifiableBodyReaders, unmodifiableConfigProperties, validator, applicationPath);
+            // @formatter:off
+            return new RoutingConfig(
+                    componentProvider,
+                    convertersHolder,
+                    Collections.unmodifiableList(resourceClasses),
+                    unmodifiableBodyWriters,
+                    unmodifiableBodyReaders,
+                    unmodifiableExceptionMappers,
+                    unmodifiableConfigProperties,
+                    validator,
+                    applicationPath);
+            // @formatter:on
         }
     }
 }

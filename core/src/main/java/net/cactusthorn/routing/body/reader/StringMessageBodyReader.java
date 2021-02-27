@@ -11,9 +11,9 @@ import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.MultivaluedMap;
 
-import net.cactusthorn.routing.body.BodyProcessor;
+import net.cactusthorn.routing.util.Prioritised;
 
-@Priority(BodyProcessor.PRIORITY_HIGHEST) //
+@Priority(Prioritised.PRIORITY_HIGHEST) //
 public class StringMessageBodyReader extends MessageBodyReaderAncestor<String> {
 
     @Override //

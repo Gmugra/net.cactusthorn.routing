@@ -2,33 +2,14 @@ package net.cactusthorn.routing.body;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;
-import java.util.Comparator;
 import java.util.HashSet;
 import java.util.Set;
 
-import javax.annotation.Priority;
-import javax.ws.rs.Priorities;
 import javax.ws.rs.core.MediaType;
 
-public abstract class BodyProcessor implements Initializable {
+import net.cactusthorn.routing.util.Prioritised;
 
-    public static final Comparator<BodyProcessor> PRIORITY_COMPARATOR = (bp1, bp2) -> {
-        if (bp1 == null && bp2 == null) {
-            return 0;
-        }
-        if (bp1 == null) {
-            return 1;
-        }
-        if (bp2 == null) {
-            return -1;
-        }
-        return bp1.priority() - bp2.priority();
-    };
-
-    public static final int LOWEST_PRIORITY = 9999;
-    public static final int PRIORITY_HIGHEST = 50;
-
-    private int priority;
+public abstract class BodyProcessor extends Prioritised implements Initializable {
 
     private Set<MediaType> mmediaTypes;
 
@@ -37,14 +18,10 @@ public abstract class BodyProcessor implements Initializable {
     private Class<?> bodyProcessorClass;
 
     public BodyProcessor(Class<?> bodyProcessorClass) {
+        super(bodyProcessorClass);
         this.bodyProcessorClass = bodyProcessorClass;
         initializable = Initializable.class.isAssignableFrom(bodyProcessorClass);
-        priority = findPriority(bodyProcessorClass);
         mmediaTypes = findMediaTypes(bodyProcessorClass);
-    }
-
-    public int priority() {
-        return priority;
     }
 
     public boolean initializable() {
@@ -65,18 +42,10 @@ public abstract class BodyProcessor implements Initializable {
 
     @Override //
     public String toString() {
-        return priority + " :: " + bodyProcessorClass.getName();
+        return priority() + " :: " + bodyProcessorClass.getName();
     }
 
     protected abstract String[] getMediaTypeAnnotationValue(Class<?> clazz);
-
-    private int findPriority(Class<?> clazz) {
-        Priority annotation = clazz.getAnnotation(Priority.class);
-        if (annotation != null) {
-            return annotation.value();
-        }
-        return Priorities.USER;
-    }
 
     private Set<MediaType> findMediaTypes(Class<?> clazz) {
         String[] types = getMediaTypeAnnotationValue(clazz);

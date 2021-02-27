@@ -25,6 +25,7 @@ import javax.ws.rs.ext.MessageBodyReader;
 import org.junit.jupiter.api.Test;
 
 import net.cactusthorn.routing.RoutingConfig;
+import net.cactusthorn.routing.util.Prioritised;
 
 public class BodyReaderTest {
 
@@ -100,7 +101,7 @@ public class BodyReaderTest {
         bodyReaders.add(new BodyReader(INITIALIZABLE_READER));
         bodyReaders.add(null);
 
-        Collections.sort(bodyReaders, BodyReader.PRIORITY_COMPARATOR);
+        Collections.sort(bodyReaders, Prioritised.PRIORITY_COMPARATOR);
 
         assertEquals("3000 :: net.cactusthorn.routing.body.reader.BodyReaderTest$InitializableReader",
                 bodyReaders.get(0).toString());

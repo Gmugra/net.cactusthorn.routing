@@ -11,6 +11,8 @@ import java.util.Collections;
 
 import javax.ws.rs.ext.ParamConverterProvider;
 
+import net.cactusthorn.routing.util.Prioritised;
+
 public class ConvertersHolder {
 
     private static final StaticStringMethodConverter VALUE_OF = new StaticStringMethodConverter("valueOf");
@@ -24,7 +26,7 @@ public class ConvertersHolder {
     public ConvertersHolder(List<ParamConverterProvider> paramConverterProviders) {
         this();
         paramConverterProviders.forEach(p -> providers.add(new ParamConverterProviderWrapper(p)));
-        Collections.sort(providers, ParamConverterProviderWrapper.PRIORITY_COMPARATOR);
+        Collections.sort(providers, Prioritised.PRIORITY_COMPARATOR);
     }
 
     public ConvertersHolder() {

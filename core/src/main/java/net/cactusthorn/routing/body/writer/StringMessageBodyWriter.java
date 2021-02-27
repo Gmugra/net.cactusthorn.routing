@@ -14,9 +14,9 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.ext.MessageBodyWriter;
 
-import net.cactusthorn.routing.body.BodyProcessor;
+import net.cactusthorn.routing.util.Prioritised;
 
-@Priority(BodyProcessor.PRIORITY_HIGHEST) //
+@Priority(Prioritised.PRIORITY_HIGHEST) //
 public class StringMessageBodyWriter implements MessageBodyWriter<String> {
 
     @Override //

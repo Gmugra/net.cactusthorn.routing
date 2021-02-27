@@ -20,16 +20,16 @@ import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.GenericEntity;
 
 import net.cactusthorn.routing.RoutingConfig;
+import net.cactusthorn.routing.RoutingServlet;
 import net.cactusthorn.routing.body.writer.Templated;
 import net.cactusthorn.routing.uri.PathTemplate.PathValues;
-
+import net.cactusthorn.routing.util.ExceptionMapperWrapper;
 import net.cactusthorn.routing.util.Messages;
 import static net.cactusthorn.routing.util.Messages.Key.ERROR_AT_PARAMETER_POSITION;
-import static net.cactusthorn.routing.util.Messages.Key.ERROR_METHOD_INVOCATION;
 
 public final class MethodInvoker {
 
-    private static final Logger LOG = Logger.getLogger(MethodInvoker.class.getName());
+    private static final Logger LOG = Logger.getLogger(RoutingServlet.class.getName());
 
     public static final class ReturnObjectInfo {
 
@@ -139,11 +139,28 @@ public final class MethodInvoker {
         }
 
         try {
-            return method.invoke(object, values);
-        } catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
-            String message = Messages.msg(ERROR_METHOD_INVOCATION);
+            return invokeWithExceptionMappers(object, values);
+        } catch (InvocationTargetException e) {
+            throw new ServerErrorException(e.getCause().getMessage(), Status.INTERNAL_SERVER_ERROR, e.getCause());
+        } catch (IllegalAccessException | IllegalArgumentException e) {
+            String message = Messages.msg(Messages.Key.ERROR_METHOD_INVOCATION);
             LOG.log(Level.SEVERE, message, e);
-            throw new ServerErrorException(message, Status.INTERNAL_SERVER_ERROR, e);
+            throw new ServerErrorException(Status.INTERNAL_SERVER_ERROR, e);
+        }
+    }
+
+    private Object invokeWithExceptionMappers(Object object, Object[] values)
+            throws IllegalAccessException, IllegalArgumentException, InvocationTargetException {
+        try {
+            return method.invoke(object, values);
+        } catch (InvocationTargetException exception) {
+            Throwable cause = exception.getCause();
+            for (ExceptionMapperWrapper<? extends Throwable> wrapper : routingConfig.exceptionMappers()) {
+                if (wrapper.throwable() == cause.getClass()) {
+                    return wrapper.response(cause);
+                }
+            }
+            throw exception;
         }
     }
 }

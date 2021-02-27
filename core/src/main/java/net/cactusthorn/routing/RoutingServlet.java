@@ -195,7 +195,8 @@ public class RoutingServlet extends HttpServlet {
 
         StatusType status = result.getStatusInfo();
         resp.setStatus(status.getStatusCode());
-        if (status.getStatusCode() == Status.NO_CONTENT.getStatusCode() || status.getFamily() == Status.Family.REDIRECTION) {
+        if (status.getStatusCode() == Status.NO_CONTENT.getStatusCode() || status.getFamily() == Status.Family.REDIRECTION
+                || result.getEntity() == null) {
             HTTP.writeHeaders(resp, result.getHeaders());
             return;
         }

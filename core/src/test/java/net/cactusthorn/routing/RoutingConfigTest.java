@@ -10,6 +10,7 @@ import javax.ws.rs.HttpMethod;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.ext.ExceptionMapper;
 
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
@@ -26,6 +27,12 @@ public class RoutingConfigTest {
 
     private static final ParametersValidator TEST_VALIDATOR = (object, method, parameters) -> {
     };
+
+    public static class TestExceptionMapper implements Cloneable, ExceptionMapper<UnsupportedOperationException> {
+        @Override public Response toResponse(UnsupportedOperationException exception) {
+            return Response.status(Response.Status.CONFLICT).build();
+        }
+    }
 
     public static class EntryPointDate {
 
@@ -153,5 +160,11 @@ public class RoutingConfigTest {
     public void applicationPathEnd() {
         RoutingConfig config = RoutingConfig.builder(new EntryPointDateProvider()).setApplicationPath("yy/cc/").build();
         assertEquals("/yy/cc/", config.applicationPath());
+    }
+
+    @Test //
+    public void exceptionMappers() {
+        RoutingConfig config = RoutingConfig.builder(new EntryPointDateProvider()).addExceptionMapper(new TestExceptionMapper()).build();
+        assertEquals(UnsupportedOperationException.class, config.exceptionMappers().get(0).throwable());
     }
 }

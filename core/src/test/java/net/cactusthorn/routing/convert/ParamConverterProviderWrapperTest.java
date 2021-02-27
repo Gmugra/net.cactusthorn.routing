@@ -14,6 +14,8 @@ import javax.ws.rs.ext.ParamConverterProvider;
 
 import org.junit.jupiter.api.Test;
 
+import net.cactusthorn.routing.util.Prioritised;
+
 public class ParamConverterProviderWrapperTest {
 
     public static class DefaultPriority implements ParamConverterProvider {
@@ -60,7 +62,7 @@ public class ParamConverterProviderWrapperTest {
         wrappers.add(null);
         wrappers.add(new ParamConverterProviderWrapper(new HiPriority()));
 
-        Collections.sort(wrappers, ParamConverterProviderWrapper.PRIORITY_COMPARATOR);
+        Collections.sort(wrappers, Prioritised.PRIORITY_COMPARATOR);
 
         assertEquals("HiPriority", wrappers.get(0).convert(null, null, null, (String)null));
         assertEquals("DefaultPriority", wrappers.get(1).convert(null, null, null, (String)null));
