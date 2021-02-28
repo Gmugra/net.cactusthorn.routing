@@ -146,6 +146,7 @@ The type of the annotated parameter must either:
 1. `javax.ws.rs.core.UriBuilder`
 1. `javax.ws.rs.core.Link.Builder`
 1. `javax.ws.rs.core.Variant.VariantListBuilder`
+1. `javax.ws.rs.core.Form`
 
 ### Extensions
 

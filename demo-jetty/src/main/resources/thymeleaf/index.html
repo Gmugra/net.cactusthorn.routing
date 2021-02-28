@@ -3,7 +3,7 @@
 <html xmlns:th="http://www.thymeleaf.org">
 
   <head>
-    <title>Micro :: Test</title>
+    <title>net.cactusthorn.routing :: Demo</title>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
     <meta charset="UTF-8">
   </head>
@@ -42,6 +42,8 @@
     <a th:href="@{/wrongrole}">@UserRoles -> Forbidden</a><br/><br/>
 
     <a th:href="@{/headers}">HttpHeaders</a><br/><br/>
+
+    <a th:href="@{/exceptionmapper}">ExceptionMapper (HTTP 503)</a><br/><br/>
   </body>
 
 </html>

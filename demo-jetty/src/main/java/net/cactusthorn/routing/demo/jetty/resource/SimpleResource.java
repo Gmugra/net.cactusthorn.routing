@@ -75,4 +75,9 @@ public class SimpleResource implements Resource {
     public String headers(@Context HttpHeaders headers) {
         return headers.getHeaderString(HttpHeaders.USER_AGENT);
     }
+
+    @GET @Path("/exceptionmapper") //
+    public String exceptionmapper() {
+        throw new UnsupportedOperationException();
+    }
 }

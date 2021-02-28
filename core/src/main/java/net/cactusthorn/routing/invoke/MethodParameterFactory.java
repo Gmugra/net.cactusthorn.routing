@@ -21,6 +21,7 @@ import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
 import javax.ws.rs.PATCH;
 import javax.ws.rs.core.Context;
+import javax.ws.rs.core.Form;
 import javax.ws.rs.core.HttpHeaders;
 
 import net.cactusthorn.routing.RoutingConfig;
@@ -87,6 +88,9 @@ final class MethodParameterFactory {
         }
         if (method.getAnnotation(POST.class) != null || method.getAnnotation(PUT.class) != null
                 || method.getAnnotation(PATCH.class) != null) {
+            if (Form.class == parameter.getType()) {
+                return new FormParameter(method, parameter, genericType, position, consumesMediaTypes);
+            }
             return new BodyReaderParameter(method, parameter, genericType, position, consumesMediaTypes, routingConfig.bodyReaders());
         }
         throw new RoutingInitializationException(Messages.msg(ONLY_POST_PUT_PATCH, method));

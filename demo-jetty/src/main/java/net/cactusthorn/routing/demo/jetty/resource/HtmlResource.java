@@ -10,7 +10,9 @@ import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
+import javax.ws.rs.core.Form;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.CookieParam;
@@ -45,11 +47,15 @@ public class HtmlResource implements Resource {
         return Response.ok(templated).type(MediaType.TEXT_HTML_TYPE).build();
     }
 
-    @POST @Path("doupload") @Consumes("multipart/form-data") //
-    public String upload(@FormParam("fname") String fname, @FormPart("myfile") Part part, @FormPart("myfile2") Part part2)
-            throws IOException {
 
-        String result = fname + " :: ";
+    @POST @Path("doupload") @Consumes("multipart/form-data") //
+    // @formatter:off
+    public String upload(
+            Form form,
+            @FormPart("myfile") Part part, 
+            @FormPart("myfile2") Part part2) throws IOException {
+
+        String result = form.asMap().getFirst("fname") + " :: ";
 
         java.nio.file.Path tmpDir = Files.createTempDirectory("");
         String fileName = part.getSubmittedFileName();
@@ -68,15 +74,17 @@ public class HtmlResource implements Resource {
 
         return result;
     }
+    // @formatter:on
 
     // @formatter:off
     @POST @Path("form") @Consumes("application/x-www-form-urlencoded") //
     public String doHtml(
             @FormParam("fname") String fname,
-            @FormParam("lname") String lname,
             @FormParam("box") List<Integer> box,
-            @CookieParam("JSESSIONID") String jsession) {
-        return fname + " :: " + lname + " :: " + box + " :: " + jsession;
+            @CookieParam("JSESSIONID") String jsession,
+            Form form) {
+        MultivaluedMap<String, String> map = form.asMap(); 
+        return fname + " :: " + map.getFirst("lname") + " :: " + map.get("box") + " :: " + jsession;
     }
     // @formatter:on
 }

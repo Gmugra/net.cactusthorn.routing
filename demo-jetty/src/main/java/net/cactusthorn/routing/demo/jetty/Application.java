@@ -81,6 +81,7 @@ public class Application {
             .addBodyReader(new SimpleGsonBodyReader<>())
             .addBodyWriter(new SimpleThymeleafBodyWriter("/thymeleaf/"))
             .addParamConverterProvider(new LocalDateParamConverterProvider())
+            .addExceptionMapper(new UnsupportedOperationExceptionMapper())
             .setParametersValidator(new SimpleParametersValidator())
             .build();
         // @formatter:on
