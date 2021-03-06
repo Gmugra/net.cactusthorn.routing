@@ -9,6 +9,11 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import java.util.logging.Logger;
+import java.util.logging.Handler;
+import java.util.logging.Level;
+import java.util.logging.LogManager;
+
 import javax.annotation.security.RolesAllowed;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -31,6 +36,7 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -164,6 +170,16 @@ public class RoutingServletTest {
     HttpServletRequest req;
     HttpServletResponse resp;
     ServletTestOutputStream outputStream;
+
+    @BeforeAll //
+    static void setUpLogger() {
+        Logger rootLogger = LogManager.getLogManager().getLogger("");
+        rootLogger.setLevel(Level.FINE);
+        //switch off default Handlers to do not get anything in console
+        for (Handler h : rootLogger.getHandlers()) {
+            h.setLevel(Level.OFF);
+        }
+    }
 
     @BeforeEach //
     void setUp() throws IOException {
@@ -420,8 +436,7 @@ public class RoutingServletTest {
         assertEquals(403, code.getValue());
     }
 
-    @Test
-    public void wrongProduces() throws ServletException, IOException {
+    @Test public void wrongProduces() throws ServletException, IOException {
         Mockito.when(req.getPathInfo()).thenReturn("/api/wrong/produces");
         Mockito.when(req.getMethod()).thenReturn(HttpMethod.GET);
         Mockito.when(req.getHeader(HttpHeaders.ACCEPT)).thenReturn(MediaType.TEXT_HTML);

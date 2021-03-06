@@ -140,6 +140,7 @@ The type of the annotated parameter must either:
    * javax.servlet.ServletContext
    * javax.ws.rs.core.SecurityContext
    * javax.ws.rs.core.HttpHeaders
+   * javax.ws.rs.core.UriInfo
 1. `javax.ws.rs.core.Response`
 1. `javax.ws.rs.ext.ExceptionMapper`
 1. `javax.ws.rs.ext.ParamConverterProvider`

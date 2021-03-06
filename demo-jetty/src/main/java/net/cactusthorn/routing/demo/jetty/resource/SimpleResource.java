@@ -19,6 +19,7 @@ import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.SecurityContext;
+import javax.ws.rs.core.UriInfo;
 
 import net.cactusthorn.routing.annotation.Template;
 import net.cactusthorn.routing.demo.jetty.dagger.Resource;
@@ -79,5 +80,10 @@ public class SimpleResource implements Resource {
     @GET @Path("/exceptionmapper") //
     public String exceptionmapper() {
         throw new UnsupportedOperationException();
+    }
+
+    @GET @Path("/uri") //
+    public String uri(@Context UriInfo uriInfo) {
+        return uriInfo.getRequestUri().toString();
     }
 }

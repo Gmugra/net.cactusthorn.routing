@@ -6,7 +6,12 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import javax.ws.rs.core.MultivaluedHashMap;
+import javax.ws.rs.core.MultivaluedMap;
+
 import net.cactusthorn.routing.util.Messages;
+import net.cactusthorn.routing.util.UnmodifiableMultivaluedMap;
+
 import static net.cactusthorn.routing.util.Messages.Key.ERROR_MULTIPLE_TEMPLATE_PARAM;
 
 public final class PathTemplate extends Template {
@@ -30,6 +35,16 @@ public final class PathTemplate extends Template {
 
         public String value(String name) {
             return values.get(name);
+        }
+
+        public MultivaluedMap<String, String> toMultivaluedMap(boolean decode) {
+            MultivaluedMap<String, String> map = new MultivaluedHashMap<>();
+            if (decode) {
+                values.entrySet().forEach(e -> map.addFirst(e.getKey(), e.getValue()));
+            } else {
+                values.entrySet().forEach(e -> map.addFirst(e.getKey(), UriComponentEncoder.PATH.encode(e.getValue())));
+            }
+            return new UnmodifiableMultivaluedMap<>(map);
         }
     }
 

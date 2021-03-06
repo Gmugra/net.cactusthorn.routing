@@ -12,6 +12,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.SecurityContext;
+import javax.ws.rs.core.UriInfo;
 import javax.ws.rs.CookieParam;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.HeaderParam;
@@ -83,6 +84,9 @@ final class MethodParameterFactory {
             }
             if (HttpHeaders.class == parameter.getType()) {
                 return new HttpHeadersParameter(method, parameter, genericType, position);
+            }
+            if (UriInfo.class == parameter.getType()) {
+                return new UriInfoParameter(method, parameter, genericType, position);
             }
             throw new RoutingInitializationException(Messages.msg(CONTEXT_NOT_SUPPORTED, parameter.getType(), method));
         }
