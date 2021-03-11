@@ -21,15 +21,13 @@ public final class PathTemplateParser {
         }
     }
 
-    String prepare(String applicationPath, Path classPathAnnotation) {
+    String prepareClassPath(Path classPathAnnotation) {
         if (classPathAnnotation == null) {
-            return applicationPath;
+            return "/";
         }
         String path = classPathAnnotation.value();
         if (path.charAt(0) != '/') {
-            path = applicationPath + path;
-        } else {
-            path = applicationPath.substring(0, applicationPath.length() - 1) + path;
+            path = '/' + path;
         }
         if (!"/".equals(path) && path.charAt(path.length() - 1) != '/') {
             path += '/';

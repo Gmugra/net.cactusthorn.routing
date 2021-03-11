@@ -64,8 +64,6 @@ public final class RoutingConfig {
 
     private final ParametersValidator validator;
 
-    private final String applicationPath;
-
     // @formatter:off
     private RoutingConfig(
                 ComponentProvider componentProvider,
@@ -75,8 +73,7 @@ public final class RoutingConfig {
                 List<BodyReader> bodyReaders,
                 List<ExceptionMapperWrapper<? extends Throwable>> exceptionMappers,
                 Map<ConfigProperty, Object> configProperties,
-                ParametersValidator validator,
-                String applicationPath) {
+                ParametersValidator validator) {
         this.componentProvider = componentProvider;
         this.convertersHolder = convertersHolder;
         this.resourceClasses = resourceClasses;
@@ -85,7 +82,6 @@ public final class RoutingConfig {
         this.exceptionMappers = exceptionMappers;
         this.configProperties = configProperties;
         this.validator = validator;
-        this.applicationPath = applicationPath;
     }
     // @formatter:off
 
@@ -125,10 +121,6 @@ public final class RoutingConfig {
         return Optional.ofNullable(validator);
     }
 
-    public String applicationPath() {
-        return applicationPath;
-    }
-
     public static final class Builder {
 
         private ComponentProvider componentProvider;
@@ -146,8 +138,6 @@ public final class RoutingConfig {
         private final Map<ConfigProperty, Object> configProperties = new EnumMap<>(ConfigProperty.class);
 
         private ParametersValidator validator;
-
-        private String applicationPath = "/";
 
         private Builder(ComponentProvider componentProvider) {
             if (componentProvider == null) {
@@ -220,20 +210,6 @@ public final class RoutingConfig {
             return this;
         }
 
-        public Builder setApplicationPath(String path) {
-            if (path == null) {
-                throw new IllegalArgumentException(Messages.isNull("path"));
-            }
-            applicationPath = path;
-            if (applicationPath.charAt(0) != '/') {
-                applicationPath = '/' + applicationPath;
-            }
-            if (!"/".equals(applicationPath) && applicationPath.charAt(applicationPath.length() - 1) != '/') {
-                applicationPath += '/';
-            }
-            return this;
-        }
-
         public RoutingConfig build() {
 
             Collections.sort(bodyWriters, Prioritised.PRIORITY_COMPARATOR);
@@ -258,8 +234,7 @@ public final class RoutingConfig {
                     unmodifiableBodyReaders,
                     unmodifiableExceptionMappers,
                     unmodifiableConfigProperties,
-                    validator,
-                    applicationPath);
+                    validator);
             // @formatter:on
         }
     }

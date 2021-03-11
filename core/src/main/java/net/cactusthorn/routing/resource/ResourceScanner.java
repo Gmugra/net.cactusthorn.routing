@@ -132,7 +132,7 @@ public class ResourceScanner {
 
         for (Class<?> clazz : routingConfig.resourceClasses()) {
 
-            String classPath = PATHTEMPLATE_PARSER.prepare(routingConfig.applicationPath(), clazz.getAnnotation(Path.class));
+            String classPath = PATHTEMPLATE_PARSER.prepareClassPath(clazz.getAnnotation(Path.class));
             Set<MediaType> classConsumesMediaTypes = CONSUMES_PARSER.consumes(clazz);
             List<MediaType> classProducesMediaTypes = PRODUCES_PARSER.produces(clazz);
 

@@ -133,36 +133,6 @@ public class RoutingConfigTest {
     }
 
     @Test //
-    public void applicationPath() {
-        RoutingConfig config = RoutingConfig.builder(new EntryPointDateProvider()).setApplicationPath("/yyyy").build();
-        assertEquals("/yyyy/", config.applicationPath());
-    }
-
-    @Test //
-    public void applicationPathNull() {
-        assertThrows(IllegalArgumentException.class,
-                () -> RoutingConfig.builder(new EntryPointDateProvider()).setApplicationPath(null).build());
-    }
-
-    @Test //
-    public void applicationPathDefault() {
-        RoutingConfig config = RoutingConfig.builder(new EntryPointDateProvider()).setApplicationPath("/").build();
-        assertEquals("/", config.applicationPath());
-    }
-
-    @Test //
-    public void applicationPathAdd() {
-        RoutingConfig config = RoutingConfig.builder(new EntryPointDateProvider()).setApplicationPath("yy/cc").build();
-        assertEquals("/yy/cc/", config.applicationPath());
-    }
-
-    @Test //
-    public void applicationPathEnd() {
-        RoutingConfig config = RoutingConfig.builder(new EntryPointDateProvider()).setApplicationPath("yy/cc/").build();
-        assertEquals("/yy/cc/", config.applicationPath());
-    }
-
-    @Test //
     public void exceptionMappers() {
         RoutingConfig config = RoutingConfig.builder(new EntryPointDateProvider()).addExceptionMapper(new TestExceptionMapper()).build();
         assertEquals(UnsupportedOperationException.class, config.exceptionMappers().get(0).throwable());
