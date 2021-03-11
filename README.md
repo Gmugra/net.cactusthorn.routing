@@ -114,6 +114,13 @@ public class Application {
 1. If some resources was found, but `@Consumes`-annotation of no one of them fit Content-Type request-header: HTTP response with status 415 send back to client.
 1. If some resources was found, but `@Produces`-annotation of no one of them fit Accept request-header: HTTP response with status 406 send back to client.
 
+### Path matching precedence rules
+The JAX-RS specification has defined strict sorting and precedence rules for matching URI expressions and is based on a most specific match wins algorithm.
+The JAX-RS provider gathers up the set of deployed URI expressions and sorts them based on the following logic:
+1. The primary key of the sort is the number of literal characters in the full URI matching pattern. The sort is in descending order.
+1. The secondary key of the sort is the number of template expressions embedded within the pattern (e.g. {id} or {id : .+}). This sort is in descending order.
+1. The tertiary key of the sort is the number of nondefault template expressions. A default template expression is one that does not define a regular expression (e.g. {id}).
+
 ### Method parameter types converting
 The type of the annotated parameter must either:
 1. Be a primitive type
