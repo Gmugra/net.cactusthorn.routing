@@ -8,6 +8,7 @@ import javax.ws.rs.ext.ExceptionMapper;
 import javax.ws.rs.ext.MessageBodyReader;
 import javax.ws.rs.ext.MessageBodyWriter;
 import javax.ws.rs.ext.ParamConverterProvider;
+import javax.ws.rs.ext.Providers;
 
 import net.cactusthorn.routing.body.reader.BodyReader;
 import net.cactusthorn.routing.body.reader.InputStreamMessageBodyReader;
@@ -19,7 +20,7 @@ import net.cactusthorn.routing.body.writer.StringMessageBodyWriter;
 import net.cactusthorn.routing.convert.ConvertersHolder;
 import net.cactusthorn.routing.util.ExceptionMapperWrapper;
 import net.cactusthorn.routing.util.Messages;
-import net.cactusthorn.routing.util.Prioritised;
+import net.cactusthorn.routing.util.ProvidersImpl;
 import net.cactusthorn.routing.validate.ParametersValidator;
 
 import java.util.ArrayList;
@@ -52,11 +53,7 @@ public final class RoutingConfig {
 
     private final ConvertersHolder convertersHolder;
 
-    private final List<BodyWriter> bodyWriters;
-
-    private final List<BodyReader> bodyReaders;
-
-    private final List<ExceptionMapperWrapper<? extends Throwable>> exceptionMappers;
+    private final Providers providers;
 
     private final ComponentProvider componentProvider;
 
@@ -69,17 +66,13 @@ public final class RoutingConfig {
                 ComponentProvider componentProvider,
                 ConvertersHolder convertersHolder,
                 List<Class<?>> resourceClasses,
-                List<BodyWriter> bodyWriters,
-                List<BodyReader> bodyReaders,
-                List<ExceptionMapperWrapper<? extends Throwable>> exceptionMappers,
+                Providers providers,
                 Map<ConfigProperty, Object> configProperties,
                 ParametersValidator validator) {
         this.componentProvider = componentProvider;
         this.convertersHolder = convertersHolder;
         this.resourceClasses = resourceClasses;
-        this.bodyWriters = bodyWriters;
-        this.bodyReaders = bodyReaders;
-        this.exceptionMappers = exceptionMappers;
+        this.providers = providers;
         this.configProperties = configProperties;
         this.validator = validator;
     }
@@ -97,16 +90,8 @@ public final class RoutingConfig {
         return resourceClasses;
     }
 
-    public List<BodyWriter> bodyWriters() {
-        return bodyWriters;
-    }
-
-    public List<BodyReader> bodyReaders() {
-        return bodyReaders;
-    }
-
-    public List<ExceptionMapperWrapper<? extends Throwable>> exceptionMappers() {
-        return exceptionMappers;
+    public Providers providers() {
+        return providers;
     }
 
     public ComponentProvider provider() {
@@ -125,7 +110,7 @@ public final class RoutingConfig {
 
         private ComponentProvider componentProvider;
 
-        private final List<ParamConverterProvider> providers = new ArrayList<>();
+        private final List<ParamConverterProvider> converterProviders = new ArrayList<>();
 
         private final List<Class<?>> resourceClasses = new ArrayList<>();
 
@@ -161,7 +146,7 @@ public final class RoutingConfig {
             if (provider == null) {
                 throw new IllegalArgumentException(Messages.isNull("provider"));
             }
-            providers.add(provider);
+            converterProviders.add(provider);
             return this;
         }
 
@@ -211,29 +196,13 @@ public final class RoutingConfig {
         }
 
         public RoutingConfig build() {
-
-            Collections.sort(bodyWriters, Prioritised.PRIORITY_COMPARATOR);
-            List<BodyWriter> unmodifiableBodyWriters = Collections.unmodifiableList(bodyWriters);
-
-            Collections.sort(bodyReaders, Prioritised.PRIORITY_COMPARATOR);
-            List<BodyReader> unmodifiableBodyReaders = Collections.unmodifiableList(bodyReaders);
-
-            Collections.sort(exceptionMappers, Prioritised.PRIORITY_COMPARATOR);
-            List<ExceptionMapperWrapper<? extends Throwable>> unmodifiableExceptionMappers = Collections.unmodifiableList(exceptionMappers);
-
-            Map<ConfigProperty, Object> unmodifiableConfigProperties = Collections.unmodifiableMap(configProperties);
-
-            ConvertersHolder convertersHolder = new ConvertersHolder(providers);
-
             // @formatter:off
             return new RoutingConfig(
                     componentProvider,
-                    convertersHolder,
+                    new ConvertersHolder(converterProviders),
                     Collections.unmodifiableList(resourceClasses),
-                    unmodifiableBodyWriters,
-                    unmodifiableBodyReaders,
-                    unmodifiableExceptionMappers,
-                    unmodifiableConfigProperties,
+                    new ProvidersImpl(bodyReaders, bodyWriters, exceptionMappers),
+                    Collections.unmodifiableMap(configProperties),
                     validator);
             // @formatter:on
         }

@@ -16,8 +16,6 @@ import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
 import net.cactusthorn.routing.RoutingConfig.ConfigProperty;
-import net.cactusthorn.routing.body.reader.ConvertersMessageBodyReader;
-import net.cactusthorn.routing.body.writer.ObjectMessageBodyWriter;
 import net.cactusthorn.routing.convert.ParamConverterProviderWrapperTest;
 import net.cactusthorn.routing.resource.ResourceScanner;
 import net.cactusthorn.routing.uri.PathTemplate.PathValues;
@@ -86,18 +84,6 @@ public class RoutingConfigTest {
     }
 
     @Test //
-    public void bodyWriter() {
-        RoutingConfig config = RoutingConfig.builder(new EntryPointDateProvider()).addBodyWriter(new ObjectMessageBodyWriter()).build();
-        assertEquals(3, config.bodyWriters().size());
-    }
-
-    @Test //
-    public void bodyReader() {
-        RoutingConfig config = RoutingConfig.builder(new EntryPointDateProvider()).addBodyReader(new ConvertersMessageBodyReader()).build();
-        assertEquals(4, config.bodyReaders().size());
-    }
-
-    @Test //
     public void responseCharacterEncoding() {
         RoutingConfig config = RoutingConfig.builder(new EntryPointDateProvider()).setResponseCharacterEncoding("KOI8-R").build();
         String value = (String) config.properties().get(ConfigProperty.RESPONSE_CHARACTER_ENCODING);
@@ -130,11 +116,5 @@ public class RoutingConfigTest {
         RoutingConfig config = RoutingConfig.builder(new EntryPointDateProvider()).setParametersValidator(TEST_VALIDATOR).build();
         Optional<ParametersValidator> validator = config.validator();
         assertTrue(validator.isPresent());
-    }
-
-    @Test //
-    public void exceptionMappers() {
-        RoutingConfig config = RoutingConfig.builder(new EntryPointDateProvider()).addExceptionMapper(new TestExceptionMapper()).build();
-        assertEquals(UnsupportedOperationException.class, config.exceptionMappers().get(0).throwable());
     }
 }

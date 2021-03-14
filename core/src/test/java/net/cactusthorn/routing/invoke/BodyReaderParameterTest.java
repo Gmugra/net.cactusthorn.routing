@@ -29,6 +29,7 @@ import net.cactusthorn.routing.ComponentProvider;
 import net.cactusthorn.routing.RoutingConfig;
 import net.cactusthorn.routing.RoutingInitializationException;
 import net.cactusthorn.routing.ServletTestInputStream;
+import net.cactusthorn.routing.util.ProvidersImpl;
 
 public class BodyReaderParameterTest extends InvokeTestAncestor {
 
@@ -67,7 +68,7 @@ public class BodyReaderParameterTest extends InvokeTestAncestor {
 
     @BeforeAll //
     protected static void beforeAll() throws Exception {
-        CONFIG.bodyReaders().forEach(r -> r.init(null, CONFIG));
+        ((ProvidersImpl)CONFIG.providers()).init(null, CONFIG);
     }
 
     @Override @BeforeEach //

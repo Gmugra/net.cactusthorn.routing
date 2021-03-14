@@ -5,47 +5,38 @@ import java.lang.reflect.Parameter;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Enumeration;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import javax.ws.rs.BadRequestException;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.MultivaluedHashMap;
 import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.ext.MessageBodyReader;
+import javax.ws.rs.ext.Providers;
 
 import net.cactusthorn.routing.RoutingInitializationException;
-import net.cactusthorn.routing.body.reader.BodyReader;
 import net.cactusthorn.routing.uri.PathTemplate.PathValues;
 
 import net.cactusthorn.routing.util.Messages;
 import static net.cactusthorn.routing.util.Messages.Key.BODY_READER_NOT_FOUND;
-import static net.cactusthorn.routing.util.Messages.Key.SOMETHING_TOTALLY_WRONG;
 
 public final class BodyReaderParameter extends MethodParameter {
 
-    private Map<MediaType, MessageBodyReader<?>> messageBodyReaders = new HashMap<>();
+    private final Providers providers;
 
     public BodyReaderParameter(Method method, Parameter parameter, Type genericType, int position, Set<MediaType> consumesMediaTypes,
-            List<BodyReader> bodyReaders) {
+            Providers providers) {
         super(method, parameter, genericType, position);
-
         for (MediaType consumesMediaType : consumesMediaTypes) {
-            for (BodyReader bodyReader : bodyReaders) {
-                if (bodyReader.isProcessable(type(), genericType(), annotations(), consumesMediaType)) {
-                    messageBodyReaders.put(consumesMediaType, bodyReader.messageBodyReader());
-                    break;
-                }
-            }
-            if (!messageBodyReaders.containsKey(consumesMediaType)) {
+            MessageBodyReader<?> reader = providers.getMessageBodyReader(type(), genericType(), annotations(), consumesMediaType);
+            if (reader == null) {
                 throw new RoutingInitializationException(Messages.msg(BODY_READER_NOT_FOUND, consumesMediaType, method()));
             }
         }
+        this.providers = providers;
     }
 
     @SuppressWarnings({ "rawtypes", "unchecked" }) @Override //
@@ -58,12 +49,7 @@ public final class BodyReaderParameter extends MethodParameter {
 
     private MessageBodyReader<?> findBodyReader(HttpServletRequest req) {
         MediaType requestMediaType = contentType(req);
-        for (Map.Entry<MediaType, MessageBodyReader<?>> entry : messageBodyReaders.entrySet()) {
-            if (entry.getKey().isCompatible(requestMediaType)) {
-                return entry.getValue();
-            }
-        }
-        throw new BadRequestException(Messages.msg(SOMETHING_TOTALLY_WRONG));
+        return providers.getMessageBodyReader(type(), genericType(), annotations(), requestMediaType);
     }
 
     private MediaType contentType(HttpServletRequest req) {

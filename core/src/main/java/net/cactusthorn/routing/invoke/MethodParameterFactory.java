@@ -13,6 +13,7 @@ import javax.servlet.http.HttpServletResponse;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.SecurityContext;
 import javax.ws.rs.core.UriInfo;
+import javax.ws.rs.ext.Providers;
 import javax.ws.rs.CookieParam;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.HeaderParam;
@@ -88,6 +89,9 @@ final class MethodParameterFactory {
             if (UriInfo.class == parameter.getType()) {
                 return new UriInfoParameter(method, parameter, genericType, position);
             }
+            if (Providers.class == parameter.getType()) {
+                return new ProvidersParameter(method, parameter, genericType, position, routingConfig.providers());
+            }
             throw new RoutingInitializationException(Messages.msg(CONTEXT_NOT_SUPPORTED, parameter.getType(), method));
         }
         if (method.getAnnotation(POST.class) != null || method.getAnnotation(PUT.class) != null
@@ -95,7 +99,7 @@ final class MethodParameterFactory {
             if (Form.class == parameter.getType()) {
                 return new FormParameter(method, parameter, genericType, position, consumesMediaTypes);
             }
-            return new BodyReaderParameter(method, parameter, genericType, position, consumesMediaTypes, routingConfig.bodyReaders());
+            return new BodyReaderParameter(method, parameter, genericType, position, consumesMediaTypes, routingConfig.providers());
         }
         throw new RoutingInitializationException(Messages.msg(ONLY_POST_PUT_PATCH, method));
     }

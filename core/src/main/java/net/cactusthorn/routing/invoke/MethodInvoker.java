@@ -129,8 +129,7 @@ public final class MethodInvoker {
             } catch (ClientErrorException e) {
                 throw e;
             } catch (Exception e) {
-                throw new BadRequestException(
-                        Messages.msg(ERROR_AT_PARAMETER_POSITION, i + 1, parameter.getClass().getSimpleName(), e), e);
+                throw new BadRequestException(Messages.msg(ERROR_AT_PARAMETER_POSITION, i + 1, parameter.getClass().getSimpleName(), e), e);
             }
         }
 
@@ -155,10 +154,9 @@ public final class MethodInvoker {
             return method.invoke(object, values);
         } catch (InvocationTargetException exception) {
             Throwable cause = exception.getCause();
-            for (ExceptionMapperWrapper<? extends Throwable> wrapper : routingConfig.exceptionMappers()) {
-                if (wrapper.throwable() == cause.getClass()) {
-                    return wrapper.response(cause);
-                }
+            ExceptionMapperWrapper<?> mapper = (ExceptionMapperWrapper<?>) routingConfig.providers().getExceptionMapper(cause.getClass());
+            if (mapper != null) {
+                return mapper.response(cause);
             }
             throw exception;
         }

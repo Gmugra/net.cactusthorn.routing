@@ -43,6 +43,7 @@ import net.cactusthorn.routing.invoke.MethodInvoker.ReturnObjectInfo;
 import net.cactusthorn.routing.uri.PathTemplate;
 import net.cactusthorn.routing.uri.PathTemplate.PathValues;
 import net.cactusthorn.routing.validate.ParametersValidator;
+import net.cactusthorn.routing.util.ProvidersImpl;
 
 public class MethodInvokerTest extends InvokeTestAncestor {
 
@@ -146,7 +147,7 @@ public class MethodInvokerTest extends InvokeTestAncestor {
 
         RoutingConfig config = RoutingConfig.builder(new EntryPoint1Provider()).addResource(EntryPoint1.class)
                 .setParametersValidator(VALIDATOR).build();
-        config.bodyReaders().forEach(r -> r.init(null, config));
+        ((ProvidersImpl)config.providers()).init(null, config);
 
         Set<MediaType> consumesMediaTypes = new HashSet<>();
         consumesMediaTypes.add(MediaType.TEXT_PLAIN_TYPE);

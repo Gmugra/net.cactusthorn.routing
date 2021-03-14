@@ -10,7 +10,6 @@ import java.util.logging.Logger;
 import javax.servlet.*;
 import javax.servlet.http.*;
 import javax.ws.rs.HttpMethod;
-import javax.ws.rs.ServerErrorException;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
@@ -21,7 +20,6 @@ import javax.ws.rs.core.Response.StatusType;
 import javax.ws.rs.ext.MessageBodyWriter;
 
 import net.cactusthorn.routing.RoutingConfig.ConfigProperty;
-import net.cactusthorn.routing.body.writer.BodyWriter;
 import net.cactusthorn.routing.body.writer.MessageBodyHeadersWriter;
 import net.cactusthorn.routing.invoke.MethodInvoker.ReturnObjectInfo;
 import net.cactusthorn.routing.resource.ResourceScanner;
@@ -31,7 +29,8 @@ import net.cactusthorn.routing.util.Headers;
 import net.cactusthorn.routing.util.Http;
 
 import net.cactusthorn.routing.util.Messages;
-import static net.cactusthorn.routing.util.Messages.Key.MESSAGE_BODY_WRITER_NOT_FOUND;
+import net.cactusthorn.routing.util.ProvidersImpl;
+
 import static net.cactusthorn.routing.util.Messages.Key.INFO_PRODUCER_PROCESSING_DONE;
 import static net.cactusthorn.routing.util.Messages.Key.INFO_PATH_INFO;
 
@@ -58,8 +57,7 @@ public class RoutingServlet extends HttpServlet {
         super.init();
         servletContext = getServletContext();
         routingConfig.provider().init(servletContext);
-        routingConfig.bodyWriters().forEach(w -> w.init(servletContext, routingConfig));
-        routingConfig.bodyReaders().forEach(r -> r.init(servletContext, routingConfig));
+        ((ProvidersImpl) routingConfig.providers()).init(servletContext, routingConfig);
         routingConfig.validator().ifPresent(v -> v.init(servletContext, routingConfig.provider()));
 
         ResourceScanner scanner = new ResourceScanner(routingConfig);
@@ -224,14 +222,7 @@ public class RoutingServlet extends HttpServlet {
 
     @SuppressWarnings("rawtypes") //
     private MessageBodyWriter findBodyWriter(MediaType responseMediaType, ReturnObjectInfo info) {
-        for (BodyWriter bodyWriter : routingConfig.bodyWriters()) {
-            if (bodyWriter.isProcessable(info.type(), info.genericType(), info.annotations(), responseMediaType)) {
-                return bodyWriter.messageBodyWriter();
-            }
-        }
-
-        // Actually it's impossible, because exists ObjectMessageBodyWriter
-        throw new ServerErrorException(Messages.msg(MESSAGE_BODY_WRITER_NOT_FOUND), INTERNAL_SERVER_ERROR);
+        return routingConfig.providers().getMessageBodyWriter(info.type(), info.genericType(), info.annotations(), responseMediaType);
     }
 
     private boolean matchAccept(List<MediaType> accept, Response result) {

@@ -23,8 +23,7 @@ public class BodyWriter extends BodyProcessor {
         this.messageBodyWriter = messageBodyWriter;
     }
 
-    @SuppressWarnings("rawtypes") //
-    public MessageBodyWriter messageBodyWriter() {
+    public MessageBodyWriter<?> messageBodyWriter() {
         return messageBodyWriter;
     }
 
