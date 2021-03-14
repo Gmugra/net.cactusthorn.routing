@@ -198,7 +198,7 @@ public class RoutingServletTest {
         servlet.doGet(req, resp);
 
         ArgumentCaptor<Integer> code = ArgumentCaptor.forClass(Integer.class);
-        Mockito.verify(resp).sendError(code.capture(), Mockito.any());
+        Mockito.verify(resp).sendError(code.capture());
         assertEquals(HttpServletResponse.SC_NOT_FOUND, code.getValue());
     }
 
@@ -265,7 +265,7 @@ public class RoutingServletTest {
         servlet.doPut(req, resp);
 
         ArgumentCaptor<Integer> code = ArgumentCaptor.forClass(Integer.class);
-        Mockito.verify(resp).sendError(code.capture(), Mockito.any());
+        Mockito.verify(resp).sendError(code.capture());
         assertEquals(400, code.getValue());
     }
 
@@ -409,7 +409,7 @@ public class RoutingServletTest {
 
         ArgumentCaptor<Integer> code = ArgumentCaptor.forClass(Integer.class);
 
-        Mockito.verify(resp).sendError(code.capture(), Mockito.any());
+        Mockito.verify(resp).sendError(code.capture());
 
         assertEquals(400, code.getValue());
     }

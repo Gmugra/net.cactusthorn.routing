@@ -148,9 +148,11 @@ public class RoutingServlet extends HttpServlet {
                     }
                     produce(req, resp, resource, result, producesMediaType.get());
                 } catch (WebApplicationException wae) {
-                    resp.sendError(wae.getResponse().getStatus(), wae.getMessage());
+                    LOG.info(wae.getMessage());
+                    resp.sendError(wae.getResponse().getStatus());
                 } catch (Exception e) {
-                    resp.sendError(BAD_REQUEST.getStatusCode(), e.getMessage());
+                    LOG.info(e.getMessage());
+                    resp.sendError(BAD_REQUEST.getStatusCode());
                 }
                 return;
             }
@@ -181,7 +183,7 @@ public class RoutingServlet extends HttpServlet {
             path += '/';
         }
         if (LOG.isLoggable(Level.FINE)) {
-            LOG.log(Level.FINE, Messages.msg(INFO_PATH_INFO, req.getMethod(), contentType, req.getCharacterEncoding(), original, path));
+            LOG.fine(Messages.msg(INFO_PATH_INFO, req.getMethod(), contentType, req.getCharacterEncoding(), original, path));
         }
         return path;
     }
@@ -216,7 +218,7 @@ public class RoutingServlet extends HttpServlet {
         writer.writeTo(info, responseMediaType, result.getHeaders(), resp.getOutputStream());
 
         if (LOG.isLoggable(Level.FINE)) {
-            LOG.log(Level.FINE, Messages.msg(INFO_PRODUCER_PROCESSING_DONE, responseMediaType));
+            LOG.fine(Messages.msg(INFO_PRODUCER_PROCESSING_DONE, responseMediaType));
         }
     }
 

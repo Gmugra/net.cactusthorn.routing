@@ -4,6 +4,10 @@ import static org.junit.jupiter.api.Assertions.*;
 
 import java.io.IOException;
 import java.util.Collections;
+import java.util.logging.Handler;
+import java.util.logging.Level;
+import java.util.logging.LogManager;
+import java.util.logging.Logger;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -15,6 +19,7 @@ import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.ext.ExceptionMapper;
 
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
@@ -64,6 +69,16 @@ public class RoutingServletExceptionMapperTest {
         servlet = spyServlet;
     }
 
+    @BeforeAll //
+    static void setUpLogger() {
+        Logger rootLogger = LogManager.getLogManager().getLogger("");
+        rootLogger.setLevel(Level.FINE);
+        //switch off default Handlers to do not get anything in console
+        for (Handler h : rootLogger.getHandlers()) {
+            h.setLevel(Level.OFF);
+        }
+    }
+
     @BeforeEach //
     void setUp() throws IOException {
         req = Mockito.mock(HttpServletRequest.class);
@@ -95,9 +110,7 @@ public class RoutingServletExceptionMapperTest {
         servlet.doGet(req, resp);
 
         ArgumentCaptor<Integer> code = ArgumentCaptor.forClass(Integer.class);
-        ArgumentCaptor<String> message = ArgumentCaptor.forClass(String.class);
-        Mockito.verify(resp).sendError(code.capture(), message.capture());
+        Mockito.verify(resp).sendError(code.capture());
         assertEquals(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode(), code.getValue());
-        assertEquals("This is error", message.getValue());
     }
 }
