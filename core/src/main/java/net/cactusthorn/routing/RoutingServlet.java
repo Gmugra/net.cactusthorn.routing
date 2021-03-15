@@ -24,6 +24,7 @@ import net.cactusthorn.routing.body.writer.MessageBodyHeadersWriter;
 import net.cactusthorn.routing.invoke.MethodInvoker.ReturnObjectInfo;
 import net.cactusthorn.routing.resource.ResourceScanner;
 import net.cactusthorn.routing.resource.ResourceScanner.Resource;
+import net.cactusthorn.routing.uri.UriComponentEncoder;
 import net.cactusthorn.routing.uri.PathTemplate.PathValues;
 import net.cactusthorn.routing.util.Headers;
 import net.cactusthorn.routing.util.Http;
@@ -185,7 +186,7 @@ public class RoutingServlet extends HttpServlet {
         if (LOG.isLoggable(Level.FINE)) {
             LOG.fine(Messages.msg(INFO_PATH_INFO, req.getMethod(), contentType, req.getCharacterEncoding(), original, path));
         }
-        return path;
+        return UriComponentEncoder.PATH.encode(path);
     }
 
     private static final Http HTTP = new Http();
