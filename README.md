@@ -26,7 +26,7 @@ Be a complete implementation of the JAX-RS.
 
 ### MessageBodyReaders & MessageBodyReaders
 
-The library do not provide "complex" MessageBodyReaders/Writers out of the box. So, to get support for XML or JSON it need to provide an implementation of MessageBodyReaders/Writers. Howerever, such implementations are trivial issue. 
+The library do not provide "complex" MessageBodyReaders/Writers out of the box. So, to get support for XML or JSON it need to provide an implementation of MessageBodyReaders/Writers.
 
 However, such implementations are trivial issue:
 * **json-gson** module as example of _application/json_ MessageBodyReaders & MessageBodyWriter using [GSON](https://github.com/google/gson)
