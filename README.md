@@ -5,34 +5,41 @@ Lightweight [JAX-RS](https://www.oracle.com/technical-resources/articles/java/ja
 
 [![Build Status](https://travis-ci.com/Gmugra/net.cactusthorn.routing.svg?branch=main)](https://travis-ci.com/Gmugra/net.cactusthorn.routing) [![Coverage Status](https://coveralls.io/repos/github/Gmugra/net.cactusthorn.routing/badge.svg?branch=main)](https://coveralls.io/github/Gmugra/net.cactusthorn.routing?branch=main) [![Language grade: Java](https://img.shields.io/lgtm/grade/java/g/Gmugra/net.cactusthorn.routing.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/Gmugra/net.cactusthorn.routing/context:java) [![GitHub release (latest by date)](https://img.shields.io/github/v/release/Gmugra/net.cactusthorn.routing)](https://github.com/Gmugra/net.cactusthorn.routing/releases/tag/v0.29) [![Maven Central with version prefix filter](https://img.shields.io/maven-central/v/net.cactusthorn.routing/core/0.29)](https://search.maven.org/search?q=g:net.cactusthorn.routing) [![GitHub](https://img.shields.io/github/license/Gmugra/net.cactusthorn.routing)](https://github.com/Gmugra/net.cactusthorn.routing/blob/main/LICENSE) [![Build by Maven](http://maven.apache.org/images/logos/maven-feather.png)](http://maven.apache.org)
 
-## Introduction
+## Motivation
 
-Small library for HTTP request routing, based on JAX-RS specification.
+The Java API for RESTful web services (JAX-RS) makes developing RESTful web services in Java simple and intuitive. It's also nice that the API defines a powerful, flexible and easy-to-use routing mechanism (mapping HTTP requests to Java object methods), that more than suitable for any web-application (not only for RESTful web services).
+
+However, the specification contains requirements (such as e.g. XML support) that inevitably turn any full implementation into a multi-megabyte-sized framework with dozen(s) of dependencies on other libraries. And often, most of these features are never used in a particular application. (For example, think of a very typical use case: a microservice that should only handle a few JSON requests / responses).
+
+The idea behind this project is to get a slightly limited, but lightweight JAX-RS implementation without big, not always necessary features, but with all the core features as per the spec.
+
+### Goals
+1. Intended to be used in conjunction with the embedded java servlet container (e.g. [Jetty](https://www.eclipse.org/jetty/), [Tomcat](https://tomcat.apache.org/), [Undertow](https://undertow.io/))
+1. Don't use any dependencies other than rs-api & annotation-api
+1. Implement JAX-RS specification as much as possible
+
+### Non-Goals
+Be a complete implementation of the JAX-RS.
 
 
-## Compromises
+## Limitations
 
 ### MessageBodyReaders & MessageBodyReaders
 
-The library do not provide complex MessageBodyReaders/Writers out of the box.
-So, to get support for XML or JSON need to provide MessageBodyReaders/Writers implementations.
-However: such implementations are trivial issue.
+The library do not provide "complex" MessageBodyReaders/Writers out of the box. So, to get support for XML or JSON it need to provide an implementation of MessageBodyReaders/Writers. Howerever, such implementations are trivial issue. 
 
-Examples:
-* **json-gson** module as example of _application/json_ Reader & Writer using [GSON](https://github.com/google/gson)
-* **thymeleaf** module as example of _text/html_ Writer using [Thymeleaf](https://www.thymeleaf.org)
+However, such implementations are trivial issue:
+* **json-gson** module as example of _application/json_ MessageBodyReaders & MessageBodyWriter using [GSON](https://github.com/google/gson)
+* **thymeleaf** module as example of _text/html_ MessageBodyWriter using [Thymeleaf](https://www.thymeleaf.org)
 
 ### ComponentProvider
 
-Implementation of ComponentProvider interface required to  provide JAX-RS resources instances.
-It seems that implementation for ComponentProvider is not so easy, because you need "scopes" (Request and/or Session) or even Singletons.
-But it's not. All of that is natural features of any good dependency injection framework (e.g. [Dagger 2](https://dagger.dev), [Guice](https://github.com/google/guice), [HK2](https://javaee.github.io/hk2/) ).
-It's anyway good idea to use dependency injection in the application, so all what is need for ComponentProvider: link it with dependency injection framework which you are using.
+The library requires an implementation of the ComponentProvider interface, which exposes JAX-RS resource instances. It seems that such an implementation is a tricky problem because you need "scopes" (Request, Session, Singletons etc.). But it's not. All of that is natural features of any good dependency injection framework (e.g. [Dagger 2](https://dagger.dev), [Guice](https://github.com/google/guice), [HK2](https://javaee.github.io/hk2/) ). It's anyway good idea to use dependency injection in the application, so all what is need for ComponentProvider: link it with dependency injection framework which you are using.
 
 Example:
 * **demo-jetty** module is Demo Application: it uses [Dagger 2](https://dagger.dev) for dependency injection and as the basis for the _ComponentProvider_ implementation.
 
-### Usage
+## Usage
 
 Usual JAX-RS resources, e.g:
 
