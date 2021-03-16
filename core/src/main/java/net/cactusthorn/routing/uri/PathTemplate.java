@@ -114,6 +114,11 @@ public final class PathTemplate extends Template {
         }
     }
 
+    @Override //
+    public String template() {
+        return UriComponentEncoder.PATH.encode(super.template());
+    }
+
     public boolean match(String path) {
         if (variables().isEmpty()) {
             return template().equals(path);

@@ -88,4 +88,16 @@ public class PathTemplateMatchesTest {
         assertTrue(t.match("/customer/acccb/doit"));
         assertFalse(t.match("/customer/12/doit"));
     }
+
+    @Test //
+    public void encodeSimple() {
+        PathTemplate t = new PathTemplate("/cus%20tomer/aaaübbb/doit");
+        assertEquals("/cus%20tomer/aaa%C3%BCbbb/doit", t.template());
+    }
+
+    @Test //
+    public void encodeWithVar() {
+        PathTemplate t = new PathTemplate("/cust omer/{var :  [abc]*}/doit");
+        assertEquals("/cust%20omer/([abc]*)/doit", t.pattern().pattern());
+    }
 }
