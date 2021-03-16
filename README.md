@@ -149,6 +149,7 @@ The type of the annotated parameter must either:
    * javax.ws.rs.core.SecurityContext
    * javax.ws.rs.core.HttpHeaders
    * javax.ws.rs.core.UriInfo
+   * javax.ws.rs.ext.Providers
 1. `javax.ws.rs.core.Response`
 1. `javax.ws.rs.ext.ExceptionMapper`
 1. `javax.ws.rs.ext.ParamConverterProvider`
