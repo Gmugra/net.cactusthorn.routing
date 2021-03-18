@@ -7,6 +7,7 @@ import java.util.stream.Stream;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.NotFoundException;
+import javax.ws.rs.Path;
 import javax.ws.rs.QueryParam;
 
 import org.junit.jupiter.api.Test;
@@ -22,6 +23,7 @@ import net.cactusthorn.routing.RoutingInitializationException;
 
 public class QueryParamParameterTest extends InvokeTestAncestor {
 
+    @Path("/test") //
     public static class EntryPoint1 {
 
         public void wrong(@QueryParam("val") int values) {
@@ -73,13 +75,12 @@ public class QueryParamParameterTest extends InvokeTestAncestor {
         // @formatter:on
     }
 
-    @Test
-    public void set() throws Exception {
+    @Test public void set() throws Exception {
         MethodParameter mp = parameterInfo(EntryPoint1.class, "set", CONFIG);
 
-        Mockito.when(request.getParameterValues("val")).thenReturn(new String[] {"10", "20", "20"});
+        Mockito.when(request.getParameterValues("val")).thenReturn(new String[] { "10", "20", "20" });
 
-        Set<?> result = (Set<?>)mp.findValue(request, null, null, null);
+        Set<?> result = (Set<?>) mp.findValue(request, null, null, null);
 
         assertEquals(2, result.size());
     }
@@ -87,7 +88,7 @@ public class QueryParamParameterTest extends InvokeTestAncestor {
     /**
      * According to JSR-339 supported only List<T>, Set<T>, or SortedSet<T>
      */
-    @ParameterizedTest @ValueSource(strings = { "collectionNoGeneric", "queue"}) //
+    @ParameterizedTest @ValueSource(strings = { "collectionNoGeneric", "queue" }) //
     public void testThrows(String method) {
         assertThrows(RoutingInitializationException.class, () -> parameterInfo(EntryPoint1.class, method, CONFIG));
     }

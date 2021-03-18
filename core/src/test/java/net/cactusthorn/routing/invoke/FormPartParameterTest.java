@@ -14,6 +14,7 @@ import java.util.stream.Stream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.Part;
 import javax.ws.rs.Consumes;
+import javax.ws.rs.Path;
 import javax.ws.rs.core.MediaType;
 
 import org.junit.jupiter.api.Test;
@@ -29,7 +30,7 @@ import net.cactusthorn.routing.annotation.FormPart;
 
 public class FormPartParameterTest extends InvokeTestAncestor {
 
-    @Consumes(MediaType.MULTIPART_FORM_DATA)
+    @Path("/test") @Consumes(MediaType.MULTIPART_FORM_DATA) //
     public static class EntryPoint1 {
 
         public void simple(@FormPart("val") Part value) {
@@ -41,7 +42,7 @@ public class FormPartParameterTest extends InvokeTestAncestor {
         public void wrongType(@FormPart("val") String value) {
         }
 
-        @Consumes(MediaType.TEXT_HTML)
+        @Consumes(MediaType.TEXT_HTML) //
         public void wrongConsumes(@FormPart("val") Part val) {
         }
     }

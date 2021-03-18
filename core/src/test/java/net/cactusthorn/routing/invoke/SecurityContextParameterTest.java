@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import java.security.Principal;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.ws.rs.Path;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.SecurityContext;
 
@@ -20,8 +21,8 @@ public class SecurityContextParameterTest extends InvokeTestAncestor {
         return "NAME";
     };
 
+    @Path("/test") //
     public static class EntryPoint1 {
-
         public void simple(@Context SecurityContext securityContext) {
         }
     }

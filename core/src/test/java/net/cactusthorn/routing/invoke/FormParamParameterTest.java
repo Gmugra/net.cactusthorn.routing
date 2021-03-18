@@ -11,6 +11,7 @@ import javax.ws.rs.Consumes;
 import javax.ws.rs.DefaultValue;
 import javax.ws.rs.FormParam;
 import javax.ws.rs.NotFoundException;
+import javax.ws.rs.Path;
 import javax.ws.rs.core.MediaType;
 
 import org.junit.jupiter.api.Test;
@@ -25,6 +26,7 @@ import net.cactusthorn.routing.RoutingInitializationException;
 
 public class FormParamParameterTest extends InvokeTestAncestor {
 
+    @Path("/test")
     public static class EntryPoint1 {
 
         public void wrongConsumes(@FormParam("val") String value) {

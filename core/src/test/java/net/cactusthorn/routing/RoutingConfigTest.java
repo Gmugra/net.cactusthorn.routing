@@ -2,13 +2,18 @@ package net.cactusthorn.routing;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.List;
 import java.util.Optional;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.HttpMethod;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
+import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.ext.ExceptionMapper;
 
@@ -116,5 +121,44 @@ public class RoutingConfigTest {
         RoutingConfig config = RoutingConfig.builder(new EntryPointDateProvider()).setParametersValidator(TEST_VALIDATOR).build();
         Optional<ParametersValidator> validator = config.validator();
         assertTrue(validator.isPresent());
+    }
+
+    public static class WrongResource {
+        @Consumes(MediaType.WILDCARD)
+        public void m4(String in) {
+        }
+    }
+
+    public static class WrongResourceProvider implements ComponentProvider {
+
+        @Override //
+        public Object provide(Class<?> clazz, HttpServletRequest request) {
+            return new EntryPointDate();
+        }
+    }
+
+    @Test //
+    public void validateResource() {
+        assertThrows(IllegalArgumentException.class,
+                () -> RoutingConfig.builder(new WrongResourceProvider()).addResource(WrongResource.class).build());
+    }
+
+    @Test //
+    public void validateResources() {
+        List<Class<?>> resources = Arrays.asList(WrongResource.class);
+        assertThrows(IllegalArgumentException.class,
+                () -> RoutingConfig.builder(new WrongResourceProvider()).addResource(resources).build());
+    }
+
+    @Test //
+    public void resourceNull() {
+        assertThrows(IllegalArgumentException.class,
+                () -> RoutingConfig.builder(new EntryPointDateProvider()).addResource((Class<?>) null).build());
+    }
+
+    @Test //
+    public void resourcesNull() {
+        assertThrows(IllegalArgumentException.class,
+                () -> RoutingConfig.builder(new EntryPointDateProvider()).addResource((Collection<Class<?>>) null).build());
     }
 }
