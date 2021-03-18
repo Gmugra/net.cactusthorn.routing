@@ -8,6 +8,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.BadRequestException;
 import javax.ws.rs.CookieParam;
 import javax.ws.rs.DefaultValue;
+import javax.ws.rs.Path;
 import javax.ws.rs.core.Cookie;
 import javax.ws.rs.core.HttpHeaders;
 
@@ -19,6 +20,7 @@ import net.cactusthorn.routing.RoutingConfig;
 
 public class CookieParamParameterTest extends InvokeTestAncestor {
 
+    @Path("/test") //
     public static class EntryPoint1 {
 
         public void simple(@CookieParam("val") String value) {

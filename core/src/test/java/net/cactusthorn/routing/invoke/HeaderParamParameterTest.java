@@ -12,6 +12,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.BadRequestException;
 import javax.ws.rs.DefaultValue;
 import javax.ws.rs.HeaderParam;
+import javax.ws.rs.Path;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -25,6 +26,7 @@ import net.cactusthorn.routing.RoutingInitializationException;
 
 public class HeaderParamParameterTest extends InvokeTestAncestor {
 
+    @Path("/test") //
     public static class EntryPoint1 {
 
         public void simple(@HeaderParam("val") String value) {

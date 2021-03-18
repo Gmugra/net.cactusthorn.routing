@@ -5,7 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import java.util.Collections;
 
 import javax.servlet.http.HttpServletRequest;
-
+import javax.ws.rs.Path;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.UriInfo;
 
@@ -19,8 +19,8 @@ import static net.cactusthorn.routing.uri.PathTemplate.PathValues;
 
 public class UriInfoParameterTest extends InvokeTestAncestor {
 
+    @Path("/test") //
     public static class EntryPoint1 {
-
         public void simple(@Context UriInfo uriInfo) {
         }
     }
