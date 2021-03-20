@@ -9,6 +9,8 @@ import javax.ws.rs.ext.MessageBodyReader;
 import javax.ws.rs.ext.MessageBodyWriter;
 import javax.ws.rs.ext.ParamConverterProvider;
 import javax.ws.rs.ext.Providers;
+import javax.ws.rs.HttpMethod;
+import javax.ws.rs.Path;
 
 import net.cactusthorn.routing.body.reader.BodyReader;
 import net.cactusthorn.routing.body.reader.InputStreamMessageBodyReader;
@@ -24,6 +26,7 @@ import net.cactusthorn.routing.util.ProvidersImpl;
 import net.cactusthorn.routing.validate.ParametersValidator;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.EnumMap;
@@ -59,7 +62,7 @@ public final class RoutingConfig {
 
     private final Map<ConfigProperty, Object> configProperties;
 
-    private final ParametersValidator validator;
+    private final Optional<ParametersValidator> validator;
 
     // @formatter:off
     private RoutingConfig(
@@ -68,7 +71,7 @@ public final class RoutingConfig {
                 List<Class<?>> resourceClasses,
                 Providers providers,
                 Map<ConfigProperty, Object> configProperties,
-                ParametersValidator validator) {
+                Optional<ParametersValidator> validator) {
         this.componentProvider = componentProvider;
         this.convertersHolder = convertersHolder;
         this.resourceClasses = resourceClasses;
@@ -103,7 +106,7 @@ public final class RoutingConfig {
     }
 
     public Optional<ParametersValidator> validator() {
-        return Optional.ofNullable(validator);
+        return validator;
     }
 
     public static final class Builder {
@@ -151,11 +154,19 @@ public final class RoutingConfig {
         }
 
         public Builder addResource(Class<?> resource) {
+            if (resource == null) {
+                throw new IllegalArgumentException(Messages.isNull("resource"));
+            }
+            validateResource(resource);
             resourceClasses.add(resource);
             return this;
         }
 
         public Builder addResource(Collection<Class<?>> resources) {
+            if (resources == null) {
+                throw new IllegalArgumentException(Messages.isNull("resource"));
+            }
+            resources.forEach(r -> validateResource(r));
             resourceClasses.addAll(resources);
             return this;
         }
@@ -203,7 +214,20 @@ public final class RoutingConfig {
                     Collections.unmodifiableList(resourceClasses),
                     new ProvidersImpl(bodyReaders, bodyWriters, exceptionMappers),
                     Collections.unmodifiableMap(configProperties),
-                    validator);
+                    Optional.ofNullable(validator));
+            // @formatter:on
+        }
+
+        private void validateResource(Class<?> resource) {
+            if (resource.getAnnotation(Path.class) != null) {
+                return;
+            }
+            // @formatter:off
+            Arrays.stream(resource.getMethods())
+                .flatMap(m -> Arrays.stream(m.getAnnotations()))
+                .filter(a -> a.annotationType().getAnnotation(HttpMethod.class) != null)
+                .findAny()
+                .orElseThrow(() -> new IllegalArgumentException(Messages.msg(Messages.Key.WRONG_ROOT_RESOURCE_CLASS, resource.getName())));
             // @formatter:on
         }
     }

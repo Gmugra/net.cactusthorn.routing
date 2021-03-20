@@ -37,6 +37,7 @@ public final class Messages {
         VARIANT_LIST_ADD,
         WRONG_CONTENT_TYPE,
         WRONG_HTTP_STATUS_CODE,
+        WRONG_ROOT_RESOURCE_CLASS,
         WRONG_TEMPLATE_PARAM,
         WRONG_TEMPLATE_PARAM_CHAR;
     }

@@ -8,6 +8,7 @@ import java.util.stream.Stream;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.DefaultValue;
+import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 
 import org.junit.jupiter.params.ParameterizedTest;
@@ -22,6 +23,7 @@ import net.cactusthorn.routing.RoutingConfig;
 
 public class PathParamParameterTest extends InvokeTestAncestor {
 
+    @Path("/test") //
     public static class EntryPoint1 {
 
         public void array(@PathParam("val") int[] values) {

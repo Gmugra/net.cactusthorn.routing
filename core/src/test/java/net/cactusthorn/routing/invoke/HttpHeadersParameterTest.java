@@ -7,6 +7,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.ws.rs.Path;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.HttpHeaders;
 
@@ -18,6 +19,7 @@ import net.cactusthorn.routing.RoutingConfig;
 
 public class HttpHeadersParameterTest extends InvokeTestAncestor {
 
+    @Path("/test") //
     public static class EntryPoint1 {
         public void simple(@Context HttpHeaders headers) {
         }
@@ -31,8 +33,7 @@ public class HttpHeadersParameterTest extends InvokeTestAncestor {
 
     private static final RoutingConfig CONFIG = RoutingConfig.builder(new EntryPoint1Provider()).addResource(EntryPoint1.class).build();
 
-    @Test
-    public void findValue() throws Exception {
+    @Test public void findValue() throws Exception {
         Map<String, String> map = new HashMap<>();
         map.put("test-header", "test-value");
         Mockito.when(request.getHeaderNames()).thenReturn(Collections.enumeration(map.keySet()));
