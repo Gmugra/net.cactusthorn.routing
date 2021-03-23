@@ -11,6 +11,7 @@ import javax.ws.rs.ext.ParamConverterProvider;
 import javax.ws.rs.ext.Providers;
 import javax.ws.rs.HttpMethod;
 import javax.ws.rs.Path;
+import javax.ws.rs.core.Application;
 
 import net.cactusthorn.routing.body.reader.BodyReader;
 import net.cactusthorn.routing.body.reader.InputStreamMessageBodyReader;
@@ -23,6 +24,7 @@ import net.cactusthorn.routing.convert.ConvertersHolder;
 import net.cactusthorn.routing.util.ExceptionMapperWrapper;
 import net.cactusthorn.routing.util.Messages;
 import net.cactusthorn.routing.util.ProvidersImpl;
+import net.cactusthorn.routing.util.RoutingApplication;
 import net.cactusthorn.routing.validate.ParametersValidator;
 
 import java.util.ArrayList;
@@ -64,6 +66,8 @@ public final class RoutingConfig {
 
     private final Optional<ParametersValidator> validator;
 
+    private final Application application;
+
     // @formatter:off
     private RoutingConfig(
                 ComponentProvider componentProvider,
@@ -71,13 +75,15 @@ public final class RoutingConfig {
                 List<Class<?>> resourceClasses,
                 Providers providers,
                 Map<ConfigProperty, Object> configProperties,
-                Optional<ParametersValidator> validator) {
+                Optional<ParametersValidator> validator,
+                Application application) {
         this.componentProvider = componentProvider;
         this.convertersHolder = convertersHolder;
         this.resourceClasses = resourceClasses;
         this.providers = providers;
         this.configProperties = configProperties;
         this.validator = validator;
+        this.application = application;
     }
     // @formatter:off
 
@@ -109,6 +115,10 @@ public final class RoutingConfig {
         return validator;
     }
 
+    public Application application() {
+        return application;
+    }
+
     public static final class Builder {
 
         private ComponentProvider componentProvider;
@@ -127,6 +137,8 @@ public final class RoutingConfig {
 
         private ParametersValidator validator;
 
+        private final RoutingApplication.Builder appBuilder = RoutingApplication.builder();
+
         private Builder(ComponentProvider componentProvider) {
             if (componentProvider == null) {
                 throw new IllegalArgumentException(Messages.isNull("componentProvider"));
@@ -137,20 +149,35 @@ public final class RoutingConfig {
                 configProperties.put(property, property.ddefault());
             }
 
-            addBodyReader(new InputStreamMessageBodyReader());
-            addBodyReader(new StringMessageBodyReader());
-            addBodyReader(new ConvertersMessageBodyReader());
+            addMessageBodyReader(new InputStreamMessageBodyReader());
+            addMessageBodyReader(new StringMessageBodyReader());
+            addMessageBodyReader(new ConvertersMessageBodyReader());
 
-            addBodyWriter(new StringMessageBodyWriter());
-            addBodyWriter(new ObjectMessageBodyWriter());
+            addMessageBodyWriter(new StringMessageBodyWriter());
+            addMessageBodyWriter(new ObjectMessageBodyWriter());
         }
 
-        public Builder addParamConverterProvider(ParamConverterProvider provider) {
-            if (provider == null) {
-                throw new IllegalArgumentException(Messages.isNull("provider"));
+        public Builder addParamConverterProvider(ParamConverterProvider paramConverterProvider) {
+            if (paramConverterProvider == null) {
+                throw new IllegalArgumentException(Messages.isNull("paramConverterProvider"));
             }
-            converterProviders.add(provider);
+            converterProviders.add(paramConverterProvider);
+            appBuilder.addSingleton(paramConverterProvider);
             return this;
+        }
+
+        public Builder addParamConverterProvider(Class<?> paramConverterProvider) {
+            if (paramConverterProvider == null) {
+                throw new IllegalArgumentException(Messages.isNull("paramConverterProvider"));
+            }
+            try {
+                ParamConverterProvider pcp = (ParamConverterProvider) paramConverterProvider.getConstructor().newInstance();
+                converterProviders.add(pcp);
+                appBuilder.addClass(paramConverterProvider);
+                return this;
+            } catch (Exception e) {
+                throw new IllegalArgumentException(e);
+            }
         }
 
         public Builder addResource(Class<?> resource) {
@@ -159,6 +186,7 @@ public final class RoutingConfig {
             }
             validateResource(resource);
             resourceClasses.add(resource);
+            appBuilder.addClass(resource);
             return this;
         }
 
@@ -166,24 +194,63 @@ public final class RoutingConfig {
             if (resources == null) {
                 throw new IllegalArgumentException(Messages.isNull("resource"));
             }
-            resources.forEach(r -> validateResource(r));
+            resources.forEach(r -> {
+                validateResource(r); appBuilder.addClass(r);
+            });
             resourceClasses.addAll(resources);
             return this;
         }
 
-        public Builder addBodyWriter(MessageBodyWriter<?> messageBodyWriter) {
+        public Builder addMessageBodyWriter(MessageBodyWriter<?> messageBodyWriter) {
             bodyWriters.add(new BodyWriter(messageBodyWriter));
+            appBuilder.addSingleton(messageBodyWriter);
             return this;
         }
 
-        public Builder addBodyReader(MessageBodyReader<?> messageBodyReader) {
+        public Builder addMessageBodyWriter(Class<?> messageBodyWriter) {
+            try {
+                MessageBodyWriter<?> mbw = (MessageBodyWriter<?>) messageBodyWriter.getConstructor().newInstance();
+                bodyWriters.add(new BodyWriter(mbw));
+                appBuilder.addClass(messageBodyWriter);
+                return this;
+            } catch (Exception e) {
+                throw new IllegalArgumentException(e);
+            }
+        }
+
+        public Builder addMessageBodyReader(MessageBodyReader<?> messageBodyReader) {
             bodyReaders.add(new BodyReader(messageBodyReader));
+            appBuilder.addSingleton(messageBodyReader);
             return this;
+        }
+
+        public Builder addMessageBodyReader(Class<?> messageBodyReader) {
+            try {
+                MessageBodyReader<?> mbr = (MessageBodyReader<?>) messageBodyReader.getConstructor().newInstance();
+                bodyReaders.add(new BodyReader(mbr));
+                appBuilder.addClass(messageBodyReader);
+                return this;
+            } catch (Exception e) {
+                throw new IllegalArgumentException(e);
+            }
         }
 
         public Builder addExceptionMapper(ExceptionMapper<? extends Throwable> exceptionMapper) {
             exceptionMappers.add(new ExceptionMapperWrapper<>(exceptionMapper));
+            appBuilder.addSingleton(exceptionMapper);
             return this;
+        }
+
+        public Builder addExceptionMapper(Class<?> exceptionMapper) {
+            try {
+                @SuppressWarnings("unchecked") ExceptionMapper<? extends Throwable> em =
+                        (ExceptionMapper<? extends Throwable>) exceptionMapper.getConstructor().newInstance();
+                exceptionMappers.add(new ExceptionMapperWrapper<>(em));
+                appBuilder.addClass(exceptionMapper);
+                return this;
+            } catch (Exception e) {
+                throw new IllegalArgumentException(e);
+            }
         }
 
         public Builder setResponseCharacterEncoding(String encoding) {
@@ -206,6 +273,20 @@ public final class RoutingConfig {
             return this;
         }
 
+        public Builder setParametersValidator(Class<?> parametersValidator) {
+            try {
+                validator = (ParametersValidator) parametersValidator.getConstructor().newInstance();
+                return this;
+            } catch (Exception e) {
+                throw new IllegalArgumentException(e);
+            }
+        }
+
+        public Builder putApplicationProperties(String name, Object value) {
+            appBuilder.putProperty(name, value);
+            return this;
+        }
+
         public RoutingConfig build() {
             // @formatter:off
             return new RoutingConfig(
@@ -214,7 +295,8 @@ public final class RoutingConfig {
                     Collections.unmodifiableList(resourceClasses),
                     new ProvidersImpl(bodyReaders, bodyWriters, exceptionMappers),
                     Collections.unmodifiableMap(configProperties),
-                    Optional.ofNullable(validator));
+                    Optional.ofNullable(validator),
+                    appBuilder.build());
             // @formatter:on
         }
 

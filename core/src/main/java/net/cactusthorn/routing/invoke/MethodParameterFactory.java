@@ -22,6 +22,7 @@ import javax.ws.rs.FormParam;
 import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
 import javax.ws.rs.PATCH;
+import javax.ws.rs.core.Application;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Form;
 import javax.ws.rs.core.HttpHeaders;
@@ -91,6 +92,9 @@ final class MethodParameterFactory {
             }
             if (Providers.class == parameter.getType()) {
                 return new ProvidersParameter(method, parameter, genericType, position, routingConfig.providers());
+            }
+            if (Application.class == parameter.getType()) {
+                return new ApplicationParameter(method, parameter, genericType, position, routingConfig.application());
             }
             throw new RoutingInitializationException(Messages.msg(CONTEXT_NOT_SUPPORTED, parameter.getType(), method));
         }
