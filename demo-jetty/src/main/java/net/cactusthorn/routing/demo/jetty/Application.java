@@ -77,12 +77,12 @@ public class Application {
             RoutingConfig.builder(ComponentProvider)
             .addResource(main.resources().keySet())
             .addResource(main.sessionBuilder().build().resources().keySet())
-            .addBodyWriter(new SimpleGsonBodyWriter<>())
-            .addBodyReader(new SimpleGsonBodyReader<>())
-            .addBodyWriter(new SimpleThymeleafBodyWriter("/thymeleaf/"))
-            .addParamConverterProvider(new LocalDateParamConverterProvider())
-            .addExceptionMapper(new UnsupportedOperationExceptionMapper())
-            .setParametersValidator(new SimpleParametersValidator())
+            .addMessageBodyWriter(SimpleGsonBodyWriter.class)
+            .addMessageBodyReader(SimpleGsonBodyReader.class)
+            .addMessageBodyWriter(new SimpleThymeleafBodyWriter("/thymeleaf/"))
+            .addParamConverterProvider(LocalDateParamConverterProvider.class)
+            .addExceptionMapper(UnsupportedOperationExceptionMapper.class)
+            .setParametersValidator(SimpleParametersValidator.class)
             .build();
         // @formatter:on
 

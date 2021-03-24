@@ -137,7 +137,7 @@ public class RoutingServletTemplatedTest {
     }
 
     private void service(String path) throws ServletException, IOException {
-        RoutingConfig c = RoutingConfig.builder(new EntryPoint1Provider()).addResource(EntryPoint1.class).addBodyWriter(new TestTemplated())
+        RoutingConfig c = RoutingConfig.builder(new EntryPoint1Provider()).addResource(EntryPoint1.class).addMessageBodyWriter(new TestTemplated())
                 .build();
         RoutingServlet toSpy = new RoutingServlet(c);
         RoutingServlet s = Mockito.spy(toSpy);

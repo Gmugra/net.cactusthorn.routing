@@ -86,12 +86,12 @@ public class Application {
             RoutingConfig.builder(myComponentProvider)
             .addResource(MyResource.class)
             .addResource(resources)
-            .addBodyWriter(new SimpleGsonBodyWriter<>())
-            .addBodyReader(new SimpleGsonBodyReader<>())
-            .addBodyWriter(new SimpleThymeleafBodyWriter("/thymeleaf/"))
-            .addParamConverterProvider(new LocalDateParamConverterProvider())
-            .addExceptionMapper(new UnsupportedOperationExceptionMapper())
-            .setParametersValidator(new SimpleParametersValidator())
+            .addMessageBodyWriter(SimpleGsonBodyWriter.class)
+            .addMessageBodyReader(SimpleGsonBodyReader.class)
+            .addMessageBodyWriter(new SimpleThymeleafBodyWriter("/thymeleaf/"))
+            .addParamConverterProvider(LocalDateParamConverterProvider.class)
+            .addExceptionMapper(UnsupportedOperationExceptionMapper.class)
+            .setParametersValidator(SimpleParametersValidator.class)
             .build();
 
         MultipartConfigElement mpConfig = new MultipartConfigElement("/tmp", 1024 * 1024, 1024 * 1024 * 5, 1024 * 1024 * 5 * 5);
@@ -149,7 +149,7 @@ The type of the annotated parameter must either:
    * default(if not present) is "\*/\*"
 1. `@Produces` for class and/or method
    * default(if not present) is "text/plain"
-1. `@Context` for method parameters. At the moment suport next types:
+1. `@Context` for method parameters. The following types are currently supported:
    * javax.servlet.http.HttpServletRequest
    * javax.servlet.http.HttpServletResponse
    * javax.servlet.ServletContext
@@ -157,6 +157,7 @@ The type of the annotated parameter must either:
    * javax.ws.rs.core.HttpHeaders
    * javax.ws.rs.core.UriInfo
    * javax.ws.rs.ext.Providers
+   * javax.ws.rs.core.Application
 1. `javax.ws.rs.core.Response`
 1. `javax.ws.rs.ext.ExceptionMapper`
 1. `javax.ws.rs.ext.ParamConverterProvider`

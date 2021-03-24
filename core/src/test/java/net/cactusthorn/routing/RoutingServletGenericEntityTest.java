@@ -85,7 +85,7 @@ public class RoutingServletGenericEntityTest {
     }
     
     static RoutingConfig config = RoutingConfig.builder(new EntryPoint1Provider()).addResource(EntryPoint1.class)
-            .addBodyWriter(new TestWriter()).build();
+            .addMessageBodyWriter(new TestWriter()).build();
 
     HttpServletRequest req;
     HttpServletResponse resp;
