@@ -23,6 +23,7 @@ import net.cactusthorn.routing.invoke.MethodInvoker;
 import net.cactusthorn.routing.invoke.MethodInvoker.ReturnObjectInfo;
 import net.cactusthorn.routing.uri.PathTemplate;
 import net.cactusthorn.routing.uri.PathTemplate.PathValues;
+import net.cactusthorn.routing.util.ResourceInfoImpl;
 
 public class ResourceScanner {
 
@@ -152,7 +153,8 @@ public class ResourceScanner {
 
                         String template = findTemplate(method);
 
-                        MethodInvoker methodInvoker = new MethodInvoker(routingConfig, clazz, method, consumesMediaTypes);
+                        MethodInvoker methodInvoker = new MethodInvoker(routingConfig, new ResourceInfoImpl(clazz, method),
+                                consumesMediaTypes);
 
                         Set<String> rolesAllowed = findRolesAllowed(method);
 

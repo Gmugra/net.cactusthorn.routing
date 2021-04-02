@@ -44,6 +44,7 @@ import net.cactusthorn.routing.uri.PathTemplate;
 import net.cactusthorn.routing.uri.PathTemplate.PathValues;
 import net.cactusthorn.routing.validate.ParametersValidator;
 import net.cactusthorn.routing.util.ProvidersImpl;
+import net.cactusthorn.routing.util.ResourceInfoImpl;
 
 public class MethodInvokerTest extends InvokeTestAncestor {
 
@@ -130,7 +131,7 @@ public class MethodInvokerTest extends InvokeTestAncestor {
                 .setParametersValidator(VALIDATOR).build();
 
         Method method = findMethod(EntryPoint1.class, methodName);
-        MethodInvoker caller = new MethodInvoker(config, EntryPoint1.class, method, DEFAULT_CONTENT_TYPES);
+        MethodInvoker caller = new MethodInvoker(config, new ResourceInfoImpl(EntryPoint1.class, method), DEFAULT_CONTENT_TYPES);
 
         Object result = caller.invoke(request, response, context, pathValues);
 
@@ -154,7 +155,7 @@ public class MethodInvokerTest extends InvokeTestAncestor {
 
         Method method = findMethod(EntryPoint1.class, "m7");
 
-        MethodInvoker caller = new MethodInvoker(config, EntryPoint1.class, method, consumesMediaTypes);
+        MethodInvoker caller = new MethodInvoker(config, new ResourceInfoImpl(EntryPoint1.class, method), consumesMediaTypes);
 
         String result = (String) caller.invoke(request, response, null, null);
 
@@ -167,7 +168,7 @@ public class MethodInvokerTest extends InvokeTestAncestor {
                 .setParametersValidator(VALIDATOR).build();
 
         Method method = findMethod(EntryPoint1.class, "m8");
-        MethodInvoker caller = new MethodInvoker(config, EntryPoint1.class, method, DEFAULT_CONTENT_TYPES);
+        MethodInvoker caller = new MethodInvoker(config, new ResourceInfoImpl(EntryPoint1.class, method), DEFAULT_CONTENT_TYPES);
 
         ReturnObjectInfo returnObjectInfo = caller.returnObjectInfo(request, response, null);
         assertEquals(Void.TYPE, returnObjectInfo.type());
@@ -183,7 +184,7 @@ public class MethodInvokerTest extends InvokeTestAncestor {
                 .setParametersValidator(VALIDATOR).build();
 
         Method method = findMethod(EntryPoint1.class, "m9");
-        MethodInvoker caller = new MethodInvoker(config, EntryPoint1.class, method, DEFAULT_CONTENT_TYPES);
+        MethodInvoker caller = new MethodInvoker(config, new ResourceInfoImpl(EntryPoint1.class, method), DEFAULT_CONTENT_TYPES);
 
         assertThrows(BadRequestException.class, () -> caller.invoke(null, null, null, null));
     }
@@ -193,7 +194,7 @@ public class MethodInvokerTest extends InvokeTestAncestor {
         RoutingConfig config = RoutingConfig.builder(new EntryPoint1Provider()).addResource(EntryPoint1.class)
                 .setParametersValidator(VALIDATOR).build();
         Method method = findMethod(EntryPoint1.class, "genericEntity");
-        MethodInvoker caller = new MethodInvoker(config, EntryPoint1.class, method, DEFAULT_CONTENT_TYPES);
+        MethodInvoker caller = new MethodInvoker(config, new ResourceInfoImpl(EntryPoint1.class, method), DEFAULT_CONTENT_TYPES);
         Response result = (Response) caller.invoke(request, response, context, new PathTemplate.PathValues());
         ReturnObjectInfo info = caller.returnObjectInfo(request, response, result.getEntity());
         assertEquals("class java.util.ArrayList", info.type().toString());

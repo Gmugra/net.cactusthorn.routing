@@ -15,6 +15,7 @@ import javax.servlet.http.HttpServletResponse;
 import javax.ws.rs.BadRequestException;
 import javax.ws.rs.ClientErrorException;
 import javax.ws.rs.ServerErrorException;
+import javax.ws.rs.container.ResourceInfo;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.GenericEntity;
@@ -94,22 +95,19 @@ public final class MethodInvoker {
 
     private RoutingConfig routingConfig;
 
-    private Class<?> clazz;
-
-    private Method method;
+    private ResourceInfo resourceInfo;
 
     private List<MethodParameter> parameters;
 
     private ReturnObjectInfo returnObjectInfo;
 
-    public MethodInvoker(RoutingConfig routingConfig, Class<?> clazz, Method method, Set<MediaType> consumesMediaTypes) {
+    public MethodInvoker(RoutingConfig routingConfig, ResourceInfo resourceInfo, Set<MediaType> consumesMediaTypes) {
         this.routingConfig = routingConfig;
-        this.clazz = clazz;
-        this.method = method;
+        this.resourceInfo = resourceInfo;
 
-        returnObjectInfo = new ReturnObjectInfo(method);
+        returnObjectInfo = new ReturnObjectInfo(resourceInfo.getResourceMethod());
 
-        parameters = MethodParameterFactory.create(method, routingConfig, consumesMediaTypes);
+        parameters = MethodParameterFactory.create(resourceInfo.getResourceMethod(), routingConfig, consumesMediaTypes);
     }
 
     public ReturnObjectInfo returnObjectInfo(HttpServletRequest req, HttpServletResponse resp, Object entity) {
@@ -118,7 +116,7 @@ public final class MethodInvoker {
 
     public Object invoke(HttpServletRequest req, HttpServletResponse res, ServletContext con, PathValues pathValues) {
 
-        Object object = routingConfig.provider().provide(clazz, req);
+        Object object = routingConfig.provider().provide(resourceInfo.getResourceClass(), req);
 
         Object[] values = parameters.size() == 0 ? new Object[0] : new Object[parameters.size()];
 
@@ -134,7 +132,7 @@ public final class MethodInvoker {
         }
 
         if (routingConfig.validator().isPresent()) {
-            routingConfig.validator().get().validate(object, method, values);
+            routingConfig.validator().get().validate(object, resourceInfo.getResourceMethod(), values);
         }
 
         try {
@@ -151,7 +149,7 @@ public final class MethodInvoker {
     private Object invokeWithExceptionMappers(Object object, Object[] values)
             throws IllegalAccessException, IllegalArgumentException, InvocationTargetException {
         try {
-            return method.invoke(object, values);
+            return resourceInfo.getResourceMethod().invoke(object, values);
         } catch (InvocationTargetException exception) {
             Throwable cause = exception.getCause();
             ExceptionMapperWrapper<?> mapper = (ExceptionMapperWrapper<?>) routingConfig.providers().getExceptionMapper(cause.getClass());
