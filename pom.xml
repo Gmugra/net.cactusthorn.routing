@@ -50,15 +50,15 @@
 
         <dependency.slf4j>1.7.30</dependency.slf4j>
         <dependency.logback-classic>1.2.3</dependency.logback-classic>
-        <dependency.junit>5.7.0</dependency.junit>
-        <dependency.mockito>3.6.28</dependency.mockito>
+        <dependency.junit>5.8.0-M1</dependency.junit>
+        <dependency.mockito>3.8.0</dependency.mockito>
         <dependency.servlet>3.1.0</dependency.servlet>
         <dependency.rs-api>2.1.1</dependency.rs-api>
         <dependency.annotation-api>1.3.2</dependency.annotation-api>
-        <dependency.jetty>9.4.35.v20201120</dependency.jetty>
+        <dependency.jetty>9.4.39.v20210325</dependency.jetty>
         <dependency.gson>2.8.6</dependency.gson>
         <dependency.thymeleaf>3.0.12.RELEASE</dependency.thymeleaf>
-        <dependency.dagger>2.30.1</dependency.dagger>
+        <dependency.dagger>2.33</dependency.dagger>
         <dependency.hibernate-validator>6.2.0.Final</dependency.hibernate-validator>
         <dependency.javax.el>3.0.1-b12</dependency.javax.el>
         <dependency.jaxb>2.3.1</dependency.jaxb>
@@ -81,10 +81,10 @@
         <plugin.pmd>3.14.0</plugin.pmd>
         <plugin.project-info-reports>3.1.1</plugin.project-info-reports>
         <plugin.checkstyle>3.1.1</plugin.checkstyle>
-            <dependency.checkstyle>8.39</dependency.checkstyle>
+            <dependency.checkstyle>8.41.1</dependency.checkstyle>
         <plugin.coveralls>4.3.0</plugin.coveralls>
-        <plugin.spotbugs>4.1.4</plugin.spotbugs>
-            <dependency.spotbugs>4.2.0</dependency.spotbugs>
+        <plugin.spotbugs>4.2.2</plugin.spotbugs>
+            <dependency.spotbugs>4.2.2</dependency.spotbugs>
         <plugin.gpg>1.6</plugin.gpg>
         <plugin.nexus-staging>1.6.8</plugin.nexus-staging>
         <plugin.release>3.0.0-M1</plugin.release>
