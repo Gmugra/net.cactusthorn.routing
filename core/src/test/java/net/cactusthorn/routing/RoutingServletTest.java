@@ -3,6 +3,10 @@ package net.cactusthorn.routing;
 import static org.junit.jupiter.api.Assertions.*;
 
 import java.io.IOException;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
@@ -52,6 +56,9 @@ public class RoutingServletTest {
     public static final ParametersValidator TEST_VALIDATOR = (object, method, parameters) -> {
         throw new BadRequestException("abc");
     };
+
+    @Target({ ElementType.METHOD }) @Retention(RetentionPolicy.RUNTIME) @HttpMethod("XYZ") public @interface XYZ {
+    }
 
     @Path("/") //
     public static class EntryPoint1 {
@@ -142,6 +149,11 @@ public class RoutingServletTest {
         public Response wrongProduces() {
             return Response.ok("some value").type(MediaType.TEXT_PLAIN_TYPE).build();
         }
+
+        @XYZ @Path("api/xyz") //
+        public String xyz() {
+            return "XYZ";
+        }
     }
 
     public static class EntryPoint1Provider implements ComponentProvider {
@@ -175,7 +187,7 @@ public class RoutingServletTest {
     static void setUpLogger() {
         Logger rootLogger = LogManager.getLogManager().getLogger("");
         rootLogger.setLevel(Level.FINE);
-        //switch off default Handlers to do not get anything in console
+        // switch off default Handlers to do not get anything in console
         for (Handler h : rootLogger.getHandlers()) {
             h.setLevel(Level.OFF);
         }
@@ -195,7 +207,7 @@ public class RoutingServletTest {
         Mockito.when(req.getPathInfo()).thenReturn("/api/wrong/abc");
         Mockito.when(req.getMethod()).thenReturn(HttpMethod.GET);
 
-        servlet.doGet(req, resp);
+        servlet.service(req, resp);
 
         ArgumentCaptor<Integer> code = ArgumentCaptor.forClass(Integer.class);
         Mockito.verify(resp).sendError(code.capture());
@@ -216,7 +228,7 @@ public class RoutingServletTest {
     public void head() throws ServletException, IOException {
         Mockito.when(req.getPathInfo()).thenReturn("/api/head");
         Mockito.when(req.getMethod()).thenReturn(HttpMethod.HEAD);
-        servlet.doHead(req, resp);
+        servlet.service(req, resp);
         ArgumentCaptor<Integer> code = ArgumentCaptor.forClass(Integer.class);
         Mockito.verify(resp).setStatus(code.capture());
         assertEquals(200, code.getValue());
@@ -230,7 +242,7 @@ public class RoutingServletTest {
         List<String> accept = new ArrayList<>();
         accept.add("text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9");
         Mockito.when(req.getHeaders(HttpHeaders.ACCEPT)).thenReturn(Collections.enumeration(accept));
-        servlet.doPost(req, resp);
+        servlet.service(req, resp);
         assertEquals(HttpMethod.POST, outputStream.toString());
     }
 
@@ -240,7 +252,7 @@ public class RoutingServletTest {
         Mockito.when(req.getMethod()).thenReturn(HttpMethod.POST);
         Mockito.when(req.getHeader(HttpHeaders.ACCEPT)).thenReturn(MediaType.APPLICATION_JSON);
 
-        servlet.doPost(req, resp);
+        servlet.service(req, resp);
 
         ArgumentCaptor<Integer> code = ArgumentCaptor.forClass(Integer.class);
         Mockito.verify(resp).sendError(code.capture(), Mockito.any());
@@ -252,7 +264,7 @@ public class RoutingServletTest {
         Mockito.when(req.getPathInfo()).thenReturn("/api/put");
         Mockito.when(req.getContentType()).thenReturn("application/json");
         Mockito.when(req.getMethod()).thenReturn(HttpMethod.PUT);
-        servlet.doPut(req, resp);
+        servlet.service(req, resp);
         assertEquals(HttpMethod.PUT, outputStream.toString());
     }
 
@@ -262,7 +274,7 @@ public class RoutingServletTest {
         Mockito.when(req.getContentType()).thenReturn("application/json; WWWWWW");
         Mockito.when(req.getMethod()).thenReturn(HttpMethod.PUT);
 
-        servlet.doPut(req, resp);
+        servlet.service(req, resp);
 
         ArgumentCaptor<Integer> code = ArgumentCaptor.forClass(Integer.class);
         Mockito.verify(resp).sendError(code.capture());
@@ -275,7 +287,7 @@ public class RoutingServletTest {
         Mockito.when(req.getContentType()).thenReturn("a/b");
         Mockito.when(req.getMethod()).thenReturn(HttpMethod.PUT);
 
-        servlet.doPut(req, resp);
+        servlet.service(req, resp);
 
         ArgumentCaptor<Integer> code = ArgumentCaptor.forClass(Integer.class);
         Mockito.verify(resp).sendError(code.capture(), Mockito.any());
@@ -286,7 +298,7 @@ public class RoutingServletTest {
     public void delete() throws ServletException, IOException {
         Mockito.when(req.getPathInfo()).thenReturn("/api/delete");
         Mockito.when(req.getMethod()).thenReturn(HttpMethod.DELETE);
-        servlet.doDelete(req, resp);
+        servlet.service(req, resp);
         ArgumentCaptor<Integer> code = ArgumentCaptor.forClass(Integer.class);
         Mockito.verify(resp).setStatus(code.capture());
         assertEquals(202, code.getValue());
@@ -296,7 +308,7 @@ public class RoutingServletTest {
     public void options() throws ServletException, IOException {
         Mockito.when(req.getPathInfo()).thenReturn("/api/options");
         Mockito.when(req.getMethod()).thenReturn(HttpMethod.OPTIONS);
-        servlet.doOptions(req, resp);
+        servlet.service(req, resp);
         ArgumentCaptor<Integer> code = ArgumentCaptor.forClass(Integer.class);
         Mockito.verify(resp).setStatus(code.capture());
         assertEquals(204, code.getValue());
@@ -307,14 +319,6 @@ public class RoutingServletTest {
         Mockito.when(req.getPathInfo()).thenReturn("/api/patch");
         Mockito.when(req.getMethod()).thenReturn(HttpMethod.PATCH);
         Mockito.when(req.getContentType()).thenReturn("");
-        servlet.doPatch(req, resp);
-        assertEquals(HttpMethod.PATCH, outputStream.toString());
-    }
-
-    @Test //
-    public void patchService() throws ServletException, IOException {
-        Mockito.when(req.getPathInfo()).thenReturn("/api/patch");
-        Mockito.when(req.getMethod()).thenReturn(HttpMethod.PATCH);
         servlet.service(req, resp);
         assertEquals(HttpMethod.PATCH, outputStream.toString());
     }
@@ -324,8 +328,29 @@ public class RoutingServletTest {
             "/api/produce;TEST_PRODUCER", "/api/response;FROM RESPONSE", "api/null;''" }) //
     public void get(String pathInfo, String expectedResponse) throws ServletException, IOException {
         Mockito.when(req.getPathInfo()).thenReturn(pathInfo);
-        servlet.doGet(req, resp);
+        Mockito.when(req.getMethod()).thenReturn(HttpMethod.GET);
+        servlet.service(req, resp);
         assertEquals(expectedResponse, outputStream.toString());
+    }
+
+    @Test //
+    public void xyz() throws ServletException, IOException {
+        Mockito.when(req.getPathInfo()).thenReturn("/api/xyz");
+        Mockito.when(req.getMethod()).thenReturn("XYZ");
+        servlet.service(req, resp);
+        assertEquals("XYZ", outputStream.toString());
+    }
+
+    @Test //
+    public void unknownMethod() throws ServletException, IOException {
+        Mockito.when(req.getMethod()).thenReturn("ABC");
+        servlet.service(req, resp);
+
+        ArgumentCaptor<Integer> code = ArgumentCaptor.forClass(Integer.class);
+
+        Mockito.verify(resp).sendError(code.capture(), Mockito.any());
+
+        assertEquals(404, code.getValue());
     }
 
     @Test //
@@ -333,7 +358,7 @@ public class RoutingServletTest {
         Mockito.when(req.getPathInfo()).thenReturn("/aaaabbb");
         Mockito.when(req.getMethod()).thenReturn(HttpMethod.GET);
 
-        servlet.doGet(req, resp);
+        servlet.service(req, resp);
 
         ArgumentCaptor<Integer> code = ArgumentCaptor.forClass(Integer.class);
 
@@ -353,7 +378,7 @@ public class RoutingServletTest {
         Mockito.when(req.getPathInfo()).thenReturn("/api/get");
         Mockito.when(req.getMethod()).thenReturn(HttpMethod.GET);
 
-        s.doGet(req, resp);
+        s.service(req, resp);
 
         ArgumentCaptor<Integer> code = ArgumentCaptor.forClass(Integer.class);
 
@@ -367,7 +392,7 @@ public class RoutingServletTest {
         Mockito.when(req.getPathInfo()).thenReturn(pathInfo);
         Mockito.when(req.getMethod()).thenReturn(HttpMethod.GET);
 
-        servlet.doGet(req, resp);
+        servlet.service(req, resp);
 
         ArgumentCaptor<Integer> code = ArgumentCaptor.forClass(Integer.class);
 
@@ -381,7 +406,7 @@ public class RoutingServletTest {
         Mockito.when(req.getPathInfo()).thenReturn("/api/redirect");
         Mockito.when(req.getMethod()).thenReturn(HttpMethod.GET);
 
-        servlet.doGet(req, resp);
+        servlet.service(req, resp);
 
         ArgumentCaptor<String> header = ArgumentCaptor.forClass(String.class);
         ArgumentCaptor<Integer> code = ArgumentCaptor.forClass(Integer.class);
@@ -405,7 +430,7 @@ public class RoutingServletTest {
         Mockito.when(req.getPathInfo()).thenReturn("/api/get");
         Mockito.when(req.getMethod()).thenReturn(HttpMethod.GET);
 
-        s.doGet(req, resp);
+        s.service(req, resp);
 
         ArgumentCaptor<Integer> code = ArgumentCaptor.forClass(Integer.class);
 
@@ -427,7 +452,7 @@ public class RoutingServletTest {
         Mockito.when(req.isUserInRole(Mockito.any())).thenReturn(false);
         Mockito.when(req.getMethod()).thenReturn(HttpMethod.GET);
 
-        s.doGet(req, resp);
+        s.service(req, resp);
 
         ArgumentCaptor<Integer> code = ArgumentCaptor.forClass(Integer.class);
 
@@ -441,7 +466,7 @@ public class RoutingServletTest {
         Mockito.when(req.getMethod()).thenReturn(HttpMethod.GET);
         Mockito.when(req.getHeader(HttpHeaders.ACCEPT)).thenReturn(MediaType.TEXT_HTML);
 
-        servlet.doGet(req, resp);
+        servlet.service(req, resp);
 
         ArgumentCaptor<Integer> code = ArgumentCaptor.forClass(Integer.class);
 

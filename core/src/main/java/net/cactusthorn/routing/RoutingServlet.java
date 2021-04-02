@@ -9,7 +9,6 @@ import java.util.logging.Logger;
 
 import javax.servlet.*;
 import javax.servlet.http.*;
-import javax.ws.rs.HttpMethod;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
@@ -67,57 +66,20 @@ public class RoutingServlet extends HttpServlet {
 
     @Override //
     protected void service(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        if (req.getMethod().equalsIgnoreCase(HttpMethod.PATCH)) {
-            doPatch(req, resp);
-        } else {
-            super.service(req, resp);
-        }
-    }
-
-    protected void doPatch(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        process(req, resp, allResources.get(HttpMethod.PATCH));
-    }
-
-    @Override //
-    protected void doHead(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        process(req, resp, allResources.get(HttpMethod.HEAD));
-    }
-
-    @Override //
-    protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        process(req, resp, allResources.get(HttpMethod.POST));
-    }
-
-    @Override //
-    protected void doPut(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        process(req, resp, allResources.get(HttpMethod.PUT));
-    }
-
-    @Override //
-    protected void doDelete(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        process(req, resp, allResources.get(HttpMethod.DELETE));
-    }
-
-    @Override //
-    protected void doOptions(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        process(req, resp, allResources.get(HttpMethod.OPTIONS));
-    }
-
-    @Override //
-    protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        process(req, resp, allResources.get(HttpMethod.GET));
+        String method = req.getMethod().toUpperCase();
+        process(req, resp, allResources.get(method));
     }
 
     private void process(HttpServletRequest req, HttpServletResponse resp, List<Resource> resources) throws IOException {
+        if (resources == null) {
+            resp.sendError(NOT_FOUND.getStatusCode(), NOT_FOUND.getReasonPhrase());
+            return;
+        }
         String contentType = contentType(req);
         if (req.getCharacterEncoding() == null) {
             req.setCharacterEncoding(defaultRequestCharacterEncoding);
         }
         String path = getPath(contentType, req);
-        if (resources.isEmpty()) {
-            resp.sendError(NOT_FOUND.getStatusCode(), NOT_FOUND.getReasonPhrase());
-            return;
-        }
         List<MediaType> accept = Headers.parseAccept(req.getHeader(HttpHeaders.ACCEPT));
         boolean matchContentTypeFail = false;
         boolean matchAcceptFail = false;

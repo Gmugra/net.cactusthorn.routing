@@ -119,7 +119,7 @@ public class RoutingServletGenericEntityTest {
         Mockito.when(req.getMethod()).thenReturn(HttpMethod.GET);
         Mockito.when(req.getCharacterEncoding()).thenReturn("UTF-8");
 
-        servlet.doGet(req, resp);
+        servlet.service(req, resp);
 
         ArgumentCaptor<Integer> code = ArgumentCaptor.forClass(Integer.class);
         Mockito.verify(resp).setStatus(code.capture());

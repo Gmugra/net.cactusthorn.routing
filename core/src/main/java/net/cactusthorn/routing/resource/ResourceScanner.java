@@ -42,8 +42,8 @@ public class ResourceScanner {
         private String template;
         private Set<String> rolesAllowed;
 
-        private Resource(PathTemplate pathTemplate, String template, List<MediaType> producesMediaTypes,
-                Set<MediaType> consumesMediaTypes, MethodInvoker methodInvoker, Set<String> rolesAllowed) {
+        private Resource(PathTemplate pathTemplate, String template, List<MediaType> producesMediaTypes, Set<MediaType> consumesMediaTypes,
+                MethodInvoker methodInvoker, Set<String> rolesAllowed) {
             this.pathTemplate = pathTemplate;
             this.producesMediaTypes = producesMediaTypes;
             this.template = template;
@@ -128,7 +128,7 @@ public class ResourceScanner {
 
     public Map<String, List<Resource>> scan() {
 
-        Map<String, List<Resource>> resources = createMap();
+        Map<String, List<Resource>> resources = new HashMap<>();
 
         for (Class<?> clazz : routingConfig.resourceClasses()) {
 
@@ -156,9 +156,16 @@ public class ResourceScanner {
 
                         Set<String> rolesAllowed = findRolesAllowed(method);
 
-                        Resource resource = new Resource(pathTemplate, template, producesMediaTypes, consumesMediaTypes,
-                                methodInvoker, rolesAllowed);
-                        resources.get(httpMethod).add(resource);
+                        Resource resource = new Resource(pathTemplate, template, producesMediaTypes, consumesMediaTypes, methodInvoker,
+                                rolesAllowed);
+
+                        if (resources.containsKey(httpMethod)) {
+                            resources.get(httpMethod).add(resource);
+                        } else {
+                            List<Resource> res = new ArrayList<>();
+                            res.add(resource);
+                            resources.put(httpMethod, res);
+                        }
                     }
                 }
             }
@@ -187,22 +194,17 @@ public class ResourceScanner {
         return Collections.emptySet();
     }
 
-    private static final Set<String> HTTP_METHODS = new HashSet<>(Arrays.asList(HttpMethod.DELETE, HttpMethod.GET, HttpMethod.HEAD,
-            HttpMethod.OPTIONS, HttpMethod.POST, HttpMethod.PUT, HttpMethod.PATCH));
-
     private String getHttpMethod(Annotation annotation) {
         HttpMethod httpMethod = annotation.annotationType().getAnnotation(HttpMethod.class);
-        if (httpMethod != null && HTTP_METHODS.contains(httpMethod.value())) {
+        if (httpMethod != null) {
             return httpMethod.value();
         }
         return null;
     }
 
-    private Map<String, List<Resource>> createMap() {
-        Map<String, List<Resource>> resources = new HashMap<>();
-        for (String method : HTTP_METHODS) {
-            resources.put(method, new ArrayList<>());
-        }
-        return resources;
-    }
+    /*
+     * private Map<String, List<Resource>> createMap() { Map<String, List<Resource>>
+     * resources = new HashMap<>(); for (String method : HTTP_METHODS) {
+     * resources.put(method, new ArrayList<>()); } return resources; }
+     */
 }
