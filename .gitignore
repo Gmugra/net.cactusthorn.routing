@@ -7,6 +7,9 @@
 
 !.travis.yml
 
+# discard ignoring GitHub settings
+!/.github/
+
 # Log file
 *.log
 
