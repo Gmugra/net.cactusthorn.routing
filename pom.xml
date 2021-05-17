@@ -78,7 +78,7 @@
         <plugin.jxr>3.0.0</plugin.jxr>
         <plugin.site>3.9.1</plugin.site>
         <plugin.pmd>3.14.0</plugin.pmd>
-        <plugin.project-info-reports>3.1.1</plugin.project-info-reports>
+        <plugin.project-info-reports>3.1.2</plugin.project-info-reports>
         <plugin.gpg>3.0.1</plugin.gpg>
         <plugin.release>3.0.0-M4</plugin.release>
         <plugin.flatten>1.2.5</plugin.flatten>
