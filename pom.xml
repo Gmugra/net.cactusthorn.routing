@@ -81,7 +81,7 @@
         <plugin.project-info-reports>3.1.1</plugin.project-info-reports>
         <plugin.gpg>3.0.1</plugin.gpg>
         <plugin.release>3.0.0-M4</plugin.release>
-        <plugin.flatten>1.2.5</plugin.flatten>
+        <plugin.flatten>1.2.7</plugin.flatten>
         <plugin.nexus-staging>1.6.8</plugin.nexus-staging>
 
         <plugin.checkstyle>3.1.2</plugin.checkstyle>
