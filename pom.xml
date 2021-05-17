@@ -75,7 +75,7 @@
         <plugin.javadoc>3.2.0</plugin.javadoc>
         <plugin.enforcer>3.0.0-M3</plugin.enforcer>
         <plugin.deploy>3.0.0-M1</plugin.deploy>
-        <plugin.jxr>3.0.0</plugin.jxr>
+        <plugin.jxr>3.1.1</plugin.jxr>
         <plugin.site>3.9.1</plugin.site>
         <plugin.pmd>3.14.0</plugin.pmd>
         <plugin.project-info-reports>3.1.1</plugin.project-info-reports>
