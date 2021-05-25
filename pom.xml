@@ -56,7 +56,7 @@
         <dependency.rs-api>2.1.1</dependency.rs-api>
         <dependency.annotation-api>1.3.2</dependency.annotation-api>
         <dependency.jetty>9.4.41.v20210516</dependency.jetty>
-        <dependency.gson>2.8.6</dependency.gson>
+        <dependency.gson>2.8.7</dependency.gson>
         <dependency.thymeleaf>3.0.12.RELEASE</dependency.thymeleaf>
         <dependency.dagger>2.35.1</dependency.dagger>
         <dependency.hibernate-validator>6.2.0.Final</dependency.hibernate-validator>
