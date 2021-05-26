@@ -258,6 +258,9 @@
                 <artifactId>maven-pmd-plugin</artifactId>
                 <configuration>
                     <verbose>true</verbose>
+                    <excludeRoots>
+                        <excludeRoot>target/generated-sources</excludeRoot>
+                    </excludeRoots>
                 </configuration>
                 <executions>
                     <execution>
