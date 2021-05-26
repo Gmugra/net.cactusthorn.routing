@@ -58,7 +58,7 @@
         <dependency.jetty>9.4.41.v20210516</dependency.jetty>
         <dependency.gson>2.8.6</dependency.gson>
         <dependency.thymeleaf>3.0.12.RELEASE</dependency.thymeleaf>
-        <dependency.dagger>2.35.1</dependency.dagger>
+        <dependency.dagger>2.36</dependency.dagger>
         <dependency.hibernate-validator>6.2.0.Final</dependency.hibernate-validator>
         <dependency.javax.el>3.0.1-b12</dependency.javax.el>
 
