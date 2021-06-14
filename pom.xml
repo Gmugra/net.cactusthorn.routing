@@ -68,7 +68,7 @@
         <plugin.test>3.0.0-M5</plugin.test>
         <plugin.clean>3.1.0</plugin.clean>
         <plugin.install>3.0.0-M1</plugin.install>
-        <plugin.dependency>3.1.2</plugin.dependency>
+        <plugin.dependency>3.2.0</plugin.dependency>
         <plugin.assembly>3.3.0</plugin.assembly>
         <plugin.jacoco>0.8.7</plugin.jacoco>
         <plugin.source>3.2.1</plugin.source>
