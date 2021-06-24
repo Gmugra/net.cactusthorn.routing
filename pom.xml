@@ -48,7 +48,7 @@
 
         <pmd.skip>true</pmd.skip>
 
-        <dependency.slf4j>1.7.30</dependency.slf4j>
+        <dependency.slf4j>1.7.31</dependency.slf4j>
         <dependency.logback-classic>1.2.3</dependency.logback-classic>
         <dependency.junit>5.7.2</dependency.junit>
         <dependency.mockito>3.11.2</dependency.mockito>
