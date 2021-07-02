@@ -38,6 +38,7 @@
 
     <properties>
         <pmd.skip>false</pmd.skip>
+        <copy.license.skip>false</copy.license.skip>
     </properties>
 
     <dependencies>
