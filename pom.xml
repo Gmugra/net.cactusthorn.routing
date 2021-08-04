@@ -89,7 +89,7 @@
         <plugin.checkstyle>3.1.2</plugin.checkstyle>
             <dependency.checkstyle>8.45</dependency.checkstyle>
         <plugin.coveralls>4.3.0</plugin.coveralls>
-            <dependency.jaxb-runtime>2.3.4</dependency.jaxb-runtime>
+            <dependency.jaxb-runtime>2.3.5</dependency.jaxb-runtime>
         <plugin.spotbugs>4.3.0</plugin.spotbugs>
             <dependency.spotbugs>4.3.0</dependency.spotbugs>
 
