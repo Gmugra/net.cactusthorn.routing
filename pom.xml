@@ -91,7 +91,7 @@
         <plugin.coveralls>4.3.0</plugin.coveralls>
             <dependency.jaxb-runtime>2.3.5</dependency.jaxb-runtime>
         <plugin.spotbugs>4.3.0</plugin.spotbugs>
-            <dependency.spotbugs>4.3.0</dependency.spotbugs>
+            <dependency.spotbugs>4.4.0</dependency.spotbugs>
 
     </properties>
 
