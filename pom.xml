@@ -87,7 +87,7 @@
         <plugin.nexus-staging>1.6.8</plugin.nexus-staging>
 
         <plugin.checkstyle>3.1.2</plugin.checkstyle>
-            <dependency.checkstyle>8.45.1</dependency.checkstyle>
+            <dependency.checkstyle>9.0</dependency.checkstyle>
         <plugin.coveralls>4.3.0</plugin.coveralls>
             <dependency.jaxb-runtime>2.3.5</dependency.jaxb-runtime>
         <plugin.spotbugs>4.3.0</plugin.spotbugs>
