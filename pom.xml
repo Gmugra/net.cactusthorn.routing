@@ -60,7 +60,7 @@
         <dependency.jetty>9.4.43.v20210629</dependency.jetty>
         <dependency.gson>2.8.8</dependency.gson>
         <dependency.thymeleaf>3.0.12.RELEASE</dependency.thymeleaf>
-        <dependency.dagger>2.37</dependency.dagger>
+        <dependency.dagger>2.40</dependency.dagger>
         <dependency.hibernate-validator>6.2.0.Final</dependency.hibernate-validator>
         <dependency.javax.el>3.0.1-b12</dependency.javax.el>
 
