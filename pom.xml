@@ -51,7 +51,7 @@
 
 
         <dependency.slf4j>1.7.32</dependency.slf4j>
-        <dependency.logback-classic>1.2.6</dependency.logback-classic>
+        <dependency.logback-classic>1.5.11</dependency.logback-classic>
         <dependency.junit>5.8.1</dependency.junit>
         <dependency.mockito>3.12.4</dependency.mockito>
         <dependency.servlet>3.1.0</dependency.servlet>
