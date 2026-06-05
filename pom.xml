@@ -72,7 +72,7 @@
         <plugin.install>3.0.0-M1</plugin.install>
         <plugin.dependency>3.2.0</plugin.dependency>
         <plugin.assembly>3.3.0</plugin.assembly>
-        <plugin.jacoco>0.8.7</plugin.jacoco>
+        <plugin.jacoco>0.8.15</plugin.jacoco>
         <plugin.source>3.2.1</plugin.source>
         <plugin.javadoc>3.3.1</plugin.javadoc>
         <plugin.enforcer>3.0.0</plugin.enforcer>
